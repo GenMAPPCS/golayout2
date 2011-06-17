@@ -25,6 +25,7 @@
 	<property name="pluginlib.dir" value="lib"/>
 	<property name="plugindata.dir" value="data"/>
 	
+	<!-- Check out this folder and reference *.jar in build path -->
 	<property name="commonlib.dir" value="../Plugins/libs/gpml"/>
 	
 	<!-- Global "magic" property for <javac> -->
