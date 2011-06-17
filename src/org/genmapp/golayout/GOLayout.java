@@ -15,32 +15,24 @@
  ******************************************************************************/
 package org.genmapp.golayout;
 
-import giny.model.Node;
-
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
 import cytoscape.Cytoscape;
-import cytoscape.data.CyAttributes;
 import cytoscape.layout.AbstractLayout;
-import cytoscape.layout.CyLayoutAlgorithm;
 import cytoscape.layout.CyLayouts;
 import cytoscape.layout.LayoutProperties;
 import cytoscape.layout.Tunable;
 import cytoscape.layout.TunableListener;
 import cytoscape.plugin.CytoscapePlugin;
 import cytoscape.view.CyNetworkView;
-import java.util.Arrays;
-import org.pathvisio.cytoscape.GpmlPlugin;
 
 public class GOLayout extends CytoscapePlugin{
 	
