@@ -20,6 +20,7 @@ import giny.model.Node;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -38,17 +39,10 @@ import cytoscape.layout.Tunable;
 import cytoscape.layout.TunableListener;
 import cytoscape.plugin.CytoscapePlugin;
 import cytoscape.view.CyNetworkView;
+import java.util.Arrays;
+import org.pathvisio.cytoscape.GpmlPlugin;
 
-public class GOLayout extends CytoscapePlugin {
-
-	protected static final String CC_ATTNAME = "annotation.GO CELLULAR_COMPONENT";
-	protected static final String BP_ATTNAME = "annotation.GO BIOLOGICAL_PROCESS";
-	protected static final String MF_ATTNAME = "annotation.GO MOLECULAR_FUNCTION";
-	protected static final String CC_CODE = "Tc";
-	protected static final String BP_CODE = "Tb";
-	protected static final String MF_CODE = "Tm";
-
-	//test
+public class GOLayout extends CytoscapePlugin{
 	
 	/**
 	 * The constructor registers our layout algorithm. The CyLayouts mechanism
@@ -89,6 +83,8 @@ public class GOLayout extends CytoscapePlugin {
 //		private IDMapper _mapper = null;
 //		private Set<DataSource> dataSources = null;
                 private Tunable gAttParTunable;
+                private Tunable gAttLayTunable;
+                private Tunable gAttNodTunable;
 		private Tunable aSpeAnnTunable;
                 private Tunable aAttAnnTunable;
                 private Tunable dsTunable;
@@ -121,18 +117,20 @@ public class GOLayout extends CytoscapePlugin {
                             Tunable.GROUP, new Integer(3)));
                     gAttParTunable = new Tunable("attributePartition",
                             "The attribute to use for partitioning",
-                            Tunable.NODEATTRIBUTE, BP_ATTNAME,
-                            getAttributeList(BP_ATTNAME), (Object) null, 0);
+                            Tunable.NODEATTRIBUTE, GOLayoutStaticValues.BP_ATTNAME,
+                            getAttributeList(GOLayoutStaticValues.BP_ATTNAME), (Object) null, 0);
                     gAttParTunable.addTunableValueListener(this);
                     layoutProperties.add(gAttParTunable);
-                    layoutProperties.add(new Tunable("attributeLayout",
+                    gAttLayTunable = new Tunable("attributeLayout",
                             "The attribute to use for the layout",
-                            Tunable.NODEATTRIBUTE, CC_ATTNAME,
-                            getAttributeList(CC_ATTNAME), (Object) null, 0));
-                    layoutProperties.add(new Tunable("attributeNodeColor",
+                            Tunable.NODEATTRIBUTE, GOLayoutStaticValues.CC_ATTNAME,
+                            getAttributeList(GOLayoutStaticValues.CC_ATTNAME), (Object) null, 0);
+                    layoutProperties.add(gAttLayTunable);
+                    gAttNodTunable = new Tunable("attributeNodeColor",
                             "The attribute to use for node color",
-                            Tunable.NODEATTRIBUTE, MF_ATTNAME,
-                            getAttributeList(MF_ATTNAME), (Object) null, 0));
+                            Tunable.NODEATTRIBUTE, GOLayoutStaticValues.MF_ATTNAME,
+                            getAttributeList(GOLayoutStaticValues.MF_ATTNAME), (Object) null, 0);
+                    layoutProperties.add(gAttNodTunable);
                     //Panel of "Annotation Settings"
                     layoutProperties.add(new Tunable("annotation",
                             "Annotation Settings (optional)",
@@ -252,29 +250,51 @@ public class GOLayout extends CytoscapePlugin {
 //
 //		}
 
+                private void checkAnnotationStatus() {
+                    System.out.println(gAttLayTunable.getValue());
+                    List CurrentNetworkAtts = Arrays.asList(Cytoscape.getNodeAttributes().getAttributeNames());
+                    if((gAttParTunable.getName().equals(GOLayoutStaticValues.BP_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.BP_ATTNAME)) ||
+                            (gAttParTunable.getName().equals(GOLayoutStaticValues.CC_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.CC_ATTNAME)) ||
+                            (gAttParTunable.getName().equals(GOLayoutStaticValues.MF_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.MF_ATTNAME)) ||
+                            (gAttLayTunable.getName().equals(GOLayoutStaticValues.CC_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.CC_ATTNAME)) ||
+                            (gAttNodTunable.getName().equals(GOLayoutStaticValues.MF_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.MF_ATTNAME))) {
+                        dsTunable.setImmutable(false);
+                        aSpeAnnTunable.setImmutable(false);
+                        aAttAnnTunable.setImmutable(false);
+                    } else {
+                        dsTunable.setImmutable(true);
+                        aSpeAnnTunable.setImmutable(true);
+                        aAttAnnTunable.setImmutable(true);
+                    }
+
+
+//                    if(CurrentNetworkAtts.contains(GOLayoutStaticValues.BP_ATTNAME)&&CurrentNetworkAtts.contains(GOLayoutStaticValues.CC_ATTNAME)&&CurrentNetworkAtts.contains(GOLayoutStaticValues.MF_ATTNAME)) {
+//                        dsTunable.setImmutable(true);
+//                        aSpeAnnTunable.setImmutable(true);
+//                        aAttAnnTunable.setImmutable(true);
+//                    }
+//                    System.out.println(.contains("GOslim-BiologicalProcess"));
+//                    System.out.println(gAttLayTunable.getValue());
+                }
+
 		public void tunableChanged(Tunable t) {
 			// TODO Auto-generated method stub
 			if (t.getName().equals("speciesAnnotation")) {
-				updateSettings();
+//				updateSettings();
 //				populateDataSourceList(); // refresh list
 //				dsTunable.setLowerBound(dsValues.toArray()); // and reset
 																// tunable
 			} else if(t.getName().equals("attributePartition")) {
-                            if(t.getValue().equals(BP_ATTNAME)) {
-                                dsTunable.setImmutable(false);
-                                aSpeAnnTunable.setImmutable(false);
-                                aAttAnnTunable.setImmutable(false);
-                            } else {
-                                dsTunable.setImmutable(true);
-                                aSpeAnnTunable.setImmutable(true);
-                                aAttAnnTunable.setImmutable(true);
-                            }
-                            if(!(t.getValue().equals(BP_ATTNAME)||t.getValue().equals(CC_ATTNAME)||t.getValue().equals(MF_ATTNAME)))
+                            if(!(t.getValue().equals(GOLayoutStaticValues.BP_ATTNAME)||
+                                    t.getValue().equals(GOLayoutStaticValues.CC_ATTNAME)||
+                                    t.getValue().equals(GOLayoutStaticValues.MF_ATTNAME)))
                                 pParLevTunable.setImmutable(true);
                             else
                                 pParLevTunable.setImmutable(false);
-                            updateSettings();
+                            //updateSettings();
                         }
+                        checkAnnotationStatus();
+                        updateSettings();
 		}
 
 		/**
@@ -494,12 +514,12 @@ public class GOLayout extends CytoscapePlugin {
 //				setupBridgeDB(MF_CODE, MF_ATTNAME, annotationAtt,
 //						annotationCode, annotationSpecies);
 //			}
-
-			if (null != CellAlgorithm.attributeName) {
-				PartitionAlgorithm.layoutName = CellAlgorithm.LAYOUT_NAME;
-			}
-			CyLayoutAlgorithm layout = CyLayouts.getLayout("partition");
-			layout.doLayout(Cytoscape.getCurrentNetworkView(), taskMonitor);
+                        //System.out.println(GpmlPlugin.getInstance());
+//			if (null != CellAlgorithm.attributeName) {
+//				PartitionAlgorithm.layoutName = CellAlgorithm.LAYOUT_NAME;
+//			}
+//			CyLayoutAlgorithm layout = CyLayouts.getLayout("partition");
+//			layout.doLayout(Cytoscape.getCurrentNetworkView(), taskMonitor);
 		}
 
 		/**

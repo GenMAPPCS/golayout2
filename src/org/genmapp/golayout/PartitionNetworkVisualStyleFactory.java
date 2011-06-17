@@ -66,7 +66,7 @@ public class PartitionNetworkVisualStyleFactory {
 	/**
 	 * 
 	 */
-	protected static String attributeName = GOLayout.MF_ATTNAME;
+	protected static String attributeName = GOLayoutStaticValues.MF_ATTNAME;
 
 	private static LabelPosition lp = new LabelPosition();
 	public static DiscreteMapping disMappingLabelPosition = new DiscreteMapping(
