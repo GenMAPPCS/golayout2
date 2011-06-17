@@ -43,7 +43,7 @@ import cytoscape.layout.CyLayouts;
 public class CellAlgorithm extends AbstractLayout {
 	protected static boolean pruneEdges = false;
 	protected static double distanceBetweenNodes = 30.0d;
-	protected static String attributeName = GOLayout.CC_ATTNAME;
+	protected static String attributeName = GOLayoutStaticValues.CC_ATTNAME;
 	protected static final String LAYOUT_NAME = "cell-layout";
 
 	// store region assignment as node attribute
