@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- build.xml - Build file for Sample Cytoscape Plugin -->
-<project name="GOLayout" default="jar" basedir=".">
+<project name="GOLayout-Chao" default="jar" basedir=".">
 	
 	<!-- Name of Plug In -->
 	<!-- Change this to the name of your Plug In -->
@@ -21,11 +21,11 @@
   	<property name="build.classes" value="${build.dir}/classes"/>
 
 	<property name="doc.dir" value="doc"/> 
+	
 	<property name="pluginlib.dir" value="lib"/>
 	<property name="plugindata.dir" value="data"/>
 	
-	<property name="pathvisio.dir" value="${pluginlib.dir}/pathvisio"/>
-	<property name="pathvisio.class.dir" value="${build.classes}.pathvisio"/>
+	<property name="commonlib.dir" value="../Plugins/libs/gpml"/>
 	
 	<!-- Global "magic" property for <javac> -->
 	<property name="build.compiler" value="modern"/>
@@ -41,8 +41,8 @@
 		<fileset dir="${pluginlib.dir}">
 			<include name="*.jar"/>
 		</fileset>
-
-		<fileset dir="${pathvisio.dir}">
+		
+		<fileset dir="${commonlib.dir}">
 			<include name="*.jar"/>
 		</fileset>
 
@@ -93,7 +93,7 @@
         <unjar dest="${build.classes}">
          <fileset dir="${pluginlib.dir}"/>
         </unjar>
-
+		
       <jar destfile="${build.dir}/${plugin.name}.jar">
         <fileset dir="${build.classes}"/>
      </jar>
