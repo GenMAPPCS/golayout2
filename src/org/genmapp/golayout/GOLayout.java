@@ -379,7 +379,9 @@ public class GOLayout extends CytoscapePlugin{
 			if ((t != null) && (t.valueChanged() || force))
 				CellAlgorithm.pruneEdges = ((Boolean) t.getValue())
 						.booleanValue();
-                        checkAnnotationStatus();
+			
+			// update UI options based on selection
+            checkAnnotationStatus();
 		}
 
 		/**
