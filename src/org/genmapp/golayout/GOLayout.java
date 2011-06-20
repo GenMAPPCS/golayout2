@@ -459,6 +459,9 @@ public class GOLayout extends CytoscapePlugin{
 		public JPanel getSettingsPanel() {
 			JPanel panel = new JPanel(new GridLayout(0, 1));
 			panel.add(layoutProperties.getTunablePanel());
+			
+			//updates ui based on current network attributes
+            checkAnnotationStatus();
 
 			return panel;
 		}
