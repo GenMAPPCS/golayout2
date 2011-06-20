@@ -261,7 +261,13 @@ public class GOLayout extends CytoscapePlugin{
                     System.out.println();
 
                     if((gAttParTunable.getValue().equals(GOLayoutStaticValues.BP_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.BP_ATTNAME))||
+                            (gAttParTunable.getValue().equals(GOLayoutStaticValues.CC_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.CC_ATTNAME))||
+                            (gAttParTunable.getValue().equals(GOLayoutStaticValues.MF_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.MF_ATTNAME))||
+                            (gAttLayTunable.getValue().equals(GOLayoutStaticValues.BP_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.BP_ATTNAME))||
                             (gAttLayTunable.getValue().equals(GOLayoutStaticValues.CC_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.CC_ATTNAME))||
+                            (gAttLayTunable.getValue().equals(GOLayoutStaticValues.MF_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.MF_ATTNAME))||
+                            (gAttNodTunable.getValue().equals(GOLayoutStaticValues.BP_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.BP_ATTNAME))||
+                            (gAttNodTunable.getValue().equals(GOLayoutStaticValues.CC_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.CC_ATTNAME))||
                             (gAttNodTunable.getValue().equals(GOLayoutStaticValues.MF_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.MF_ATTNAME))) {
                         dsTunable.setImmutable(false);
                         aSpeAnnTunable.setImmutable(false);
