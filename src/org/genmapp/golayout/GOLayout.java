@@ -110,19 +110,19 @@ public class GOLayout extends CytoscapePlugin{
                     gAttParTunable = new Tunable("attributePartition",
                             "The attribute to use for partitioning",
                             Tunable.NODEATTRIBUTE, GOLayoutStaticValues.BP_ATTNAME,
-                            getAttributeList(GOLayoutStaticValues.BP_ATTNAME), (Object) null, 0);
+                            getInitialAttributeList(), (Object) null, 0);
                     gAttParTunable.addTunableValueListener(this);
                     layoutProperties.add(gAttParTunable);
                     gAttLayTunable = new Tunable("attributeLayout",
                             "The attribute to use for the layout",
                             Tunable.NODEATTRIBUTE, GOLayoutStaticValues.CC_ATTNAME,
-                            getAttributeList(GOLayoutStaticValues.CC_ATTNAME), (Object) null, 0);
+                            getInitialAttributeList(), (Object) null, 0);
                     gAttLayTunable.addTunableValueListener(this);
                     layoutProperties.add(gAttLayTunable);
                     gAttNodTunable = new Tunable("attributeNodeColor",
                             "The attribute to use for node color",
                             Tunable.NODEATTRIBUTE, GOLayoutStaticValues.MF_ATTNAME,
-                            getAttributeList(GOLayoutStaticValues.MF_ATTNAME), (Object) null, 0);
+                            getInitialAttributeList(), (Object) null, 0);
                     gAttNodTunable.addTunableValueListener(this);
                     layoutProperties.add(gAttNodTunable);
                     //Panel of "Annotation Settings"
@@ -201,12 +201,12 @@ public class GOLayout extends CytoscapePlugin{
 
 		}
 
-                public List<String> getAttributeList(String goAttribute){
-                    List tempList = getInitialAttributeList();
-                    if(tempList.indexOf(goAttribute)==-1)
-                        tempList.add(goAttribute);
-                    return tempList;
-                }
+//                public List<String> getAttributeList(String goAttribute){
+//                    List tempList = getInitialAttributeList();
+//                    if(tempList.indexOf(goAttribute)==-1)
+//                        tempList.add(goAttribute);
+//                    return tempList;
+//                }
 
 //		public void populateDataSourceList() {
 //			try {
@@ -244,21 +244,31 @@ public class GOLayout extends CytoscapePlugin{
 //
 //		}
 
+                private void checkAttributes(Tunable globalTunable, String goAttribute){
+                    List CurrentNetworkAtts = Arrays.asList(Cytoscape.getNodeAttributes().getAttributeNames());
+                    List layoutAttrs = (List)globalTunable.getLowerBound();
+                    if(!CurrentNetworkAtts.contains(goAttribute)){
+                        layoutAttrs.add(goAttribute);
+                        globalTunable.setLowerBound(layoutAttrs);
+                    }
+                    globalTunable.setValue(goAttribute);
+                }
+
                 private void checkAnnotationStatus() {
                     List CurrentNetworkAtts = Arrays.asList(Cytoscape.getNodeAttributes().getAttributeNames());
-                    System.out.println(((gAttParTunable.getValue().equals(GOLayoutStaticValues.BP_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.BP_ATTNAME)))+" "
-                            +(!(gAttParTunable.getValue().equals(GOLayoutStaticValues.BP_ATTNAME))));
-                    System.out.println(((gAttLayTunable.getValue().equals(GOLayoutStaticValues.CC_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.CC_ATTNAME)))+" "
-                            +(!(gAttLayTunable.getValue().equals(GOLayoutStaticValues.CC_ATTNAME))));
-                    System.out.println(((gAttNodTunable.getValue().equals(GOLayoutStaticValues.MF_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.MF_ATTNAME)))+" "
-                            +(!(gAttNodTunable.getValue().equals(GOLayoutStaticValues.MF_ATTNAME))));
-                    System.out.println((((gAttParTunable.getValue().equals(GOLayoutStaticValues.BP_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.BP_ATTNAME)) ||
-                            !(gAttParTunable.getValue().equals(GOLayoutStaticValues.BP_ATTNAME)))&&
-                            ((gAttLayTunable.getValue().equals(GOLayoutStaticValues.CC_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.CC_ATTNAME)) ||
-                            !(gAttLayTunable.getValue().equals(GOLayoutStaticValues.CC_ATTNAME)))&&
-                            ((gAttNodTunable.getValue().equals(GOLayoutStaticValues.MF_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.MF_ATTNAME)) ||
-                            !(gAttNodTunable.getValue().equals(GOLayoutStaticValues.MF_ATTNAME)))));
-                    System.out.println();
+//                    System.out.println(((gAttParTunable.getValue().equals(GOLayoutStaticValues.BP_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.BP_ATTNAME)))+" "
+//                            +(!(gAttParTunable.getValue().equals(GOLayoutStaticValues.BP_ATTNAME))));
+//                    System.out.println(((gAttLayTunable.getValue().equals(GOLayoutStaticValues.CC_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.CC_ATTNAME)))+" "
+//                            +(!(gAttLayTunable.getValue().equals(GOLayoutStaticValues.CC_ATTNAME))));
+//                    System.out.println(((gAttNodTunable.getValue().equals(GOLayoutStaticValues.MF_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.MF_ATTNAME)))+" "
+//                            +(!(gAttNodTunable.getValue().equals(GOLayoutStaticValues.MF_ATTNAME))));
+//                    System.out.println((((gAttParTunable.getValue().equals(GOLayoutStaticValues.BP_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.BP_ATTNAME)) ||
+//                            !(gAttParTunable.getValue().equals(GOLayoutStaticValues.BP_ATTNAME)))&&
+//                            ((gAttLayTunable.getValue().equals(GOLayoutStaticValues.CC_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.CC_ATTNAME)) ||
+//                            !(gAttLayTunable.getValue().equals(GOLayoutStaticValues.CC_ATTNAME)))&&
+//                            ((gAttNodTunable.getValue().equals(GOLayoutStaticValues.MF_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.MF_ATTNAME)) ||
+//                            !(gAttNodTunable.getValue().equals(GOLayoutStaticValues.MF_ATTNAME)))));
+//                    System.out.println();
 
                     if((gAttParTunable.getValue().equals(GOLayoutStaticValues.BP_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.BP_ATTNAME))||
                             (gAttParTunable.getValue().equals(GOLayoutStaticValues.CC_ATTNAME)&&!CurrentNetworkAtts.contains(GOLayoutStaticValues.CC_ATTNAME))||
@@ -387,7 +397,7 @@ public class GOLayout extends CytoscapePlugin{
 						.booleanValue();
 			
 			// update UI options based on selection
-            checkAnnotationStatus();
+                        checkAnnotationStatus();
 		}
 
 		/**
@@ -465,12 +475,14 @@ public class GOLayout extends CytoscapePlugin{
 		 * 
 		 */
 		public JPanel getSettingsPanel() {
-			JPanel panel = new JPanel(new GridLayout(0, 1));
-			panel.add(layoutProperties.getTunablePanel());
-			
 			//updates ui based on current network attributes
-            checkAnnotationStatus();
-
+                        checkAnnotationStatus();
+                        checkAttributes(gAttParTunable, GOLayoutStaticValues.BP_ATTNAME);
+                        checkAttributes(gAttLayTunable, GOLayoutStaticValues.CC_ATTNAME);
+                        checkAttributes(gAttNodTunable, GOLayoutStaticValues.MF_ATTNAME);
+                        
+                        JPanel panel = new JPanel(new GridLayout(0, 1));
+			panel.add(layoutProperties.getTunablePanel());
 			return panel;
 		}
 
