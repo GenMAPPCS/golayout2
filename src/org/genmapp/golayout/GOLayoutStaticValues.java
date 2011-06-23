@@ -16,4 +16,6 @@ public class GOLayoutStaticValues {
     protected static final String CC_CODE = "Tc";
     protected static final String BP_CODE = "Tb";
     protected static final String MF_CODE = "Tm";
+    protected static final String[] speciesList = {"Human", "Mouse", "Yeast", "Fruitfly", "Celegans","Zebrafish"};
+    protected static final String bridgedbSpecieslist = "http://svn.bigcat.unimaas.nl/bridgedb/trunk/org.bridgedb.bio/resources/org/bridgedb/bio/organisms.txt";
 }
