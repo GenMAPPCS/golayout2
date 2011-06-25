@@ -100,7 +100,7 @@ public class GOLayout extends CytoscapePlugin{
             // species
             speciesValues = Arrays.asList(GOLayoutStaticValues.speciesList);
             
-            dsValues.add("ensmble");
+            dsValues.add("Ensembl");
             // dynamically populate list of datasource names
             //populateDataSourceList();
 
@@ -276,9 +276,27 @@ public class GOLayout extends CytoscapePlugin{
             CyNetwork currentNetwork = Cytoscape.getCurrentNetwork();
             CyAttributes currentAttrs = Cytoscape.getNodeAttributes();
             for (CyNode cn : (List<CyNode>) currentNetwork.nodesList()) {
-                if((currentAttrs.hasAttribute(cn.getIdentifier(), goAttribute))&&
-                        (!currentAttrs.getAttribute(cn.getIdentifier(), goAttribute).equals("null")))
-                    count++;
+                if (currentAttrs.hasAttribute(cn.getIdentifier(), goAttribute)) {
+                	byte type = currentAttrs.getType(goAttribute);
+                	if (type == CyAttributes.TYPE_SIMPLE_LIST) {
+                		List list = currentAttrs.getListAttribute(cn.getIdentifier(), goAttribute);
+                		if (list.size() > 1){
+                			count++;
+                		} else if (list.size() == 1){
+                			if (list.get(0) != null)
+                				if (!list.get(0).equals(""))
+                					count++;
+                		}
+                	} else if (type == CyAttributes.TYPE_STRING) {    
+                		if (!currentAttrs.getStringAttribute(cn.getIdentifier(), goAttribute).equals("null"))
+                			count++;
+                	} else {
+                		//we don't have to be as careful with other attribute types
+                		if (!currentAttrs.getAttribute(cn.getIdentifier(), goAttribute).equals(null))
+                			count++;
+                	}
+                }
+
             }
             return count;
         }
