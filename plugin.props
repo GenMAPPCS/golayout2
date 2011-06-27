@@ -10,7 +10,7 @@ pluginName=GOLayout Plugin
 
 # Description used to give users information about the plugin such as what it does.
 # Html tags are encouraged for formatting purposes.
-pluginDescription=GO term and pathway overrepresentation analysis
+pluginDescription=Network partition, layout and color based on Gene Ontology or other annotations
 
 # Plugin version number, this must be two numbers separated by a decimlal.  Ex. 0.2, 14.03
 pluginVersion=0.3
