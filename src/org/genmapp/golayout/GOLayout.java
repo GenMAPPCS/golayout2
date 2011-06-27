@@ -37,6 +37,13 @@ import cytoscape.layout.Tunable;
 import cytoscape.layout.TunableListener;
 import cytoscape.plugin.CytoscapePlugin;
 import cytoscape.view.CyNetworkView;
+import java.util.Iterator;
+import java.util.Set;
+import org.bridgedb.BridgeDb;
+import org.bridgedb.DataSource;
+import org.bridgedb.IDMapper;
+import org.bridgedb.IDMapperException;
+import org.bridgedb.bio.BioDataSource;
 
 public class GOLayout extends CytoscapePlugin{
 	
@@ -74,8 +81,8 @@ public class GOLayout extends CytoscapePlugin{
 //		public String annotationSpecies = "Human";
         private List<String> dsValues = new ArrayList<String>();
         private List<String> speciesValues = new ArrayList<String>();
-//		private IDMapper _mapper = null;
-//		private Set<DataSource> dataSources = null;
+		private IDMapper _mapper = null;
+		private Set<DataSource> dataSources = null;
         private Tunable gAttParTunable;
         private Tunable gAttParPerTunable;
         private Tunable gAttLayTunable;
@@ -115,7 +122,7 @@ public class GOLayout extends CytoscapePlugin{
             gAttParTunable.addTunableValueListener(this);
             layoutProperties.add(gAttParTunable);
             gAttParPerTunable = new Tunable("partitionAnnotationPer",
-                    "Annotation rate:", Tunable.BUTTON, "0/0");
+                    " ", Tunable.BUTTON, "0/0");
             gAttParPerTunable.setImmutable(true);
             layoutProperties.add(gAttParPerTunable);
             gAttLayTunable = new Tunable("attributeLayout",
@@ -125,7 +132,7 @@ public class GOLayout extends CytoscapePlugin{
             gAttLayTunable.addTunableValueListener(this);
             layoutProperties.add(gAttLayTunable);
             gAttLayPerTunable = new Tunable("layoutAnnotationPer",
-                    "Annotation rate:", Tunable.BUTTON, "0/0");
+                    " ", Tunable.BUTTON, "0/0");
             gAttLayPerTunable.setImmutable(true);
             layoutProperties.add(gAttLayPerTunable);
             gAttNodTunable = new Tunable("attributeNodeColor",
@@ -135,7 +142,7 @@ public class GOLayout extends CytoscapePlugin{
             gAttNodTunable.addTunableValueListener(this);
             layoutProperties.add(gAttNodTunable);
             gAttNodPerTunable = new Tunable("colorAnnotationPer",
-                    "Annotation rate:", Tunable.BUTTON, "0/0");
+                    " ", Tunable.BUTTON, "0/0");
             gAttNodPerTunable.setImmutable(true);
             layoutProperties.add(gAttNodPerTunable);
             //Panel of "Annotation Settings"
@@ -154,7 +161,7 @@ public class GOLayout extends CytoscapePlugin{
             aAttAnnTunable = new Tunable("attributeAnnotation",
                     "The identifier to use for annotation retrieval",
                     Tunable.NODEATTRIBUTE, annotationAtt,
-                    (Object) getInitialAttributeList(), (Object) null, 0);
+                    (Object) new ArrayList<String>(), (Object) null, 0);
             layoutProperties.add(aAttAnnTunable);
             dsTunable = new Tunable("dsAnnotation",
                     "Type of identifier, e.g., Entrez Gene", Tunable.LIST,
@@ -225,41 +232,38 @@ public class GOLayout extends CytoscapePlugin{
 //                    return tempList;
 //                }
 
-//		public void populateDataSourceList() {
-//			try {
-//				Class.forName("org.bridgedb.webservice.bridgerest.BridgeRest");
-//			} catch (ClassNotFoundException e) {
-//				System.out
-//						.println("Can't register org.bridgedb.rdb.IDMapperRdb");
-//				e.printStackTrace();
-//			}
-//
-//			BioDataSource.init();
-//			// now we connect to the driver and create a IDMapper instance.
-//			// TODO: Update to use multiple species
-//			try {
-//				_mapper = BridgeDb
-//						.connect("idmapper-bridgerest:http://webservice.bridgedb.org/"
-//								+ annotationSpecies);
-//			} catch (IDMapperException e) {
-//				e.printStackTrace();
-//			}
-//			try {
-//				dataSources = _mapper.getCapabilities()
-//						.getSupportedSrcDataSources();
-//			} catch (IDMapperException e) {
-//				e.printStackTrace();
-//			}
-//			dsValues.clear();
-//			if (dataSources.size() > 0) {
-//				Iterator it = dataSources.iterator();
-//				while (it.hasNext()) {
-//					dsValues.add(((DataSource) it.next()).getFullName());
-//				}
-//
-//			}
-//
-//		}
+        public void populateDataSourceList(String annotationSpecies) {
+            try {
+                Class.forName("org.bridgedb.webservice.bridgerest.BridgeRest");
+            } catch (ClassNotFoundException e) {
+                System.out.println("Can't register org.bridgedb.rdb.IDMapperRdb");
+                e.printStackTrace();
+            }
+
+            BioDataSource.init();
+            // now we connect to the driver and create a IDMapper instance.
+            // TODO: Update to use multiple species
+            try {
+                _mapper = BridgeDb.connect("idmapper-bridgerest:http://webservice.bridgedb.org/"+annotationSpecies);
+                //System.out.println(_mapper.toString());
+            } catch (IDMapperException e) {
+                e.printStackTrace();
+            }
+            try {
+                dataSources = _mapper.getCapabilities().getSupportedSrcDataSources();
+                //System.out.println(dataSources.size());
+            } catch (IDMapperException e) {
+                e.printStackTrace();
+            }
+            dsValues.clear();
+            if (dataSources.size() > 0) {
+                Iterator it = dataSources.iterator();
+                while (it.hasNext()) {
+                    dsValues.add(((DataSource) it.next()).getFullName());
+                }
+            }
+//            System.out.println(dsValues.size());
+        }
 
         private void checkAttributes(Tunable globalTunable, String goAttribute){
             List CurrentNetworkAtts = Arrays.asList(Cytoscape.getNodeAttributes().getAttributeNames());
@@ -382,25 +386,29 @@ public class GOLayout extends CytoscapePlugin{
 //                    System.out.println(gAttLayTunable.getValue());
         }
 
-        private String getSpeciesCommonName(String speName) {
+        private String[] getSpeciesCommonName(String speName) {
+            String[] result = {"", ""};
             List<String> lines = GOLayoutUtil.readUrl(GOLayoutStaticValues.bridgedbSpecieslist);
             for (String line : lines) {
                 String tempMappingString = line.replace("\t", " ").toUpperCase();
                 if(tempMappingString.indexOf(speName.toUpperCase())!=-1) {
                     String[] s = line.split("\t");
-                    return s[2].trim();
+                    result[0] = s[2].trim();
+                    result[1] = s[3].trim();
+                    return result;
                 }
             }
-            return "";
+            return null;
         }
 
         public void tunableChanged(Tunable t) {
             // TODO Auto-generated method stub
             checkAnnotationStatus();
             if (t.getName().equals("speciesAnnotation")) {
-//				updateSettings();
-//				populateDataSourceList(); // refresh list
-//				dsTunable.setLowerBound(dsValues.toArray()); // and reset
+                //Regenerate list of ID types when user select another species.
+                String[] speciesCode = getSpeciesCommonName(speciesValues.get(new Integer(t.getValue().toString()).intValue()));
+                populateDataSourceList(speciesCode[1]);
+                dsTunable.setLowerBound((Object) dsValues.toArray());
             } else if (t.getName().equals("annotationSwitch")) {
                 if(((Boolean) t.getValue()).booleanValue()==true) {
                     dsTunable.setImmutable(false);
@@ -583,11 +591,17 @@ public class GOLayout extends CytoscapePlugin{
             checkAttributes(gAttLayTunable, GOLayoutStaticValues.CC_ATTNAME);
             checkAttributes(gAttNodTunable, GOLayoutStaticValues.MF_ATTNAME);
 
-            //Guess species and id of current network for annotation
-            String initSpecies = getSpeciesCommonName(CytoscapeInit.getProperties().getProperty("defaultSpeciesName"));
-            if(!initSpecies.equals(""))
-                aSpeAnnTunable.setValue(speciesValues.indexOf(initSpecies));
-
+            //Guess species current network for annotation
+            String[] defaultSpecies = getSpeciesCommonName(CytoscapeInit.getProperties().getProperty("defaultSpeciesName"));
+            if(!defaultSpecies[0].equals("")) {
+                aSpeAnnTunable.setValue(speciesValues.indexOf(defaultSpecies[0]));
+                populateDataSourceList(defaultSpecies[1]);
+                dsTunable.setLowerBound((Object) dsValues.toArray());
+            }
+            //Guess id of current network for annotation
+//            String defaultID = Cytoscape.getCurrentNetwork().getNode(0).getIdentifier();//Cytoscape.getNodeAttributes().//Cytoscape.getCurrentNetwork().;
+            //populateDataSourceList(defaultSpecies[1]);
+            
             JPanel panel = new JPanel(new GridLayout(0, 1));
             panel.add(layoutProperties.getTunablePanel());
             return panel;
