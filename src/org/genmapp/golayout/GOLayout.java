@@ -20,9 +20,12 @@ import cytoscape.CyNode;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -31,28 +34,39 @@ import cytoscape.Cytoscape;
 import cytoscape.CytoscapeInit;
 import cytoscape.data.CyAttributes;
 import cytoscape.layout.AbstractLayout;
+import cytoscape.layout.CyLayoutAlgorithm;
 import cytoscape.layout.CyLayouts;
 import cytoscape.layout.LayoutProperties;
 import cytoscape.layout.Tunable;
 import cytoscape.layout.TunableListener;
 import cytoscape.plugin.CytoscapePlugin;
+import cytoscape.plugin.PluginManager;
 import cytoscape.view.CyNetworkView;
 import java.util.Iterator;
 import java.util.Set;
+import javax.swing.JLabel;
 import org.bridgedb.BridgeDb;
 import org.bridgedb.DataSource;
 import org.bridgedb.IDMapper;
 import org.bridgedb.IDMapperException;
 import org.bridgedb.bio.BioDataSource;
+import org.genmapp.golayout.utils.FileDownload;
+import org.pathvisio.cytoscape.GpmlPlugin;
 
 public class GOLayout extends CytoscapePlugin{
+    public static String GOLayoutBaseDir;
 	
     /**
      * The constructor registers our layout algorithm. The CyLayouts mechanism
      * will worry about how to get it in the right menu, etc.
      */
     public GOLayout() {
-
+        try {
+            GOLayoutBaseDir = PluginManager.getPluginManager().getPluginManageDirectory().getCanonicalPath() + "/GOLayout/";
+        } catch (IOException e) {
+            GOLayoutBaseDir = "/GOLayout/";
+            e.printStackTrace();
+        }        
         CyLayouts.addLayout(new GOLayoutAlgorithm(), "GO Layout");
         CyLayouts.addLayout(new PartitionAlgorithm(), null);
         CyLayouts.addLayout(new CellAlgorithm(), null);
@@ -76,11 +90,12 @@ public class GOLayout extends CytoscapePlugin{
         private static final String HELP = "GOLayout Help";
         private LayoutProperties layoutProperties = null;
 
-        public String annotationAtt = "canonicalName";
+        public String annotationAtt = "ID";
         public String annotationCode = null;
-//		public String annotationSpecies = "Human";
+		public String annotationSpeciesCode = "";
         private List<String> dsValues = new ArrayList<String>();
         private List<String> speciesValues = new ArrayList<String>();
+        private List<String> aAttAnnValues = new ArrayList<String>();
 		private IDMapper _mapper = null;
 		private Set<DataSource> dataSources = null;
         private Tunable gAttParTunable;
@@ -108,6 +123,7 @@ public class GOLayout extends CytoscapePlugin{
             speciesValues = Arrays.asList(GOLayoutStaticValues.speciesList);
             
             dsValues.add("Ensembl");
+            aAttAnnValues.add("ID");
             // dynamically populate list of datasource names
             //populateDataSourceList();
 
@@ -161,7 +177,7 @@ public class GOLayout extends CytoscapePlugin{
             aAttAnnTunable = new Tunable("attributeAnnotation",
                     "The identifier to use for annotation retrieval",
                     Tunable.NODEATTRIBUTE, annotationAtt,
-                    (Object) new ArrayList<String>(), (Object) null, 0);
+                    aAttAnnValues, null, 0);
             layoutProperties.add(aAttAnnTunable);
             dsTunable = new Tunable("dsAnnotation",
                     "Type of identifier, e.g., Entrez Gene", Tunable.LIST,
@@ -351,6 +367,7 @@ public class GOLayout extends CytoscapePlugin{
 //                        aAttAnnTunable.setImmutable(true);
 //                        aAnnSwiTunable.setValue(false);
 //                    }
+            //If user didn't choose GO attribute for partition, disable 'The deepest level of GO term for partition'
             if(isGOAttr(gAttParTunable)) {
                 pParLevTunable.setImmutable(false);
             } else {
@@ -359,12 +376,15 @@ public class GOLayout extends CytoscapePlugin{
             if((isGOAttr(gAttParTunable)&&(!CurrentNetworkAtts.contains(gAttParTunable.getValue().toString())||checkAnnotationRate(gAttParTunable.getValue().toString())==0))||
                     (isGOAttr(gAttLayTunable)&&(!CurrentNetworkAtts.contains(gAttLayTunable.getValue().toString())||checkAnnotationRate(gAttLayTunable.getValue().toString())==0))||
                     (isGOAttr(gAttNodTunable)&&(!CurrentNetworkAtts.contains(gAttNodTunable.getValue().toString())||checkAnnotationRate(gAttNodTunable.getValue().toString())==0))) {
+                //Any of three global settings is GO attribute and annotation rate equls 0. 
+                //Force user to fetch the annotations, and user can not turn off the annotation panel.
                 dsTunable.setImmutable(false);
                 aSpeAnnTunable.setImmutable(false);
                 aAttAnnTunable.setImmutable(false);
                 aAnnSwiTunable.setValue(true);
                 aAnnSwiTunable.setImmutable(true);
             } else if(!(isGOAttr(gAttParTunable)||isGOAttr(gAttLayTunable)||isGOAttr(gAttNodTunable))) {
+                //None of three global settings is GO attribute, user can not turn on the annotattion panel.
                 dsTunable.setImmutable(true);
                 aSpeAnnTunable.setImmutable(true);
                 aAttAnnTunable.setImmutable(true);
@@ -407,7 +427,8 @@ public class GOLayout extends CytoscapePlugin{
             if (t.getName().equals("speciesAnnotation")) {
                 //Regenerate list of ID types when user select another species.
                 String[] speciesCode = getSpeciesCommonName(speciesValues.get(new Integer(t.getValue().toString()).intValue()));
-                populateDataSourceList(speciesCode[1]);
+                annotationSpeciesCode = speciesCode[1];
+                populateDataSourceList(annotationSpeciesCode);
                 dsTunable.setLowerBound((Object) dsValues.toArray());
             } else if (t.getName().equals("annotationSwitch")) {
                 if(((Boolean) t.getValue()).booleanValue()==true) {
@@ -594,13 +615,19 @@ public class GOLayout extends CytoscapePlugin{
             //Guess species current network for annotation
             String[] defaultSpecies = getSpeciesCommonName(CytoscapeInit.getProperties().getProperty("defaultSpeciesName"));
             if(!defaultSpecies[0].equals("")) {
+                annotationSpeciesCode = defaultSpecies[1];
                 aSpeAnnTunable.setValue(speciesValues.indexOf(defaultSpecies[0]));
-                populateDataSourceList(defaultSpecies[1]);
+                populateDataSourceList(annotationSpeciesCode);
                 dsTunable.setLowerBound((Object) dsValues.toArray());
             }
             //Guess id of current network for annotation
 //            String defaultID = Cytoscape.getCurrentNetwork().getNode(0).getIdentifier();//Cytoscape.getNodeAttributes().//Cytoscape.getCurrentNetwork().;
             //populateDataSourceList(defaultSpecies[1]);
+
+            dsTunable.setImmutable(true);
+            aSpeAnnTunable.setImmutable(true);
+            aAttAnnTunable.setImmutable(true);
+            aAnnSwiTunable.setValue(false);
             
             JPanel panel = new JPanel(new GridLayout(0, 1));
             panel.add(layoutProperties.getTunablePanel());
@@ -659,6 +686,17 @@ public class GOLayout extends CytoscapePlugin{
 //						annotationCode, annotationSpecies);
 //			}
                 //System.out.println(GpmlPlugin.getInstance());
+            //Need annotation or not?
+            if(((Boolean) aAnnSwiTunable.getValue()).booleanValue()) {
+                //Check the selected ID. If it is Ensembl, skip this step
+                if(false) {
+                    //Check local file for mapping
+                }
+                //Check local file for annotation
+                
+            }
+            //Testing FileDownload function
+            new FileDownload("Sc_GOslim_20110601.tab");
 //			if (null != CellAlgorithm.attributeName) {
 //				PartitionAlgorithm.layoutName = CellAlgorithm.LAYOUT_NAME;
 //			}
