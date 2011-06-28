@@ -693,10 +693,12 @@ public class GOLayout extends CytoscapePlugin{
                     //Check local file for mapping
                 }
                 //Check local file for annotation
-                
-            }
-            //Testing FileDownload function
-            new FileDownload("Sc_GOslim_20110601.tab");
+                if(false) {
+                    //Testing FileDownload function
+                    new FileDownload("Sc_GOslim_20110601.tab");
+                }
+                IdMapping.mapAnnotation(GOLayout.GOLayoutBaseDir+"Sc_GOslim_20110601.tab", "ID");
+            }            
 //			if (null != CellAlgorithm.attributeName) {
 //				PartitionAlgorithm.layoutName = CellAlgorithm.LAYOUT_NAME;
 //			}
