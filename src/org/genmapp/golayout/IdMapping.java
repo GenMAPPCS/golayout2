@@ -31,21 +31,40 @@ public class IdMapping extends AbstractLayout {
         super();
     }
 
-    @Override
-    public void construct() {
+    public static boolean mapAnnotation(String GOSlimFilePath, String idName) {
         System.out.println("Call idmapping success!");
         //CyDataset d
-        connectFileDB();
-        getSecKeyType();
+        connectFileDB(GOSlimFilePath);
+        //getSecKeyType();
         CyNetwork currentNetwork = Cytoscape.getCurrentNetwork();
         System.out.println("Current Network Size: "+currentNetwork.nodesList().size());
         List<String> nodeIds = new ArrayList<String>();
         for (CyNode cn : (List<CyNode>) currentNetwork.nodesList()) {
             nodeIds.add(cn.getIdentifier());
         }
-        mapAnnotation("canonicalName", "GOslim-BiologicalProcess");
-        mapAnnotation("canonicalName", "GOslim-CellularComponent");
-        mapAnnotation("canonicalName", "GOslim-MolecularFunction");
+        mapAttribute(idName, GOLayoutStaticValues.BP_ATTNAME);
+        mapAttribute(idName, GOLayoutStaticValues.CC_ATTNAME);
+        mapAttribute(idName, GOLayoutStaticValues.MF_ATTNAME);
+
+        return true;
+    }
+
+
+    @Override
+    public void construct() {
+//        System.out.println("Call idmapping success!");
+//        //CyDataset d
+//        connectFileDB();
+//        getSecKeyType();
+//        CyNetwork currentNetwork = Cytoscape.getCurrentNetwork();
+//        System.out.println("Current Network Size: "+currentNetwork.nodesList().size());
+//        List<String> nodeIds = new ArrayList<String>();
+//        for (CyNode cn : (List<CyNode>) currentNetwork.nodesList()) {
+//            nodeIds.add(cn.getIdentifier());
+//        }
+//        mapAnnotation("canonicalName", "GOslim-BiologicalProcess");
+//        mapAnnotation("canonicalName", "GOslim-CellularComponent");
+//        mapAnnotation("canonicalName", "GOslim-MolecularFunction");
         //CyCommandResult result = mapIdentifiers(nodeIds, "Ensembl", "GOslim-BiologicalProcess");
         /**
         Map<String, Set<String>> secondaryKeyMap = new HashMap<String, Set<String>>();
@@ -117,7 +136,7 @@ public class IdMapping extends AbstractLayout {
             return type;
     }
 
-    private static CyCommandResult mapAnnotation(String pkt, String skt) {
+    private static CyCommandResult mapAttribute(String pkt, String skt) {
 		Map<String, Object> args = new HashMap<String, Object>();
 		args.put("sourceattr", pkt);
 		args.put("targettype", skt);
@@ -165,12 +184,12 @@ public class IdMapping extends AbstractLayout {
     /**
      *
      */
-    public static void connectFileDB() {
+    public static void connectFileDB(String filePath) {
         System.out.println("-----run connectFileDB-----");
         String type = null;
         Map<String, Object> args = new HashMap<String, Object>();
         args.put("classpath", "org.bridgedb.file.IDMapperText");
-        args.put("connstring", "idmapper-text:dssep=	,transitivity=false@file:/C:/Users/Chao/Downloads/Sc_GOslim.tab");
+        args.put("connstring", "idmapper-text:dssep=	,transitivity=false@file:/"+filePath);
         args.put("displayname", "fileGOslim");
         CyCommandResult result = null;
         try {
