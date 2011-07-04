@@ -38,6 +38,7 @@ import java.util.zip.ZipFile;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import org.genmapp.golayout.GOLayout;
 
 
 /**
@@ -94,12 +95,12 @@ public class Downloader implements DownloadListener {
 		downloadStatus = Status.DOWNLOADING;
 
 		File downloadParentDirectory = new File(
-				FileDownload.genmappcsdatabasedir);
+				GOLayout.GOLayoutBaseDir);
 		if (!downloadParentDirectory.exists()) {
 			downloadParentDirectory.mkdir();
 		}
 
-		File tempDirectory = new File(FileDownload.genmappcsdatabasedir + ID);
+		File tempDirectory = new File(GOLayout.GOLayoutBaseDir + ID);
 		if (!tempDirectory.exists()) {
 			tempDirectory.mkdir();
 		}
@@ -185,13 +186,13 @@ public class Downloader implements DownloadListener {
 		// check if the fileName exists in current directory, if so rename it to
 		// filename_1 and so on
 		// TODO check for this ahead of time
-		File testFile = new File(FileDownload.genmappcsdatabasedir
+		File testFile = new File(GOLayout.GOLayoutBaseDir
 				+ outputFileName);
 		if (testFile.exists()) {
 			String newName = null;
 			for (int i = 1; testFile.exists(); i++) {
 				newName = outputFileName + "_" + i;
-				testFile = new File(FileDownload.genmappcsdatabasedir + newName);
+				testFile = new File(GOLayout.GOLayoutBaseDir + newName);
 			}
 			outputFileName = newName;
 		}
@@ -201,14 +202,14 @@ public class Downloader implements DownloadListener {
 			pbar.setString("rebuilding File...");
 		}
 		try {
-			outputFile = new File(FileDownload.genmappcsdatabasedir
+			outputFile = new File(GOLayout.GOLayoutBaseDir
 					+ outputFileName);
 			BufferedOutputStream out = new BufferedOutputStream(
 					new FileOutputStream(outputFile, true));
 			byte buffer[] = new byte[1024];
 
 			for (int i = 0; i < JET_COUNT; i++) {
-				File file = new File(FileDownload.genmappcsdatabasedir
+				File file = new File(GOLayout.GOLayoutBaseDir
 						+ identifier + "/" + identifier + "part" + i);
 				BufferedInputStream in = new BufferedInputStream(
 						new FileInputStream(file));
@@ -223,7 +224,7 @@ public class Downloader implements DownloadListener {
 				file.delete();
 			}
 
-			File tempDirectory = new File(FileDownload.genmappcsdatabasedir
+			File tempDirectory = new File(GOLayout.GOLayoutBaseDir
 					+ identifier);
 			tempDirectory.delete();
 
@@ -238,31 +239,31 @@ public class Downloader implements DownloadListener {
 			ex.printStackTrace();
 		}
 
-		/*
-		 * Now, unzip and cleanup.
-		 */
-		try {
-			ZipFile zipFile = new ZipFile(outputFile.toString());
-
-			Enumeration entries = zipFile.entries();
-			while (entries.hasMoreElements()) {
-				ZipEntry entry = (ZipEntry) entries.nextElement();
-				String[] filepath = entry.getName().split("/");
-				String finalFile = FileDownload.genmappcsdatabasedir + filepath[filepath.length - 1];
-				System.out.println("Extracting file: " + entry.getName()
-						+ " to " + finalFile);
-				copyInputStream(zipFile.getInputStream(entry),
-						new BufferedOutputStream(new FileOutputStream(
-								finalFile)));
-			}
-
-			zipFile.close();
-			outputFile.delete();
-		} catch (IOException ioe) {
-			System.out.println("Unhandled exception:");
-			ioe.printStackTrace();
-			return;
-		}
+//		/*
+//		 * Now, unzip and cleanup.
+//		 */
+//		try {
+//			ZipFile zipFile = new ZipFile(outputFile.toString());
+//
+//			Enumeration entries = zipFile.entries();
+//			while (entries.hasMoreElements()) {
+//				ZipEntry entry = (ZipEntry) entries.nextElement();
+//				String[] filepath = entry.getName().split("/");
+//				String finalFile = FileDownload.genmappcsdatabasedir + filepath[filepath.length - 1];
+//				System.out.println("Extracting file: " + entry.getName()
+//						+ " to " + finalFile);
+//				copyInputStream(zipFile.getInputStream(entry),
+//						new BufferedOutputStream(new FileOutputStream(
+//								finalFile)));
+//			}
+//
+//			zipFile.close();
+//			outputFile.delete();
+//		} catch (IOException ioe) {
+//			System.out.println("Unhandled exception:");
+//			ioe.printStackTrace();
+//			return;
+//		}
 		// proudly proclaim completion
 		//System.out.println("5. proclaiming finish");
 		downloadStatus = Status.FINISHED;
