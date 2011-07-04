@@ -6,10 +6,12 @@
 package org.genmapp.golayout;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -66,5 +68,18 @@ public class GOLayoutUtil {
             e.printStackTrace();
         }
         return ret;
+    }
+
+    /**
+     * @param prefix
+     * @return
+     */
+    public static List<String> retrieveLocalFiles(String filePath) {
+        File dir = new File(filePath);
+        if (!dir.exists()) {
+            dir.mkdir();
+        }
+        String[] children = dir.list();
+        return Arrays.asList(children);
     }
 }
