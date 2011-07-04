@@ -24,8 +24,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -42,15 +40,12 @@ import cytoscape.layout.TunableListener;
 import cytoscape.plugin.CytoscapePlugin;
 import cytoscape.plugin.PluginManager;
 import cytoscape.view.CyNetworkView;
-import java.util.Iterator;
 import java.util.Set;
-import javax.swing.JLabel;
-import org.bridgedb.BridgeDb;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.bridgedb.DataSource;
 import org.bridgedb.IDMapper;
-import org.bridgedb.IDMapperException;
-import org.bridgedb.bio.BioDataSource;
-import org.genmapp.golayout.utils.FileDownload;
+import org.genmapp.golayout.utils.FileDownloadDialog;
 import org.pathvisio.cytoscape.GpmlPlugin;
 
 public class GOLayout extends CytoscapePlugin{
@@ -85,10 +80,11 @@ public class GOLayout extends CytoscapePlugin{
     }
 
     public class GOLayoutAlgorithm extends AbstractLayout implements
-                    TunableListener {
+                    TunableListener, ActionListener  {
         protected static final String LAYOUT_NAME = "0-golayout";
         private static final String HELP = "GOLayout Help";
         private LayoutProperties layoutProperties = null;
+        private boolean initializaionTag = false;
 
         public String annotationAtt = "ID";
         public String annotationCode = null;
@@ -96,6 +92,7 @@ public class GOLayout extends CytoscapePlugin{
         private List<String> dsValues = new ArrayList<String>();
         private List<String> speciesValues = new ArrayList<String>();
         private List<String> aAttAnnValues = new ArrayList<String>();
+        private List<String> downloadDBList = new ArrayList<String>();
 		private IDMapper _mapper = null;
 		private Set<DataSource> dataSources = null;
         private Tunable gAttParTunable;
@@ -107,6 +104,7 @@ public class GOLayout extends CytoscapePlugin{
         private Tunable aAnnSwiTunable;
         private Tunable aSpeAnnTunable;
         private Tunable aAttAnnTunable;
+        private Tunable aAnnDowTunable;
         private Tunable dsTunable;
         private Tunable lPreTemTunable;
         private Tunable lLoaTemTunable;
@@ -164,7 +162,7 @@ public class GOLayout extends CytoscapePlugin{
             //Panel of "Annotation Settings"
             layoutProperties.add(new Tunable("annotation",
                     "Annotation Settings (optional)",
-                    Tunable.GROUP, new Integer(4)));
+                    Tunable.GROUP, new Integer(5)));
             aAnnSwiTunable = new Tunable("annotationSwitch",
                     "Annotate current network", Tunable.BOOLEAN, true);
             aAnnSwiTunable.addTunableValueListener(this);
@@ -183,6 +181,11 @@ public class GOLayout extends CytoscapePlugin{
                     "Type of identifier, e.g., Entrez Gene", Tunable.LIST,
                     new Integer(0), (Object) dsValues.toArray(), null, 0);
             layoutProperties.add(dsTunable);
+            aAnnDowTunable =  new Tunable("annotationFileDownload",
+                    " ", Tunable.BUTTON, "Download", this, null, 0);
+            layoutProperties.add(aAnnDowTunable);
+            //aAnnDowTunable..addActionListener(this);
+            aAnnDowTunable.setImmutable(true);
             //Panel of "Partition Settings"
             layoutProperties.add(new Tunable("partition", "Partition Settings",
                     Tunable.GROUP, new Integer(3)));
@@ -248,37 +251,88 @@ public class GOLayout extends CytoscapePlugin{
 //                    return tempList;
 //                }
 
-        public void populateDataSourceList(String annotationSpecies) {
-            try {
-                Class.forName("org.bridgedb.webservice.bridgerest.BridgeRest");
-            } catch (ClassNotFoundException e) {
-                System.out.println("Can't register org.bridgedb.rdb.IDMapperRdb");
-                e.printStackTrace();
-            }
+//        public void populateDataSourceList(String annotationSpecies) {
+//            try {
+//                Class.forName("org.bridgedb.webservice.bridgerest.BridgeRest");
+//            } catch (ClassNotFoundException e) {
+//                System.out.println("Can't register org.bridgedb.rdb.IDMapperRdb");
+//                e.printStackTrace();
+//            }
+//
+//            BioDataSource.init();
+//            // now we connect to the driver and create a IDMapper instance.
+//            // TODO: Update to use multiple species
+//            try {
+//                _mapper = BridgeDb.connect("idmapper-bridgerest:http://webservice.bridgedb.org/"+annotationSpecies);
+//                //System.out.println(_mapper.toString());
+//            } catch (IDMapperException e) {
+//                e.printStackTrace();
+//            }
+//            try {
+//                dataSources = _mapper.getCapabilities().getSupportedSrcDataSources();
+//                //System.out.println(dataSources.size());
+//            } catch (IDMapperException e) {
+//                e.printStackTrace();
+//            }
+//            dsValues.clear();
+//            if (dataSources.size() > 0) {
+//                Iterator it = dataSources.iterator();
+//                while (it.hasNext()) {
+//                    dsValues.add(((DataSource) it.next()).getFullName());
+//                }
+//            }
+//        }
 
-            BioDataSource.init();
-            // now we connect to the driver and create a IDMapper instance.
-            // TODO: Update to use multiple species
-            try {
-                _mapper = BridgeDb.connect("idmapper-bridgerest:http://webservice.bridgedb.org/"+annotationSpecies);
-                //System.out.println(_mapper.toString());
-            } catch (IDMapperException e) {
-                e.printStackTrace();
+        private List<String> checkMappingResources(String species){
+            List<String> downloadList = new ArrayList<String>();
+            List<String> localFileList = new ArrayList<String>();
+
+            List<String> derbyRemotelist = GOLayoutUtil.readUrl(GOLayoutStaticValues.bridgedbDerbyDir);
+            String latestDerbyDB = identifyLatestVersion(derbyRemotelist, species+"_Derby", ".bridge");
+            System.out.println("latestDerbyDB: "+latestDerbyDB);
+            List<String> goslimRemotelist = GOLayoutUtil.readUrl(GOLayoutStaticValues.genmappcsDatabaseDir);
+            String latestGOslimDB = identifyLatestVersion(goslimRemotelist, species+"_GOslim", ".tab");
+            System.out.println("latestGOslimDB: "+latestGOslimDB);
+            
+            localFileList = GOLayoutUtil.retrieveLocalFiles(GOLayout.GOLayoutBaseDir);
+            if(localFileList==null || localFileList.isEmpty()) {
+                downloadList.add(GOLayoutStaticValues.bridgedbDerbyDir+latestDerbyDB);
+                downloadList.add(GOLayoutStaticValues.genmappcsDatabaseDir+latestGOslimDB);
+                System.out.println("No any local db, need download all");
+            }  else {
+                String localDerbyDB = identifyLatestVersion(localFileList, species+"_Derby", ".bridge");
+                System.out.println("localDerbyDB: "+localDerbyDB);
+                if(localDerbyDB.equals("")||!localDerbyDB.equals(latestDerbyDB))
+                    downloadList.add(GOLayoutStaticValues.bridgedbDerbyDir+latestDerbyDB);
+                String localGOslimDB = identifyLatestVersion(localFileList, species+"_GOslim", ".tab");
+                System.out.println("localGOslimDB: "+localGOslimDB);
+                if(localGOslimDB.equals("")||!localGOslimDB.equals(latestGOslimDB))
+                    downloadList.add(GOLayoutStaticValues.genmappcsDatabaseDir+latestGOslimDB);
             }
-            try {
-                dataSources = _mapper.getCapabilities().getSupportedSrcDataSources();
-                //System.out.println(dataSources.size());
-            } catch (IDMapperException e) {
-                e.printStackTrace();
-            }
-            dsValues.clear();
-            if (dataSources.size() > 0) {
-                Iterator it = dataSources.iterator();
-                while (it.hasNext()) {
-                    dsValues.add(((DataSource) it.next()).getFullName());
+            return downloadList;
+        }
+
+        private String identifyLatestVersion(List<String> dbList, String prefix, String surfix) {
+            String result = "";
+            int latestdate = 0;
+            for (String filename : dbList) {
+                Pattern p = Pattern.compile(prefix+"_\\d{8}\\"+surfix);
+                Matcher m = p.matcher(filename);
+		if(m.find()) {
+                    //System.out.println(m.group());
+                    filename = m.group();
+                //if(filename.matches(prefix+".*\\d{8}.*\\"+surfix)) {
+                    String datestr = filename.substring(filename.lastIndexOf("_") + 1, filename.indexOf("."));
+                    if (datestr.matches("^\\d{8}$")) {
+                        int date = new Integer(datestr);
+                        if (date > latestdate) {
+                            latestdate = date;
+                            result = filename;
+                        }
+                    }
                 }
             }
-//            System.out.println(dsValues.size());
+            return result;
         }
 
         private void checkAttributes(Tunable globalTunable, String goAttribute){
@@ -390,6 +444,7 @@ public class GOLayout extends CytoscapePlugin{
                 aAttAnnTunable.setImmutable(true);
                 aAnnSwiTunable.setValue(false);
                 aAnnSwiTunable.setImmutable(true);
+                aAnnDowTunable.setImmutable(true);
             } else {
                 aAnnSwiTunable.setImmutable(false);
             }
@@ -397,6 +452,7 @@ public class GOLayout extends CytoscapePlugin{
             gAttParPerTunable.setValue(checkAnnotationRate(gAttParTunable.getValue().toString())+"/"+numberOfNodes);
             gAttLayPerTunable.setValue(checkAnnotationRate(gAttLayTunable.getValue().toString())+"/"+numberOfNodes);
             gAttNodPerTunable.setValue(checkAnnotationRate(gAttNodTunable.getValue().toString())+"/"+numberOfNodes);
+            checkDownloadStatus();
 //                    if(CurrentNetworkAtts.contains(GOLayoutStaticValues.BP_ATTNAME)&&CurrentNetworkAtts.contains(GOLayoutStaticValues.CC_ATTNAME)&&CurrentNetworkAtts.contains(GOLayoutStaticValues.MF_ATTNAME)) {
 //                        dsTunable.setImmutable(true);
 //                        aSpeAnnTunable.setImmutable(true);
@@ -404,6 +460,21 @@ public class GOLayout extends CytoscapePlugin{
 //                    }
 //                    System.out.println(.contains("GOslim-BiologicalProcess"));
 //                    System.out.println(gAttLayTunable.getValue());
+        }
+
+        private void checkDownloadStatus() {
+            System.out.println(downloadDBList.size());
+            if(((Boolean) aAnnSwiTunable.getValue()).booleanValue()) {
+                if(downloadDBList.isEmpty()) {
+                    aAttAnnTunable.setImmutable(false);
+                    dsTunable.setImmutable(false);
+                    aAnnDowTunable.setImmutable(true);
+                } else {
+                    aAttAnnTunable.setImmutable(true);
+                    dsTunable.setImmutable(true);
+                    aAnnDowTunable.setImmutable(false);
+                }
+            }
         }
 
         private String[] getSpeciesCommonName(String speName) {
@@ -422,25 +493,32 @@ public class GOLayout extends CytoscapePlugin{
         }
 
         public void tunableChanged(Tunable t) {
+            System.out.println("*******************tunableChanged**************************");
+            System.out.println(t.getName());
             // TODO Auto-generated method stub
-            checkAnnotationStatus();
+            //checkAnnotationStatus();
             if (t.getName().equals("speciesAnnotation")) {
                 //Regenerate list of ID types when user select another species.
                 String[] speciesCode = getSpeciesCommonName(speciesValues.get(new Integer(t.getValue().toString()).intValue()));
                 annotationSpeciesCode = speciesCode[1];
-                populateDataSourceList(annotationSpeciesCode);
+                downloadDBList = checkMappingResources(annotationSpeciesCode);
+                //populateDataSourceList(annotationSpeciesCode);
                 dsTunable.setLowerBound((Object) dsValues.toArray());
+                checkDownloadStatus();
             } else if (t.getName().equals("annotationSwitch")) {
-                if(((Boolean) t.getValue()).booleanValue()==true) {
-                    dsTunable.setImmutable(false);
+                if(((Boolean) t.getValue()).booleanValue()) {
                     aSpeAnnTunable.setImmutable(false);
-                    aAttAnnTunable.setImmutable(false);
+                    checkDownloadStatus();
                 } else {
                     dsTunable.setImmutable(true);
                     aSpeAnnTunable.setImmutable(true);
                     aAttAnnTunable.setImmutable(true);
+                    aAnnDowTunable.setImmutable(true);
                 }
+            } else {
+                checkAnnotationStatus();
             }
+            //checkAnnotationStatus();
             updateSettings();
         }
 
@@ -606,29 +684,37 @@ public class GOLayout extends CytoscapePlugin{
          *
          */
         public JPanel getSettingsPanel() {
-            //updates ui based on current network attributes
-            checkAnnotationStatus();
-            checkAttributes(gAttParTunable, GOLayoutStaticValues.BP_ATTNAME);
-            checkAttributes(gAttLayTunable, GOLayoutStaticValues.CC_ATTNAME);
-            checkAttributes(gAttNodTunable, GOLayoutStaticValues.MF_ATTNAME);
+            if(!initializaionTag) {
+                System.out.println("*******************getSettingsPanel**************************");
+                //Guess species current network for annotation
+                String[] defaultSpecies = getSpeciesCommonName(CytoscapeInit.getProperties().getProperty("defaultSpeciesName"));
+                if(!defaultSpecies[0].equals("")) {
+                    annotationSpeciesCode = defaultSpecies[1];
+                    aSpeAnnTunable.setValue(speciesValues.indexOf(defaultSpecies[0]));
+                    downloadDBList = checkMappingResources(annotationSpeciesCode);
+                    //System.out.print(checkMappingResources(defaultSpecies[1]).size());
+                    //populateDataSourceList(annotationSpeciesCode);
+                    checkDownloadStatus();
+                    dsTunable.setLowerBound((Object) dsValues.toArray());
+                }
+                //Guess id of current network for annotation
+    //            String defaultID = Cytoscape.getCurrentNetwork().getNode(0).getIdentifier();//Cytoscape.getNodeAttributes().//Cytoscape.getCurrentNetwork().;
+                //populateDataSourceList(defaultSpecies[1]);
 
-            //Guess species current network for annotation
-            String[] defaultSpecies = getSpeciesCommonName(CytoscapeInit.getProperties().getProperty("defaultSpeciesName"));
-            if(!defaultSpecies[0].equals("")) {
-                annotationSpeciesCode = defaultSpecies[1];
-                aSpeAnnTunable.setValue(speciesValues.indexOf(defaultSpecies[0]));
-                populateDataSourceList(annotationSpeciesCode);
-                dsTunable.setLowerBound((Object) dsValues.toArray());
+                dsTunable.setImmutable(true);
+                aSpeAnnTunable.setImmutable(true);
+                aAttAnnTunable.setImmutable(true);
+                aAnnSwiTunable.setValue(false);
+
+                //updates ui based on current network attributes
+                checkAnnotationStatus();
+                checkAttributes(gAttParTunable, GOLayoutStaticValues.BP_ATTNAME);
+                checkAttributes(gAttLayTunable, GOLayoutStaticValues.CC_ATTNAME);
+                checkAttributes(gAttNodTunable, GOLayoutStaticValues.MF_ATTNAME);
+                
+                initializaionTag = true;
             }
-            //Guess id of current network for annotation
-//            String defaultID = Cytoscape.getCurrentNetwork().getNode(0).getIdentifier();//Cytoscape.getNodeAttributes().//Cytoscape.getCurrentNetwork().;
-            //populateDataSourceList(defaultSpecies[1]);
 
-            dsTunable.setImmutable(true);
-            aSpeAnnTunable.setImmutable(true);
-            aAttAnnTunable.setImmutable(true);
-            aAnnSwiTunable.setValue(false);
-            
             JPanel panel = new JPanel(new GridLayout(0, 1));
             panel.add(layoutProperties.getTunablePanel());
             return panel;
@@ -695,7 +781,7 @@ public class GOLayout extends CytoscapePlugin{
                 //Check local file for annotation
                 if(false) {
                     //Testing FileDownload function
-                    new FileDownload("Sc_GOslim_20110601.tab");
+                    //new FileDownload("Sc_GOslim_20110601.tab");
                 }
                 IdMapping.mapAnnotation(GOLayout.GOLayoutBaseDir+"Sc_GOslim_20110601.tab", "ID");
             }            
@@ -704,6 +790,16 @@ public class GOLayout extends CytoscapePlugin{
 //			}
 //			CyLayoutAlgorithm layout = CyLayouts.getLayout("partition");
 //			layout.doLayout(Cytoscape.getCurrentNetworkView(), taskMonitor);
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            FileDownloadDialog srcConfDialog
+                = new FileDownloadDialog(Cytoscape.getDesktop(), downloadDBList);
+            srcConfDialog.setLocationRelativeTo(Cytoscape.getDesktop());
+            srcConfDialog.setSize(450, 100);
+            srcConfDialog.setVisible(true);
+            downloadDBList = checkMappingResources(annotationSpeciesCode);
+            checkDownloadStatus();
         }
 
         /**
