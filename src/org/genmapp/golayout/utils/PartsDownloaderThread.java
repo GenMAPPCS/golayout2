@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import org.genmapp.golayout.GOLayout;
 
 /**
  * Represents the downloader thread which run parallely and download segments of a file
@@ -80,7 +81,7 @@ public class PartsDownloaderThread implements Runnable {
                 connection.setReadTimeout(15000);
                 connection.connect();
 
-                File outputDir = new File(FileDownload.genmappcsdatabasedir);
+                File outputDir = new File(GOLayout.GOLayoutBaseDir);
                 if (!outputDir.exists() || !outputDir.isDirectory()) {
                     outputDir.mkdir();
                 }
@@ -88,7 +89,7 @@ public class PartsDownloaderThread implements Runnable {
                 int res = connection.getResponseCode();
 //                System.out.println("Response=" + connection.getResponseMessage());
                 InputStream in = connection.getInputStream();
-                OutputStream out = new BufferedOutputStream(new FileOutputStream(FileDownload.genmappcsdatabasedir + task.getID() + "/" + task.getID() + "part" + partNumber));
+                OutputStream out = new BufferedOutputStream(new FileOutputStream(GOLayout.GOLayoutBaseDir + task.getID() + "/" + task.getID() + "part" + partNumber));
 
                 int d = 0;
 //                System.out.println("READING part " + partNumber);
