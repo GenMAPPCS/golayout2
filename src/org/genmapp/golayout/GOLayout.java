@@ -30,6 +30,9 @@ import javax.swing.JPanel;
 
 import cytoscape.Cytoscape;
 import cytoscape.CytoscapeInit;
+import cytoscape.command.CyCommandException;
+import cytoscape.command.CyCommandManager;
+import cytoscape.command.CyCommandResult;
 import cytoscape.data.CyAttributes;
 import cytoscape.layout.AbstractLayout;
 import cytoscape.layout.CyLayoutAlgorithm;
@@ -40,6 +43,8 @@ import cytoscape.layout.TunableListener;
 import cytoscape.plugin.CytoscapePlugin;
 import cytoscape.plugin.PluginManager;
 import cytoscape.view.CyNetworkView;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -65,7 +70,7 @@ public class GOLayout extends CytoscapePlugin{
         CyLayouts.addLayout(new GOLayoutAlgorithm(), "GO Layout");
         CyLayouts.addLayout(new PartitionAlgorithm(), null);
         CyLayouts.addLayout(new CellAlgorithm(), null);
-        CyLayouts.addLayout(new IdMapping(), "IdMapping");
+        //CyLayouts.addLayout(new IdMapping(), "IdMapping");
 
         // JMenuItem item = new JMenuItem("Add GO-slim annotations");
         // JMenu layoutMenu = Cytoscape.getDesktop().getCyMenus().getMenuBar()
@@ -475,7 +480,27 @@ public class GOLayout extends CytoscapePlugin{
                     aAnnDowTunable.setImmutable(false);
                 }
             }
+            
         }
+
+        public Set<String> guessIdType(String sampleId){
+            Set<String> idTypes;
+            Map<String, Object> args = new HashMap<String, Object>();
+            args.put("sourceid", sampleId);
+            try {
+                CyCommandResult result = CyCommandManager.execute("idmapping", "guess id type", args);
+                idTypes = (Set<String>) result.getResult();
+            } catch (CyCommandException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                return null;
+            } catch (RuntimeException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                return null;
+            }
+            return idTypes;
+	}
 
         private String[] getSpeciesCommonName(String speName) {
             String[] result = {"", ""};
@@ -505,10 +530,14 @@ public class GOLayout extends CytoscapePlugin{
                 //populateDataSourceList(annotationSpeciesCode);
                 dsTunable.setLowerBound((Object) dsValues.toArray());
                 checkDownloadStatus();
+                if(downloadDBList.isEmpty())
+                        dsValues = IdMapping.getSourceTypes(GOLayout.GOLayoutBaseDir+identifyLatestVersion(GOLayoutUtil.retrieveLocalFiles(GOLayout.GOLayoutBaseDir), annotationSpeciesCode+"_Derby", ".bridge"));
+                    dsTunable.setLowerBound((Object) dsValues.toArray());
             } else if (t.getName().equals("annotationSwitch")) {
                 if(((Boolean) t.getValue()).booleanValue()) {
                     aSpeAnnTunable.setImmutable(false);
                     checkDownloadStatus();
+                    dsTunable.setLowerBound((Object) dsValues.toArray());
                 } else {
                     dsTunable.setImmutable(true);
                     aSpeAnnTunable.setImmutable(true);
@@ -695,6 +724,8 @@ public class GOLayout extends CytoscapePlugin{
                     //System.out.print(checkMappingResources(defaultSpecies[1]).size());
                     //populateDataSourceList(annotationSpeciesCode);
                     checkDownloadStatus();
+                    if(downloadDBList.isEmpty())
+                        dsValues = IdMapping.getSourceTypes(GOLayout.GOLayoutBaseDir+identifyLatestVersion(GOLayoutUtil.retrieveLocalFiles(GOLayout.GOLayoutBaseDir), annotationSpeciesCode+"_Derby", ".bridge"));
                     dsTunable.setLowerBound((Object) dsValues.toArray());
                 }
                 //Guess id of current network for annotation
@@ -783,7 +814,32 @@ public class GOLayout extends CytoscapePlugin{
                     //Testing FileDownload function
                     //new FileDownload("Sc_GOslim_20110601.tab");
                 }
-                IdMapping.mapAnnotation(GOLayout.GOLayoutBaseDir+"Sc_GOslim_20110601.tab", "ID");
+//                CyAttributes currentAttrs = Cytoscape.getNodeAttributes();
+//                for (CyNode cn : (List<CyNode>) currentNetwork.nodesList()) {
+//                    if (currentAttrs.hasAttribute(cn.getIdentifier(), goAttribute)) {
+//                            byte type = currentAttrs.getType(goAttribute);
+//                            if (type == CyAttributes.TYPE_SIMPLE_LIST) {
+//                                    List list = currentAttrs.getListAttribute(cn.getIdentifier(), goAttribute);
+//                                    if (list.size() > 1){
+//                                            count++;
+//                                    } else if (list.size() == 1){
+//                                            if (list.get(0) != null)
+//                                                    if (!list.get(0).equals(""))
+//                                                            count++;
+//                                    }
+//                            } else if (type == CyAttributes.TYPE_STRING) {
+//                                    if (!currentAttrs.getStringAttribute(cn.getIdentifier(), goAttribute).equals("null"))
+//                                            count++;
+//                            } else {
+//                                    //we don't have to be as careful with other attribute types
+//                                    if (!currentAttrs.getAttribute(cn.getIdentifier(), goAttribute).equals(null))
+//                                            count++;
+//                            }
+//                    }
+//
+//                }
+
+                IdMapping.mapAnnotation(GOLayout.GOLayoutBaseDir+identifyLatestVersion(GOLayoutUtil.retrieveLocalFiles(GOLayout.GOLayoutBaseDir), annotationSpeciesCode+"_GOslim", ".tab"), "ID");
             }            
 //			if (null != CellAlgorithm.attributeName) {
 //				PartitionAlgorithm.layoutName = CellAlgorithm.LAYOUT_NAME;
@@ -800,6 +856,9 @@ public class GOLayout extends CytoscapePlugin{
             srcConfDialog.setVisible(true);
             downloadDBList = checkMappingResources(annotationSpeciesCode);
             checkDownloadStatus();
+            if(downloadDBList.isEmpty())
+                dsValues = IdMapping.getSourceTypes(GOLayout.GOLayoutBaseDir+identifyLatestVersion(GOLayoutUtil.retrieveLocalFiles(GOLayout.GOLayoutBaseDir), annotationSpeciesCode+"_Derby", ".bridge"));
+            dsTunable.setLowerBound((Object) dsValues.toArray());
         }
 
         /**
