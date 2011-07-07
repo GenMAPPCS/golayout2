@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package org.genmapp.golayout.utils;
+package org.genmapp.golayout.download;
 
-import org.genmapp.golayout.utils.Status;
+import org.genmapp.golayout.download.Status;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;

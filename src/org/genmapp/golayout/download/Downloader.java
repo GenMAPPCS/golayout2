@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package org.genmapp.golayout.utils;
+package org.genmapp.golayout.download;
 
 //package downloader;
-import org.genmapp.golayout.utils.DownloaderTask;
-import org.genmapp.golayout.utils.PartsDownloaderThread;
-import org.genmapp.golayout.utils.Status;
+import org.genmapp.golayout.download.DownloaderTask;
+import org.genmapp.golayout.download.PartsDownloaderThread;
+import org.genmapp.golayout.download.Status;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;

@@ -12,12 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package org.genmapp.golayout.utils;
+package org.genmapp.golayout.download;
+
+import org.genmapp.golayout.download.Status;
+import java.net.URL;
 
 /**
- * a listener interface
+ * clsss to store the details of the file to be downloaded
  * @author Anurag Sharma
  */
-public interface DownloadListener {
-    public void onDownloadFinish(DownloadEvent evt);
+public class DownloadEvent {
+
+    public String ID;
+    public URL url;
+    public Status status;
 }

@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package org.genmapp.golayout.utils;
+package org.genmapp.golayout.download;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
