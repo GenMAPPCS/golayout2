@@ -1,8 +1,18 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
+/*******************************************************************************
+ * Copyright 2011 Chao Zhang
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package org.genmapp.golayout;
 
 import org.genmapp.golayout.utils.GOLayoutUtil;
@@ -625,6 +635,7 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
             //Guess species current network for annotation
             String[] defaultSpecies = getSpeciesCommonName(CytoscapeInit
                     .getProperties().getProperty("defaultSpeciesName"));
+            System.out.println(defaultSpecies[0]);
             if(!defaultSpecies[0].equals("")) {
                 annotationSpeciesCode = defaultSpecies[1];
                 aSpeAnnTunable.setValue(speciesValues.indexOf(defaultSpecies[0]));
@@ -805,11 +816,11 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
 
     public void actionPerformed(ActionEvent e) {
         if(((JButton)e.getSource()).getText().equals("Download")) {
-            FileDownloadDialog srcConfDialog
+            FileDownloadDialog annDownloadDialog
                 = new FileDownloadDialog(Cytoscape.getDesktop(), downloadDBList);
-            srcConfDialog.setLocationRelativeTo(Cytoscape.getDesktop());
-            srcConfDialog.setSize(450, 100);
-            srcConfDialog.setVisible(true);
+            annDownloadDialog.setLocationRelativeTo(Cytoscape.getDesktop());
+            annDownloadDialog.setSize(450, 100);
+            annDownloadDialog.setVisible(true);
             downloadDBList = checkMappingResources(annotationSpeciesCode);
             checkDownloadStatus();
             if(downloadDBList.isEmpty())
@@ -820,17 +831,28 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
             aAttTypTunable.setLowerBound((Object) aAttTypValues.toArray());
             setDefaultAttType("ID");
         } else if (((JButton)e.getSource()).getText().equals("Annotate")) {
-            CyNetwork currentNetwork = Cytoscape.getCurrentNetwork();
-            CyAttributes currentAttrs = Cytoscape.getNodeAttributes();
-            Object printObject = "";
-            //System.out.println(currentNetwork.nodesList().get(0));
-            if(aAttAnnTunable.getValue().equals("ID"))
-                printObject = "ID: "+currentNetwork.nodesList().get(0);
-            else
-                printObject = aAttAnnTunable.getValue().toString()+": "
-                        +currentAttrs.getAttribute(currentNetwork.nodesList()
-                        .get(0).toString(), aAttAnnTunable.getValue().toString());
-            //System.out.println(printObject);
+            String[] selectSpecies = getSpeciesCommonName(speciesValues.get(
+                    new Integer(aSpeAnnTunable.getValue().toString()).intValue()));
+            if(!selectSpecies[0].equals("")) {
+                List<String> localFileList = GOLayoutUtil.retrieveLocalFiles(
+                    GOLayout.GOLayoutDatabaseDir);
+                String localDerbyDB = GOLayout.GOLayoutDatabaseDir +
+                        identifyLatestVersion(localFileList,selectSpecies[1]+
+                        "_Derby", ".bridge") + ".bridge";
+                String localGOslimDB = GOLayout.GOLayoutDatabaseDir+
+                        identifyLatestVersion(localFileList,selectSpecies[1]+
+                        "_GOslim", ".tab") + ".tab";
+                AnnotationDialog idMappingDialog = new AnnotationDialog(
+                        Cytoscape.getDesktop(), localDerbyDB, localGOslimDB, 
+                        aAttAnnTunable.getValue().toString(),
+                        aAttTypTunable.getValue().toString(),
+                        aAttTypValues.get(findMatchType("Ensembl")).toString());
+                idMappingDialog.setLocationRelativeTo(Cytoscape.getDesktop());
+                idMappingDialog.setSize(450, 100);
+                idMappingDialog.setVisible(true);
+            } else {
+                System.out.println("Retrive species error!");
+            }            
         } else if (((JButton)e.getSource()).getText().equals("Help!")) {
 
         }

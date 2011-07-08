@@ -1,8 +1,18 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
+/*******************************************************************************
+ * Copyright 2011 Chao Zhang
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package org.genmapp.golayout;
 
 import cytoscape.CyNetwork;
@@ -54,6 +64,23 @@ public class IdMapping {
         }
         return sourceIDTypes;
     }
+    
+    public static boolean mapID(String derbyFilePath, String sourceIDName, String targetIDName) {
+        System.out.println("Call idmapping success!");
+        Map<String, Object> args = new HashMap<String, Object>();
+        args.put("classpath", "org.bridgedb.rdb.IDMapperRdb");
+        args.put("connstring", "idmapper-pgdb:"+derbyFilePath);
+        args.put("displayname", "DerbyDatabase");
+        //CyDataset d
+        connectFileDB(args);
+        CyNetwork currentNetwork = Cytoscape.getCurrentNetwork();
+        List<String> nodeIds = new ArrayList<String>();
+        for (CyNode cn : (List<CyNode>) currentNetwork.nodesList()) {
+            nodeIds.add(cn.getIdentifier());
+        }
+        mapAttribute(sourceIDName, targetIDName);
+        return true;
+    }
 
     public static boolean mapAnnotation(String GOSlimFilePath, String idName) {
         System.out.println("Call idmapping success!");
@@ -71,7 +98,6 @@ public class IdMapping {
         mapAttribute(idName, GOLayoutStaticValues.BP_ATTNAME);
         mapAttribute(idName, GOLayoutStaticValues.CC_ATTNAME);
         mapAttribute(idName, GOLayoutStaticValues.MF_ATTNAME);
-
         return true;
     }
 

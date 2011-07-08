@@ -1,8 +1,18 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
+/*******************************************************************************
+ * Copyright 2011 Chao Zhang
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ******************************************************************************/
 package org.genmapp.golayout;
 
 import java.awt.event.ActionEvent;
@@ -22,14 +32,23 @@ import org.genmapp.golayout.download.Downloader;
  * @author Chao
  */
 public class AnnotationDialog extends JDialog implements ActionListener {
-    public  List<String> downloadFileList;
+    public  String localDerbyDBPath;
+    public  String localGOslimDBPath;
+    public  String selectedMappingID;
+    public  String selectedMappingType;
+    public  String ensemblIDType;
     private JPanel optionPane;
     public  JLabel messageLabel;
     public  JButton comfirmButton;
     
-    public AnnotationDialog(JFrame aFrame, List<String> downloadDBList) {
+    public AnnotationDialog(JFrame aFrame, String localDerbyDB, String localGOslimDB,
+            String mappingID, String mappingType, String ensemblType) {
         super(aFrame, true);
-        downloadFileList = downloadDBList;
+        localDerbyDBPath = localDerbyDB;
+        localGOslimDBPath = localGOslimDB;
+        selectedMappingID = mappingID;
+        selectedMappingType = mappingType;
+        ensemblIDType = ensemblType;
         setTitle("Annotating current network");
 
         optionPane = new JPanel();
@@ -65,30 +84,23 @@ class AnnotationThread extends Thread {
 
     public void run() {
         try {
-            System.out.println("starting download");
-            for(String fileName:sp.downloadFileList) {
-                Downloader d = new Downloader();
-                d.download(fileName);
-                int progress = d.getProgress();
-                while (progress < 99) {
-                    System.out.println(fileName + ": " + progress + "%");
-                    sp.messageLabel.setText(fileName + ": " + progress + "%");
-                    Thread.sleep(500);
-                    progress = d.getProgress();
-
-                }
-                sp.messageLabel.setText(fileName + ": 100%");
-
-                // must wait for completion of uncompression before giving up thread
-                d.waitFor();
+            System.out.println("starting annotating");            
+            sp.messageLabel.setText("Starting annotating");
+            if(sp.selectedMappingType.indexOf("ensembl")!=-1) {
+                IdMapping.mapID(sp.localDerbyDBPath, sp.selectedMappingID, sp.ensemblIDType);
+                IdMapping.mapAnnotation(sp.localGOslimDBPath, sp.ensemblIDType);
+            } else {
+                IdMapping.mapAnnotation(sp.localGOslimDBPath, sp.selectedMappingID);
             }
+            // must wait for completion of uncompression before giving up thread
+            //this.waitFor();
             sp.comfirmButton.setText("Finished!");
             sp.comfirmButton.setEnabled(true);
-        } catch (MalformedURLException e1) {
-            e1.printStackTrace();
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        } catch (InterruptedException e) {
+//        } catch (MalformedURLException e1) {
+//            e1.printStackTrace();
+//        } catch (IOException e1) {
+//            e1.printStackTrace();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
