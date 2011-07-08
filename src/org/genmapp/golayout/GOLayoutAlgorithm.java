@@ -10,9 +10,6 @@ import cytoscape.CyNetwork;
 import cytoscape.CyNode;
 import cytoscape.Cytoscape;
 import cytoscape.CytoscapeInit;
-import cytoscape.command.CyCommandException;
-import cytoscape.command.CyCommandManager;
-import cytoscape.command.CyCommandResult;
 import cytoscape.data.CyAttributes;
 import cytoscape.layout.AbstractLayout;
 import cytoscape.layout.LayoutProperties;
@@ -23,9 +20,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -76,7 +71,7 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
         // hardcode species until web service support query of supported
         // species
         speciesValues = Arrays.asList(GOLayoutStaticValues.speciesList);
-        aAttTypValues.add("Ensembl");
+        aAttTypValues.add("Ensembl1");
         aAttAnnValues.add("ID");
 
         layoutProperties = new LayoutProperties(getName());
@@ -130,8 +125,9 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
                 "The identifier to use for annotation retrieval",
                 Tunable.NODEATTRIBUTE, annotationAtt,
                 aAttAnnValues, null, 0);
+        aAttAnnTunable.addTunableValueListener(this);
         layoutProperties.add(aAttAnnTunable);
-        aAttTypTunable = new Tunable("dsAnnotation",
+        aAttTypTunable = new Tunable("attributeTypes",
                 "Type of identifier, e.g., Entrez Gene", Tunable.LIST,
                 new Integer(0), (Object) aAttTypValues.toArray(), null, 0);
         layoutProperties.add(aAttTypTunable);
@@ -202,33 +198,34 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
     private List<String> checkMappingResources(String species){
         List<String> downloadList = new ArrayList<String>();
         List<String> localFileList = new ArrayList<String>();
-//
-//        List<String> derbyRemotelist = GOLayoutUtil.readUrl(GOLayoutStaticValues.bridgedbDerbyDir);
-//        String latestDerbyDB = identifyLatestVersion(derbyRemotelist, species+"_Derby", ".bridge");
-//        System.out.println("latestDerbyDB: "+latestDerbyDB);
-//        List<String> goslimRemotelist = GOLayoutUtil.readUrl(GOLayoutStaticValues.genmappcsDatabaseDir);
-//        String latestGOslimDB = identifyLatestVersion(goslimRemotelist, species+"_GOslim", ".tab");
-//        System.out.println("latestGOslimDB: "+latestGOslimDB);
 
-        String latestDerbyDB = identifyLatestVersion(GOLayout.derbyRemotelist, species+"_Derby", ".bridge");
-        System.out.println("latestDerbyDB: "+latestDerbyDB);
-        String latestGOslimDB = identifyLatestVersion(GOLayout.goslimRemotelist, species+"_GOslim", ".tab");
-        System.out.println("latestGOslimDB: "+latestGOslimDB);
+        String latestDerbyDB = identifyLatestVersion(GOLayout.derbyRemotelist,
+                species+"_Derby", ".zip");
+        String latestGOslimDB = identifyLatestVersion(GOLayout.goslimRemotelist,
+                species+"_GOslim", ".zip");
 
-        localFileList = GOLayoutUtil.retrieveLocalFiles(GOLayout.GOLayoutBaseDir);
+        localFileList = GOLayoutUtil.retrieveLocalFiles(GOLayout.GOLayoutDatabaseDir);
         if(localFileList==null || localFileList.isEmpty()) {
-            downloadList.add(GOLayoutStaticValues.bridgedbDerbyDir+latestDerbyDB);
-            downloadList.add(GOLayoutStaticValues.genmappcsDatabaseDir+latestGOslimDB);
+            downloadList.add(GOLayoutStaticValues.bridgedbDerbyDir+latestDerbyDB+".zip");
+            downloadList.add(GOLayoutStaticValues.genmappcsDatabaseDir+latestGOslimDB+".zip");
             System.out.println("No any local db, need download all");
         }  else {
-            String localDerbyDB = identifyLatestVersion(localFileList, species+"_Derby", ".bridge");
-            System.out.println("localDerbyDB: "+localDerbyDB);
+            String localDerbyDB = identifyLatestVersion(localFileList,
+                    species+"_Derby", ".bridge");
+            if(latestDerbyDB.equals("")&&!localDerbyDB.equals(""))
+                latestDerbyDB = localDerbyDB;
+            //System.out.println("latestDerbyDB: "+latestDerbyDB);
+            //System.out.println("localDerbyDB: "+localDerbyDB);
             if(localDerbyDB.equals("")||!localDerbyDB.equals(latestDerbyDB))
-                downloadList.add(GOLayoutStaticValues.bridgedbDerbyDir+latestDerbyDB);
-            String localGOslimDB = identifyLatestVersion(localFileList, species+"_GOslim", ".tab");
-            System.out.println("localGOslimDB: "+localGOslimDB);
+                downloadList.add(GOLayoutStaticValues.bridgedbDerbyDir+latestDerbyDB+".zip");
+            String localGOslimDB = identifyLatestVersion(localFileList,
+                    species+"_GOslim", ".tab");
+            if(latestGOslimDB.equals("")&&!localGOslimDB.equals(""))
+                latestGOslimDB = localGOslimDB;
+            //System.out.println("latestGOslimDB: "+latestGOslimDB);
+            //System.out.println("localGOslimDB: "+localGOslimDB);
             if(localGOslimDB.equals("")||!localGOslimDB.equals(latestGOslimDB))
-                downloadList.add(GOLayoutStaticValues.genmappcsDatabaseDir+latestGOslimDB);
+                downloadList.add(GOLayoutStaticValues.genmappcsDatabaseDir+latestGOslimDB+".zip");
         }
         return downloadList;
     }
@@ -241,12 +238,13 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
             Matcher m = p.matcher(filename);
             if(m.find()) {
                 filename = m.group();
-                String datestr = filename.substring(filename.lastIndexOf("_") + 1, filename.indexOf("."));
+                String datestr = filename.substring(filename.lastIndexOf("_")+1,
+                        filename.indexOf("."));
                 if (datestr.matches("^\\d{8}$")) {
                     int date = new Integer(datestr);
                     if (date > latestdate) {
                         latestdate = date;
-                        result = filename;
+                        result = filename.substring(0,filename.lastIndexOf("."));
                     }
                 }
             }
@@ -255,7 +253,8 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
     }
 
     private void checkAttributes(Tunable globalTunable, String goAttribute){
-        List CurrentNetworkAtts = Arrays.asList(Cytoscape.getNodeAttributes().getAttributeNames());
+        List CurrentNetworkAtts = Arrays.asList(Cytoscape.getNodeAttributes().
+                getAttributeNames());
         List layoutAttrs = (List)globalTunable.getLowerBound();
         if(!CurrentNetworkAtts.contains(goAttribute)){
             layoutAttrs.add(goAttribute);
@@ -270,26 +269,28 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
         CyAttributes currentAttrs = Cytoscape.getNodeAttributes();
         for (CyNode cn : (List<CyNode>) currentNetwork.nodesList()) {
             if (currentAttrs.hasAttribute(cn.getIdentifier(), goAttribute)) {
-                    byte type = currentAttrs.getType(goAttribute);
-                    if (type == CyAttributes.TYPE_SIMPLE_LIST) {
-                            List list = currentAttrs.getListAttribute(cn.getIdentifier(), goAttribute);
-                            if (list.size() > 1){
-                                    count++;
-                            } else if (list.size() == 1){
-                                    if (list.get(0) != null)
-                                            if (!list.get(0).equals(""))
-                                                    count++;
-                            }
-                    } else if (type == CyAttributes.TYPE_STRING) {
-                            if (!currentAttrs.getStringAttribute(cn.getIdentifier(), goAttribute).equals("null"))
-                                    count++;
-                    } else {
-                            //we don't have to be as careful with other attribute types
-                            if (!currentAttrs.getAttribute(cn.getIdentifier(), goAttribute).equals(null))
-                                    count++;
+                byte type = currentAttrs.getType(goAttribute);
+                if (type == CyAttributes.TYPE_SIMPLE_LIST) {
+                    List list = currentAttrs.getListAttribute(
+                        cn.getIdentifier(), goAttribute);
+                    if (list.size() > 1){
+                        count++;
+                    } else if (list.size() == 1){
+                        if (list.get(0) != null)
+                            if (!list.get(0).equals(""))
+                                count++;
                     }
+                } else if (type == CyAttributes.TYPE_STRING) {
+                    if (!currentAttrs.getStringAttribute(cn.getIdentifier(),
+                            goAttribute).equals("null"))
+                        count++;
+                } else {
+                    //we don't have to be as careful with other attribute types
+                    if (!currentAttrs.getAttribute(cn.getIdentifier(),
+                            goAttribute).equals(null))
+                        count++;
+                }
             }
-
         }
         return count;
     }
@@ -305,7 +306,8 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
     }
 
     private void checkAnnotationStatus() {
-        List CurrentNetworkAtts = Arrays.asList(Cytoscape.getNodeAttributes().getAttributeNames());
+        List CurrentNetworkAtts = Arrays.asList(Cytoscape.getNodeAttributes()
+                .getAttributeNames());
         int numberOfNodes = Cytoscape.getCurrentNetwork().nodesList().size();
         //If user didn't choose GO attribute for partition, disable 'The deepest level of GO term for partition'
         if(isGOAttr(gAttParTunable)) {
@@ -313,9 +315,12 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
         } else {
             pParLevTunable.setImmutable(true);
         }
-        if((isGOAttr(gAttParTunable)&&(!CurrentNetworkAtts.contains(gAttParTunable.getValue().toString())||checkAnnotationRate(gAttParTunable.getValue().toString())==0))||
-                (isGOAttr(gAttLayTunable)&&(!CurrentNetworkAtts.contains(gAttLayTunable.getValue().toString())||checkAnnotationRate(gAttLayTunable.getValue().toString())==0))||
-                (isGOAttr(gAttNodTunable)&&(!CurrentNetworkAtts.contains(gAttNodTunable.getValue().toString())||checkAnnotationRate(gAttNodTunable.getValue().toString())==0))) {
+        if((isGOAttr(gAttParTunable)&&(!CurrentNetworkAtts.contains(gAttParTunable.getValue().toString())||
+                checkAnnotationRate(gAttParTunable.getValue().toString())==0))||
+                (isGOAttr(gAttLayTunable)&&(!CurrentNetworkAtts.contains(gAttLayTunable.getValue().toString())||
+                checkAnnotationRate(gAttLayTunable.getValue().toString())==0))||
+                (isGOAttr(gAttNodTunable)&&(!CurrentNetworkAtts.contains(gAttNodTunable.getValue().toString())||
+                checkAnnotationRate(gAttNodTunable.getValue().toString())==0))) {
             //Any of three global settings is GO attribute and annotation rate equls 0.
             //Force user to fetch the annotations, and user can not turn off the annotation panel.
             aAttTypTunable.setImmutable(false);
@@ -337,14 +342,16 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
             //aAnnDowTunable.setImmutable(false);
         }
 
-        gAttParPerTunable.setValue(checkAnnotationRate(gAttParTunable.getValue().toString())+"/"+numberOfNodes);
-        gAttLayPerTunable.setValue(checkAnnotationRate(gAttLayTunable.getValue().toString())+"/"+numberOfNodes);
-        gAttNodPerTunable.setValue(checkAnnotationRate(gAttNodTunable.getValue().toString())+"/"+numberOfNodes);
+        gAttParPerTunable.setValue(checkAnnotationRate(
+                gAttParTunable.getValue().toString())+"/"+numberOfNodes);
+        gAttLayPerTunable.setValue(checkAnnotationRate(
+                gAttLayTunable.getValue().toString())+"/"+numberOfNodes);
+        gAttNodPerTunable.setValue(checkAnnotationRate(
+                gAttNodTunable.getValue().toString())+"/"+numberOfNodes);
         checkDownloadStatus();
     }
 
     private void checkDownloadStatus() {
-        System.out.println(downloadDBList.size());
         if(((Boolean) aAnnSwiTunable.getValue()).booleanValue()) {
             if(downloadDBList.isEmpty()) {
                 aAttAnnTunable.setImmutable(false);
@@ -364,29 +371,41 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
 
     }
 
-    public Set<String> guessIdType(String sampleId){
-        Set<String> idTypes;
-        Map<String, Object> args = new HashMap<String, Object>();
-        args.put("sourceid", sampleId);
-        try {
-            CyCommandResult result = CyCommandManager.execute("idmapping", "guess id type", args);
-            idTypes = (Set<String>) result.getResult();
-        } catch (CyCommandException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            return null;
-        } catch (RuntimeException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            return null;
+    private void setDefaultAttType(String idName) {
+        String sampleID = Cytoscape.getCurrentNetwork().nodesList().get(0)
+                .toString();
+        if(!idName.equals("ID"))
+            sampleID = Cytoscape.getNodeAttributes().getAttribute(sampleID,
+                    idName).toString();
+        Set<String> guessResult = IdMapping.guessIdType(sampleID);
+        if(guessResult.isEmpty()) {
+            aAttTypTunable.setValue(findMatchType("Ensembl"));
+        } else {
+            aAttTypTunable.setValue(findMatchType(guessResult.toArray()[0]
+                    .toString()));
         }
-        return idTypes;
+    }
+
+    private int findMatchType(String matchSeq) {
+        int i = aAttTypValues.indexOf(matchSeq);        
+        if(i==-1) {
+            int n=0;
+            for(String type:aAttTypValues) {
+                if(type.trim().toLowerCase().indexOf("ensembl")!=-1)
+                    return n;
+                n++;
+            }
+            return 0;
+        } else {
+            return i;
+        }
     }
 
     private String[] getSpeciesCommonName(String speName) {
         String[] result = {"", ""};
-        List<String> lines = GOLayoutUtil.readUrl(GOLayoutStaticValues.bridgedbSpecieslist);
-        for (String line : lines) {
+        //List<String> lines = GOLayoutUtil.readUrl(GOLayoutStaticValues.bridgedbSpecieslist);
+        //for (String line : lines) {
+        for (String line : GOLayout.speciesMappinglist) {
             String tempMappingString = line.replace("\t", " ").toUpperCase();
             if(tempMappingString.indexOf(speName.toUpperCase())!=-1) {
                 String[] s = line.split("\t");
@@ -399,26 +418,30 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
     }
 
     public void tunableChanged(Tunable t) {
-        System.out.println("*******************tunableChanged**************************");
+        System.out.println("*************tunableChanged******************");
         System.out.println(t.getName());
         // TODO Auto-generated method stub
         //checkAnnotationStatus();
         if (t.getName().equals("speciesAnnotation")) {
             //Regenerate list of ID types when user select another species.
-            String[] speciesCode = getSpeciesCommonName(speciesValues.get(new Integer(t.getValue().toString()).intValue()));
+            String[] speciesCode = getSpeciesCommonName(speciesValues.get(
+                    new Integer(t.getValue().toString()).intValue()));
             annotationSpeciesCode = speciesCode[1];
             downloadDBList = checkMappingResources(annotationSpeciesCode);
             //populateDataSourceList(annotationSpeciesCode);
             //aAttTypTunable.setLowerBound((Object) aAttTypValues.toArray());
             checkDownloadStatus();
             if(downloadDBList.isEmpty())
-                aAttTypValues = IdMapping.getSourceTypes(GOLayout.GOLayoutBaseDir+identifyLatestVersion(GOLayoutUtil.retrieveLocalFiles(GOLayout.GOLayoutBaseDir), annotationSpeciesCode+"_Derby", ".bridge"));
+                aAttTypValues = IdMapping.getSourceTypes(GOLayout.GOLayoutDatabaseDir
+                        +identifyLatestVersion(GOLayoutUtil.retrieveLocalFiles(
+                        GOLayout.GOLayoutDatabaseDir), annotationSpeciesCode+
+                        "_Derby", ".bridge")+".bridge");
             aAttTypTunable.setLowerBound((Object) aAttTypValues.toArray());
+            setDefaultAttType("ID");
         } else if (t.getName().equals("annotationSwitch")) {
             if(((Boolean) t.getValue()).booleanValue()) {
                 aSpeAnnTunable.setImmutable(false);
                 checkDownloadStatus();
-                aAttTypTunable.setLowerBound((Object) aAttTypValues.toArray());
                 aAnnDowTunable.setImmutable(false);
             } else {
                 aAttTypTunable.setImmutable(true);
@@ -426,6 +449,8 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
                 aAttAnnTunable.setImmutable(true);
                 aAnnDowTunable.setImmutable(true);
             }
+        } else if (t.getName().equals("attributeAnnotation")) {
+            setDefaultAttType(t.getValue().toString());
         } else {
             checkAnnotationStatus();
         }
@@ -490,7 +515,7 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
 //				annotationSpecies = newValue;
 //			}
 //
-//			t = layoutProperties.get("dsAnnotation");
+//			t = layoutProperties.get("attributeTypes");
 //			if ((t != null) && (t.valueChanged() || force)) {
 //				String newValue = dsValues.get((Integer) t.getValue());
 //				annotationCode = newValue;
@@ -596,9 +621,10 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
      */
     public JPanel getSettingsPanel() {
         if(!initializaionTag) {
-            System.out.println("*******************getSettingsPanel**************************");
+            System.out.println("**************getSettingsPanel*************");
             //Guess species current network for annotation
-            String[] defaultSpecies = getSpeciesCommonName(CytoscapeInit.getProperties().getProperty("defaultSpeciesName"));
+            String[] defaultSpecies = getSpeciesCommonName(CytoscapeInit
+                    .getProperties().getProperty("defaultSpeciesName"));
             if(!defaultSpecies[0].equals("")) {
                 annotationSpeciesCode = defaultSpecies[1];
                 aSpeAnnTunable.setValue(speciesValues.indexOf(defaultSpecies[0]));
@@ -607,10 +633,13 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
                 //populateDataSourceList(annotationSpeciesCode);
                 checkDownloadStatus();
                 if(downloadDBList.isEmpty()) {
-                    aAttTypValues = IdMapping.getSourceTypes(GOLayout.GOLayoutBaseDir+identifyLatestVersion(GOLayoutUtil.retrieveLocalFiles(GOLayout.GOLayoutBaseDir), annotationSpeciesCode+"_Derby", ".bridge"));
-                    //aAnnDowTunable.setValue("Annotate");
+                    aAttTypValues = IdMapping.getSourceTypes(GOLayout.GOLayoutDatabaseDir
+                            +identifyLatestVersion(GOLayoutUtil.retrieveLocalFiles(
+                            GOLayout.GOLayoutDatabaseDir), annotationSpeciesCode+
+                            "_Derby", ".bridge")+".bridge");
                 }
                 aAttTypTunable.setLowerBound((Object) aAttTypValues.toArray());
+                setDefaultAttType("ID");
             }
             //Guess id of current network for annotation
 //            String defaultID = Cytoscape.getCurrentNetwork().getNode(0).getIdentifier();//Cytoscape.getNodeAttributes().//Cytoscape.getCurrentNetwork().;
@@ -723,7 +752,49 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
 //
 //                }
 
-            IdMapping.mapAnnotation(GOLayout.GOLayoutBaseDir+identifyLatestVersion(GOLayoutUtil.retrieveLocalFiles(GOLayout.GOLayoutBaseDir), annotationSpeciesCode+"_GOslim", ".tab"), "ID");
+            //IdMapping.mapAnnotation(GOLayout.GOLayoutDatabaseDir+identifyLatestVersion(GOLayoutUtil.retrieveLocalFiles(GOLayout.GOLayoutDatabaseDir), annotationSpeciesCode+"_GOslim", ".tab"), "ID");
+            CyNetwork currentNetwork = Cytoscape.getCurrentNetwork();
+            CyAttributes currentAttrs = Cytoscape.getNodeAttributes();
+            Object printObject = "";
+            //System.out.println(currentNetwork.nodesList().get(0));
+            if(aAttAnnTunable.getValue().equals("ID"))
+                printObject = currentNetwork.nodesList().get(0);
+            else
+                printObject = currentAttrs.getAttribute(currentNetwork.nodesList()
+                        .get(0).toString(), aAttAnnTunable.getValue().toString());
+//            if(guessIdType(printObject.toString()).isEmpty()) {
+//                System.out.println("没猜到^_^");
+//            } else {
+//                System.out.println(guessIdType(printObject.toString()));
+//            }
+            
+
+
+//        for (CyNode cn : (List<CyNode>) currentNetwork.nodesList()) {
+//            if (currentAttrs.hasAttribute(cn.getIdentifier(), goAttribute)) {
+//                    byte type = currentAttrs.getType(goAttribute);
+//                    if (type == CyAttributes.TYPE_SIMPLE_LIST) {
+//                            List list = currentAttrs.getListAttribute(cn.getIdentifier(), goAttribute);
+//                            if (list.size() > 1){
+//                                    count++;
+//                            } else if (list.size() == 1){
+//                                    if (list.get(0) != null)
+//                                            if (!list.get(0).equals(""))
+//                                                    count++;
+//                            }
+//                    } else if (type == CyAttributes.TYPE_STRING) {
+//                            if (!currentAttrs.getStringAttribute(cn.getIdentifier(), goAttribute).equals("null"))
+//                                    count++;
+//                    } else {
+//                            //we don't have to be as careful with other attribute types
+//                            if (!currentAttrs.getAttribute(cn.getIdentifier(), goAttribute).equals(null))
+//                                    count++;
+//                    }
+//            }
+//
+//        }
+            //aAttAnnTunable.getValue();
+            //guessIdType();
         }
 //			if (null != CellAlgorithm.attributeName) {
 //				PartitionAlgorithm.layoutName = CellAlgorithm.LAYOUT_NAME;
@@ -742,10 +813,26 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
             downloadDBList = checkMappingResources(annotationSpeciesCode);
             checkDownloadStatus();
             if(downloadDBList.isEmpty())
-                aAttTypValues = IdMapping.getSourceTypes(GOLayout.GOLayoutBaseDir+identifyLatestVersion(GOLayoutUtil.retrieveLocalFiles(GOLayout.GOLayoutBaseDir), annotationSpeciesCode+"_Derby", ".bridge"));
+                aAttTypValues = IdMapping.getSourceTypes(GOLayout.GOLayoutDatabaseDir
+                        +identifyLatestVersion(GOLayoutUtil.retrieveLocalFiles(
+                        GOLayout.GOLayoutDatabaseDir), annotationSpeciesCode+
+                        "_Derby", ".bridge")+".bridge");
             aAttTypTunable.setLowerBound((Object) aAttTypValues.toArray());
+            setDefaultAttType("ID");
         } else if (((JButton)e.getSource()).getText().equals("Annotate")) {
-            
+            CyNetwork currentNetwork = Cytoscape.getCurrentNetwork();
+            CyAttributes currentAttrs = Cytoscape.getNodeAttributes();
+            Object printObject = "";
+            //System.out.println(currentNetwork.nodesList().get(0));
+            if(aAttAnnTunable.getValue().equals("ID"))
+                printObject = "ID: "+currentNetwork.nodesList().get(0);
+            else
+                printObject = aAttAnnTunable.getValue().toString()+": "
+                        +currentAttrs.getAttribute(currentNetwork.nodesList()
+                        .get(0).toString(), aAttAnnTunable.getValue().toString());
+            //System.out.println(printObject);
+        } else if (((JButton)e.getSource()).getText().equals("Help!")) {
+
         }
     }
 }

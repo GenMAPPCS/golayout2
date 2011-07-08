@@ -24,6 +24,7 @@ import cytoscape.plugin.CytoscapePlugin;
 import cytoscape.plugin.PluginManager;
 import cytoscape.view.CyNetworkView;
 import cytoscape.view.cytopanels.CytoPanel;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.SwingConstants;
@@ -33,12 +34,14 @@ import org.genmapp.golayout.utils.GOLayoutUtil;
 
 public class GOLayout extends CytoscapePlugin{
     public static String GOLayoutBaseDir;
+    public static String GOLayoutDatabaseDir;
     public static boolean tagInternetConn;
     public static boolean tagGPMLPlugin;
     public static boolean tagCyComPlugin;
     public static boolean tagNodePlugin;
     public static List<String> derbyRemotelist = new ArrayList<String>();
     public static List<String> goslimRemotelist = new ArrayList<String>();
+    public static List<String> speciesMappinglist = new ArrayList<String>();
 	
     /**
      * The constructor registers our layout algorithm. The CyLayouts mechanism
@@ -51,13 +54,23 @@ public class GOLayout extends CytoscapePlugin{
             GOLayoutBaseDir = "/GOLayout/";
             e.printStackTrace();
         }
+        GOLayoutDatabaseDir=GOLayoutBaseDir+"/DB/";
+        speciesMappinglist = GOLayoutUtil.readResource(this.getClass().getResource(GOLayoutStaticValues.bridgedbSpecieslist));
         //Check internet connection
         GOLayout.tagInternetConn = GOLayoutUtil.checkConnection();
         if(GOLayout.tagInternetConn) {
             //Get the lastest db lists
             derbyRemotelist = GOLayoutUtil.readUrl(GOLayoutStaticValues.bridgedbDerbyDir);
+            //GOLayoutUtil.writeFile(derbyRemotelist, GOLayoutBaseDir+"derbyDBList.txt");
             goslimRemotelist = GOLayoutUtil.readUrl(GOLayoutStaticValues.genmappcsDatabaseDir);
+            //GOLayoutUtil.writeFile(derbyRemotelist, GOLayoutBaseDir+"goslimDBList.txt");
         }
+//        } else {
+//            if(new File(GOLayoutBaseDir+"derbyDBList.txt").exists())
+//                derbyRemotelist = GOLayoutUtil.readFile(GOLayoutBaseDir+"derbyDBList.txt");
+//            if(new File(GOLayoutBaseDir+"goslimDBList.txt").exists())
+//                goslimRemotelist = GOLayoutUtil.readFile(GOLayoutBaseDir+"goslimDBList.txt");
+//        }
         
         CyLayouts.addLayout(new GOLayoutAlgorithm(), "GO Layout");
         CyLayouts.addLayout(new PartitionAlgorithm(), null);

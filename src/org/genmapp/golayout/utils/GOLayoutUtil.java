@@ -6,7 +6,10 @@
 package org.genmapp.golayout.utils;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -97,6 +100,10 @@ public class GOLayoutUtil {
 //        return ret;
 //    }
 
+    /**
+     * @param strUrl
+     * @return
+     */
     public static List<String> readUrl(final String strUrl) {
         final List<String> ret = new ArrayList<String>();
         try {
@@ -125,7 +132,66 @@ public class GOLayoutUtil {
     }
 
     /**
-     * @param prefix
+     * @param filename
+     * @return
+     */
+    public static List<String> readFile(final String filename) {
+        final List<String> ret = new ArrayList<String>();
+        try {
+            BufferedReader in = new BufferedReader(new FileReader(filename));
+            String inputLine;
+            while ((inputLine = in.readLine()) != null)
+                ret.add(inputLine);
+            in.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ret;
+    }
+
+    /**
+     * @param txtList
+     * @param MyFilePath
+     * @return
+     */
+    public static boolean writeFile(List<String> txtList, String MyFilePath) {
+        boolean tag = true;
+        try {
+            FileWriter writer = new FileWriter(MyFilePath);
+            BufferedWriter bufWriter = new BufferedWriter(writer);
+            for(String txtData:txtList){
+                bufWriter.write(txtData);
+                bufWriter.newLine();
+            }
+            bufWriter.close();
+            writer.close();
+        } catch (Exception e) {
+            tag = false;
+            e.printStackTrace();
+        }
+        return tag;
+    }
+
+    /**
+     * @param filename
+     * @return
+     */
+    public static List<String> readResource(final URL filename) {
+        final List<String> ret = new ArrayList<String>();
+        try {
+            BufferedReader in = new BufferedReader(new InputStreamReader(filename.openStream()));
+            String inputLine;
+            while ((inputLine = in.readLine()) != null)
+                ret.add(inputLine);
+            in.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ret;
+    }
+
+    /**
+     * @param filePath
      * @return
      */
     public static List<String> retrieveLocalFiles(String filePath) {

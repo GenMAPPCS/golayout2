@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package org.genmapp.golayout.download;
+package org.genmapp.golayout;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,21 +15,22 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import org.genmapp.golayout.download.Downloader;
 
 /**
  *
  * @author Chao
  */
-public class FileDownloadDialog extends JDialog implements ActionListener {
+public class AnnotationDialog extends JDialog implements ActionListener {
     public  List<String> downloadFileList;
     private JPanel optionPane;
     public  JLabel messageLabel;
     public  JButton comfirmButton;
-
-    public FileDownloadDialog(JFrame aFrame, List<String> downloadDBList) {
+    
+    public AnnotationDialog(JFrame aFrame, List<String> downloadDBList) {
         super(aFrame, true);
         downloadFileList = downloadDBList;
-        setTitle("Downloading databases");
+        setTitle("Annotating current network");
 
         optionPane = new JPanel();
         messageLabel = new JLabel();
@@ -41,7 +42,7 @@ public class FileDownloadDialog extends JDialog implements ActionListener {
         this.add(optionPane);
         //Handle window closing correctly.
         this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        new DownloadThread(this).start();
+        new AnnotationThread(this).start();
     }
 
     /** This method handles events for the text field. */
@@ -54,11 +55,11 @@ public class FileDownloadDialog extends JDialog implements ActionListener {
  *
  * @author Anurag Sharma
  */
-class DownloadThread extends Thread {
+class AnnotationThread extends Thread {
 
-    private FileDownloadDialog sp;
+    private AnnotationDialog sp;
 
-    public DownloadThread(FileDownloadDialog sp) {
+    public AnnotationThread(AnnotationDialog sp) {
         this.sp = sp;
     }
 
@@ -77,8 +78,7 @@ class DownloadThread extends Thread {
 
                 }
                 sp.messageLabel.setText(fileName + ": 100%");
-                sp.messageLabel.setText("Uncompressing " + fileName + "...");
-                
+
                 // must wait for completion of uncompression before giving up thread
                 d.waitFor();
             }

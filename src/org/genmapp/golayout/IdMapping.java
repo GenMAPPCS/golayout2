@@ -37,7 +37,7 @@ public class IdMapping {
         CyCommandResult result = null;
         try {
             result = CyCommandManager.execute("idmapping",
-                    "get source id types", noargs);
+                    "get target id types", noargs);
         } catch (CyCommandException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -73,6 +73,25 @@ public class IdMapping {
         mapAttribute(idName, GOLayoutStaticValues.MF_ATTNAME);
 
         return true;
+    }
+
+    public static Set<String> guessIdType(String sampleId){
+        Set<String> idTypes;
+        Map<String, Object> args = new HashMap<String, Object>();
+        args.put("sourceid", sampleId);
+        try {
+            CyCommandResult result = CyCommandManager.execute("idmapping", "guess id type", args);
+            idTypes = (Set<String>) result.getResult();
+        } catch (CyCommandException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return null;
+        } catch (RuntimeException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return null;
+        }
+        return idTypes;
     }
 
     /**
