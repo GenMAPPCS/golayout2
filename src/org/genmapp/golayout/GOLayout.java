@@ -15,6 +15,11 @@
  ******************************************************************************/
 package org.genmapp.golayout;
 
+import org.genmapp.golayout.partition.PartitionAlgorithm;
+import org.genmapp.golayout.layout.PartitionNetworkVisualStyleFactory;
+import org.genmapp.golayout.layout.CellAlgorithm;
+import org.genmapp.golayout.utils.GOLayoutStaticValues;
+import org.genmapp.golayout.setting.GOLayoutAlgorithm;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -109,16 +114,4 @@ public class GOLayout extends CytoscapePlugin{
     public static void createVisualStyle(CyNetworkView view) {
         PartitionNetworkVisualStyleFactory.createVisualStyle(view);
     }    
-}
-
-/**
- * This class direct a browser to the help manual web page.
- */
-class GetHelpListener implements ActionListener {
-	private String helpURL = "http://genmapp.org/GOLayout/GOLayout.html";
-
-	public void actionPerformed(ActionEvent ae) {
-		cytoscape.util.OpenBrowser.openURL(helpURL);
-	}
-
 }
