@@ -28,12 +28,15 @@ import cytoscape.layout.CyLayouts;
 import cytoscape.plugin.CytoscapePlugin;
 import cytoscape.plugin.PluginManager;
 import cytoscape.view.CyNetworkView;
+import cytoscape.view.NetworkPanel;
 import cytoscape.view.cytopanels.CytoPanel;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.ImageIcon;
 import javax.swing.SwingConstants;
 //import org.genmapp.golayout.tree.WorkspacesPanel;
+import org.genmapp.golayout.partition.GOLayoutNetworkPanel;
 import org.genmapp.golayout.utils.GOLayoutUtil;
 
 
@@ -92,7 +95,8 @@ public class GOLayout extends CytoscapePlugin{
         CytoPanel cytoPanel1 = Cytoscape.getDesktop().getCytoPanel(
                 SwingConstants.WEST);
         //WorkspacesPanel wsPanel = new WorkspacesPanel();
-        //cytoPanel1.add("GOLayout", wsPanel);
+        GOLayoutNetworkPanel wsPanel = new GOLayoutNetworkPanel(Cytoscape.getDesktop());
+        cytoPanel1.add("GOLayout", null, wsPanel, "GOLayout Panel", 1);
 //        cytoPanel1.add("GenMAPP-CS", new ImageIcon(getClass().getResource(
 //                "images/genmappcs.png")), wsPanel, "Workspaces Panel", 0);
         cytoPanel1.setSelectedIndex(0);

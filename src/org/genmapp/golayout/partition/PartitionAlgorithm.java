@@ -48,17 +48,19 @@ import cytoscape.layout.LayoutProperties;
 import cytoscape.view.CyDesktopManager;
 import cytoscape.view.CyNetworkView;
 import cytoscape.view.CytoscapeDesktop;
+import java.util.Collections;
 import org.genmapp.golayout.GOLayout;
+import org.genmapp.golayout.utils.GOLayoutUtil;
 
 /**
  * PartitionAlgorithm
  */
 public class PartitionAlgorithm extends AbstractLayout implements
-		PropertyChangeListener {
+        PropertyChangeListener {
 	double distanceBetweenNodes = 80.0d;
 	LayoutProperties layoutProperties = null;
 
-	protected static String layoutName = "force-directed";
+	public static String layoutName = "force-directed";
 	private ArrayList<Object> nodeAttributeValues = new ArrayList();
 	// private Object[] layoutNames = null;
 	public static String attributeName = GOLayoutStaticValues.BP_ATTNAME;
@@ -160,7 +162,7 @@ public class PartitionAlgorithm extends AbstractLayout implements
 	}
 
 	/**
-	 * 
+	 * Generate the unique value list of the selected attribute
 	 */
 	public ArrayList<Object> setupNodeAttributeValues() {
 		CyAttributes attribs = Cytoscape.getNodeAttributes();
@@ -361,47 +363,63 @@ public class PartitionAlgorithm extends AbstractLayout implements
 		return buf.toString();
 	}
 
+    private CyNetwork getParentNetwork(String networkID) {
+        for(CyNetwork c:Cytoscape.getNetworkSet()) {
+            if(c.getTitle().equals(networkID))
+                return c;
+        }
+        return Cytoscape.getNetwork(networkID);
+    }
+
 	/**
 	 * build a subnetwork for selected nodes leverages from
 	 * cytoscape.actions.NewWindowSelectedNodesOnlyAction
 	 * 
 	 * @param current_network
 	 */
-	public void buildSubNetwork(CyNetwork current_network, String attributeValue) {
-
-		CyNetworkView current_network_view = null;
-
+    public void buildSubNetwork(CyNetwork current_network, Object[] goInfo) {
+        CyNetworkView current_network_view = null;
+        CyNetwork parentNet = null;
 		if (Cytoscape.viewExists(current_network.getIdentifier())) {
 			current_network_view = Cytoscape.getNetworkView(current_network
 					.getIdentifier());
 		} // end of if ()
 
-		List nodes = attributeValueNodeMap.get(attributeValue);
+		List nodes = attributeValueNodeMap.get(goInfo[0]);
 		// System.out.println("Got nodes for attributeValue: " + attributeValue
 		// + " = " + nodes.size());
 		if (nodes == null) {
 			return;
 		}
-
+        
 		//System.out.println("SIZE: " +attributeValue +": "+ nodes.size());
-		
+        //System.out.println(goInfo[1].toString().trim()+":"+Cytoscape.viewExists(goInfo[1].toString().trim()));
+        if(goInfo[1]!="root") {
+            parentNet = getParentNetwork(goInfo[1].toString().trim());
+            //System.out.println("aaa:"+parentNet.getIdentifier());
+        } else {
+            parentNet = current_network;
+        }
+
 		CyNetwork new_network = Cytoscape.createNetwork(nodes, current_network
 				.getConnectingEdges(new ArrayList(nodes)),
 		// CyNetworkNaming.getSuggestedSubnetworkTitle(current_network),
-				attributeValue, // for network title
-				current_network, (nodes.size() >= NETWORK_LIMIT_MIN)
+				goInfo[0].toString(), // for network title
+				parentNet, (nodes.size() >= NETWORK_LIMIT_MIN)
 						&& nodes.size() <= NETWORK_LIMIT_MAX);
 		// optional create network view
-
+        //new_network.setIdentifier(goInfo[0].toString().trim());
+        //System.out.println(parentNet.getIdentifier()+"\t"+new_network.getIdentifier()+"\t"+new_network.);
 		CyNetworkView new_view = Cytoscape.getNetworkView(new_network
 				.getIdentifier());
-
-		if (new_view == Cytoscape.getNullNetworkView()) {
+//        for(CyNetwork c:Cytoscape.getNetworkSet())
+//            System.out.println(c.getIdentifier());
+        if (new_view == Cytoscape.getNullNetworkView()) {
 			return;
 		}
 
 		views.add(new_view);
-
+        
 		// listen for window maximize or restore.
 		Cytoscape.getDesktop().getNetworkViewManager().getInternalFrame(
 				new_view).addPropertyChangeListener(
@@ -426,8 +444,69 @@ public class PartitionAlgorithm extends AbstractLayout implements
 		if (PartitionNetworkVisualStyleFactory.attributeName != null) {
 			Cytoscape.getVisualMappingManager().setVisualStyle(
 					PartitionNetworkVisualStyleFactory.attributeName);
-		}
+		}        
 	}
+//	public void buildSubNetwork(CyNetwork current_network, String attributeValue) {
+//
+//		CyNetworkView current_network_view = null;
+//
+//		if (Cytoscape.viewExists(current_network.getIdentifier())) {
+//			current_network_view = Cytoscape.getNetworkView(current_network
+//					.getIdentifier());
+//		} // end of if ()
+//
+//		List nodes = attributeValueNodeMap.get(attributeValue);
+//		// System.out.println("Got nodes for attributeValue: " + attributeValue
+//		// + " = " + nodes.size());
+//		if (nodes == null) {
+//			return;
+//		}
+//
+//		//System.out.println("SIZE: " +attributeValue +": "+ nodes.size());
+//
+//		CyNetwork new_network = Cytoscape.createNetwork(nodes, current_network
+//				.getConnectingEdges(new ArrayList(nodes)),
+//		// CyNetworkNaming.getSuggestedSubnetworkTitle(current_network),
+//				attributeValue, // for network title
+//				current_network, (nodes.size() >= NETWORK_LIMIT_MIN)
+//						&& nodes.size() <= NETWORK_LIMIT_MAX);
+//		// optional create network view
+//
+//		CyNetworkView new_view = Cytoscape.getNetworkView(new_network
+//				.getIdentifier());
+//
+//		if (new_view == Cytoscape.getNullNetworkView()) {
+//			return;
+//		}
+//
+//		views.add(new_view);
+//
+//		// listen for window maximize or restore.
+//		Cytoscape.getDesktop().getNetworkViewManager().getInternalFrame(
+//				new_view).addPropertyChangeListener(
+//				JInternalFrame.IS_MAXIMUM_PROPERTY, this);
+//
+//		// apply layout
+//		if (current_network_view != Cytoscape.getNullNetworkView()) {
+//
+//			// CyLayoutAlgorithm layout =
+//			// CyLayouts.getLayout("force-directed");
+//			// System.out.println("Layout: " + new_view.getTitle() +" :: "+
+//			// layoutName);
+//
+//			CyLayoutAlgorithm layout = CyLayouts.getLayout(layoutName);
+//			layout.doLayout(new_view);
+//
+//		}
+//
+//		// set graphics level of detail
+//		((DingNetworkView) new_view).setGraphLOD(new CyGraphAllLOD());
+//
+//		if (PartitionNetworkVisualStyleFactory.attributeName != null) {
+//			Cytoscape.getVisualMappingManager().setVisualStyle(
+//					PartitionNetworkVisualStyleFactory.attributeName);
+//		}
+//	}
 
 	// }
 
@@ -452,7 +531,8 @@ public class PartitionAlgorithm extends AbstractLayout implements
 	 * The layout protocol...
 	 */
 	public void construct() {
-
+        System.out.println("*************PartitionAlgorithm******************");
+        System.out.println(attributeName);
 		// if "(none)" was selected in setting, then skip partitioning
 		if (null == attributeName) {
 
@@ -515,20 +595,88 @@ public class PartitionAlgorithm extends AbstractLayout implements
 
 				int nbrProcesses = attributeValues.size();
 				int count = 0;
-	
-				for (Object val : attributeValues) {
+
+                System.out.println("******************************************");
+                Object[][] networkTreeObjArray = buildNetworkTreeMap(attributeValues);
+                for (int i=0;i<networkTreeObjArray.length;i++) {
 					count++;
 					taskMonitor.setPercentCompleted((100 * count)
 							/ nbrProcesses);
-					taskMonitor.setStatus("building subnetwork for " + val);
-					buildSubNetwork(net, val.toString());
+					taskMonitor.setStatus("building subnetwork for " + networkTreeObjArray[i][0]);
+					buildSubNetwork(net, networkTreeObjArray[i]);
 				}
+	
+//				for (Object val : attributeValues) {
+//					count++;
+//					taskMonitor.setPercentCompleted((100 * count)
+//							/ nbrProcesses);
+//					taskMonitor.setStatus("building subnetwork for " + val);
+//					buildSubNetwork(net, val.toString());
+//				}
 				buildSubnetworkOverview(net);
 				tileNetworkViews(); // tile and fit content in each view
-
+                System.out.println("******************************************");
+                Set<CyNetwork> aaa = Cytoscape.getNetworkSet();
+                //System.out.println(Cytoscape.getNetworkSet());
+                for(CyNetwork a:aaa)
+                    System.out.println(a.getIdentifier()+" : "+a.getTitle()+" : "+Cytoscape.viewExists(a.getIdentifier()));
+                System.out.println("en_network"+" : "+Cytoscape.viewExists("en_network"));
 			}
 		}
 	}
+
+    public Object[][] buildNetworkTreeMap(Set<Object> attributeValues) {
+        Object[] goTermList = attributeValues.toArray();
+        Map<String, String> readMappingFile = GOLayoutUtil.readMappingFile(this.getClass().getResource(GOLayoutStaticValues.BP_GO_PathFile), attributeValues);
+        Map<String, String> pathTermMap = new HashMap<String, String>();
+        ArrayList<String> pathList = new ArrayList(readMappingFile.keySet());
+        for(String gopath:pathList) {
+            int goPathLevel = gopath.trim().length()-gopath.replace(".", "").trim().length();
+            if(pathTermMap.containsKey(readMappingFile.get(gopath))){
+                String currentPath = pathTermMap.get(readMappingFile.get(gopath));
+                int currentGoPathLevel = currentPath.trim().length()-currentPath.replace(".", "").trim().length();
+                if(goPathLevel<currentGoPathLevel)
+                    pathTermMap.put(readMappingFile.get(gopath), gopath);
+            } else {
+                pathTermMap.put(readMappingFile.get(gopath), gopath);
+            }
+        }
+        Map<String, String> termTreeMap = new HashMap<String, String>();
+        for(int i=0;i<goTermList.length;i++) {
+            String queryPath = pathTermMap.get(goTermList[i].toString());
+            int queryPathLevel = queryPath.trim().length()-queryPath.replace(".", "").trim().length();
+            for(int j=0;j<goTermList.length;j++) {
+                if(j!=i) {
+                    String targetPath = pathTermMap.get(goTermList[j].toString());
+                    int targetPathLevel = targetPath.trim().length()-targetPath.replace(".", "").trim().length();
+                    if(queryPathLevel>targetPathLevel){
+                        if(targetPath.equals(queryPath.substring(0, targetPath.length()))) {
+                            if(termTreeMap.containsKey(goTermList[i].toString())) {
+                                String currentPath = pathTermMap.get(termTreeMap.get(goTermList[i].toString()));
+                                int currentGoPathLevel = currentPath.trim().length()-currentPath.replace(".", "").trim().length();
+                                if(targetPathLevel>currentGoPathLevel)
+                                    termTreeMap.put(goTermList[i].toString(), goTermList[j].toString());
+                            } else {
+                                termTreeMap.put(goTermList[i].toString(), goTermList[j].toString());
+                            }
+                        }
+                    }
+                }
+            }
+            if(!termTreeMap.containsKey(goTermList[i].toString())) {
+                termTreeMap.put(goTermList[i].toString(), "root");
+            }
+        }
+        Object[][] networkTreeArray = new String[attributeValues.size()][4];
+        for(int i=0;i<goTermList.length;i++) {
+            networkTreeArray[i][0] = goTermList[i];
+            networkTreeArray[i][1] = termTreeMap.get(goTermList[i].toString());
+            networkTreeArray[i][2] = pathTermMap.get(goTermList[i].toString());
+            networkTreeArray[i][3] = (networkTreeArray[i][2].toString().trim().length()- networkTreeArray[i][2].toString().replace(".", "").trim().length()+1)+"";
+        }
+        networkTreeArray = GOLayoutUtil.dataSort(networkTreeArray, 3);
+        return networkTreeArray;
+    }
 
 	public void propertyChange(PropertyChangeEvent evt) {
 		// TODO Possible solution for large label drawing bug on tile view

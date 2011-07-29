@@ -23,6 +23,8 @@ import cytoscape.Cytoscape;
 import cytoscape.CytoscapeInit;
 import cytoscape.data.CyAttributes;
 import cytoscape.layout.AbstractLayout;
+import cytoscape.layout.CyLayoutAlgorithm;
+import cytoscape.layout.CyLayouts;
 import cytoscape.layout.LayoutProperties;
 import cytoscape.layout.Tunable;
 import cytoscape.layout.TunableListener;
@@ -772,21 +774,6 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
 //                }
 
             //IdMapping.mapAnnotation(GOLayout.GOLayoutDatabaseDir+identifyLatestVersion(GOLayoutUtil.retrieveLocalFiles(GOLayout.GOLayoutDatabaseDir), annotationSpeciesCode+"_GOslim", ".tab"), "ID");
-            CyNetwork currentNetwork = Cytoscape.getCurrentNetwork();
-            CyAttributes currentAttrs = Cytoscape.getNodeAttributes();
-            Object printObject = "";
-            //System.out.println(currentNetwork.nodesList().get(0));
-            if(aAttAnnTunable.getValue().equals("ID"))
-                printObject = currentNetwork.nodesList().get(0);
-            else
-                printObject = currentAttrs.getAttribute(currentNetwork.nodesList()
-                        .get(0).toString(), aAttAnnTunable.getValue().toString());
-//            if(guessIdType(printObject.toString()).isEmpty()) {
-//                System.out.println("没猜到^_^");
-//            } else {
-//                System.out.println(guessIdType(printObject.toString()));
-//            }
-            
 
 
 //        for (CyNode cn : (List<CyNode>) currentNetwork.nodesList()) {
@@ -815,11 +802,15 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
             //aAttAnnTunable.getValue();
             //guessIdType();
         }
-//			if (null != CellAlgorithm.attributeName) {
-//				PartitionAlgorithm.layoutName = CellAlgorithm.LAYOUT_NAME;
-//			}
-//			CyLayoutAlgorithm layout = CyLayouts.getLayout("partition");
-//			layout.doLayout(Cytoscape.getCurrentNetworkView(), taskMonitor);
+		// comment CellAlgorithm for testing partitioning, 07/10/2011
+        CellAlgorithm.attributeName = null;
+        PartitionNetworkVisualStyleFactory.attributeName = null;
+
+        if (null != CellAlgorithm.attributeName) {
+            PartitionAlgorithm.layoutName = CellAlgorithm.LAYOUT_NAME;
+        }
+        CyLayoutAlgorithm layout = CyLayouts.getLayout("partition");
+        layout.doLayout(Cytoscape.getCurrentNetworkView(), taskMonitor);
     }
 
     public void actionPerformed(ActionEvent e) {

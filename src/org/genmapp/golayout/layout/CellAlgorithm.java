@@ -47,7 +47,7 @@ public class CellAlgorithm extends AbstractLayout {
 	public static boolean pruneEdges = false;
 	public static double distanceBetweenNodes = 30.0d;
 	public static String attributeName = GOLayoutStaticValues.CC_ATTNAME;
-	protected static final String LAYOUT_NAME = "cell-layout";
+	public static final String LAYOUT_NAME = "cell-layout";
 
 	// store region assignment as node attribute
 	protected static final String REGION_ATT = "_cellularLayoutRegion";

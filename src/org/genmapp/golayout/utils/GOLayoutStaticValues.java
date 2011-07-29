@@ -31,4 +31,7 @@ public class GOLayoutStaticValues {
     public static final String bridgedbSpecieslist = "/resources/organisms.txt";
     public static final String genmappcsDatabaseDir = "http://genmapp.org/genmappcs/databases/";
     public static final String bridgedbDerbyDir = "http://bridgedb.org/data/gene_database/";
+    public static final String BP_GO_PathFile = "/resources/annotation.GO BIOLOGICAL_PROCESS";
+    public static final String CC_GO_PathFile = "/resources/annotation.GO CELLULAR_COMPONENT";
+    public static final String MF_GO_PathFile = "/resources/annotation.GO MOLECULAR_FUNCTION";
 }

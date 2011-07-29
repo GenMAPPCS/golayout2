@@ -29,7 +29,10 @@ import java.net.URLConnection;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.pathvisio.cytoscape.GpmlPlugin;
 
 /**
@@ -201,6 +204,51 @@ public class GOLayoutUtil {
     }
 
     /**
+     * @param filename
+     * @return
+     */
+    public static Map<String, String> readMappingFile(final URL filename) {
+        final Map<String, String> ret = new HashMap<String, String>();
+        try {
+            BufferedReader in = new BufferedReader(new InputStreamReader(filename.openStream()));
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                String[] retail = inputLine.split("\t");
+                if(retail.length>=2) {
+                    ret.put(retail[0].trim(), retail[1].trim());
+                }
+            }
+            in.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ret;
+    }
+
+    /**
+     * @param filename
+     * @return
+     */
+    public static Map<String, String> readMappingFile(final URL filename, Set<Object> secondAttributeList) {
+        final Map<String, String> ret = new HashMap<String, String>();
+        try {
+            BufferedReader in = new BufferedReader(new InputStreamReader(filename.openStream()));
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                String[] retail = inputLine.split("\t");
+                if(retail.length>=2) {
+                    if(secondAttributeList.contains(retail[1].trim()))
+                        ret.put(retail[0].trim(), retail[1].trim());
+                }
+            }
+            in.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ret;
+    }
+
+    /**
      * @param filePath
      * @return
      */
@@ -212,4 +260,58 @@ public class GOLayoutUtil {
         String[] children = dir.list();
         return Arrays.asList(children);
     }
+
+	/**
+	 * sorting an array by one of the columns, and then return a increasing array.
+	 * @param a - unsorted Object array
+	 * @param b - the column number of array
+	 * @return sorted array
+	 */
+	public static Object[][] dataSort(Object[][] a, int b){
+		Object[][] dataArray = a;
+		int array_size = a.length;
+		if (a[0].length <= b) {
+			return null;
+		}
+		//Build-Max-Heap
+		for(int i = new Double(Math.floor((array_size-1)/2)).intValue(); i>=0; i--){
+			//Max-Heap
+			Object[] key = dataArray[i];
+			int largest = 0;
+			do {
+				largest = (i+1)*2-1;
+				if (((i+1)*2<array_size)&&(new Double(dataArray[(i+1)*2][b].toString()).doubleValue()>new Double(dataArray[(i+1)*2-1][b].toString()).doubleValue())) {
+					largest = (i+1)*2;
+				}
+				if (((i+1)*2-1<array_size)&&(new Double(key[b].toString()).doubleValue()<new Double(dataArray[largest][b].toString()).doubleValue())){
+					dataArray[i] = dataArray[largest];
+					i = largest;
+				} else {
+					dataArray[i] = key;
+				}
+			} while(key != dataArray[i]);
+		}
+		for(int i = array_size-1; i>=1; i--){
+			Object[] key = dataArray[i];
+			dataArray[i] = dataArray[0];
+			dataArray[0] = key;
+			array_size = array_size - 1;
+			int j = 0;
+			key = dataArray[j];
+			int largest = 0;
+			do {
+				largest = (j+1) * 2 - 1;
+				if (((j+1) * 2<array_size)&&(new Double(dataArray[(j+1) * 2][b].toString()).doubleValue()>new Double(dataArray[(j+1) * 2 - 1][b].toString()).doubleValue())) {
+					largest = (j+1) * 2;
+				}
+				if (((j+1) * 2-1<array_size)&&(new Double(key[b].toString()).doubleValue()<new Double(dataArray[largest][b].toString()).doubleValue())){
+					dataArray[j] = dataArray[largest];
+					j = largest;
+				} else {
+					dataArray[j] = key;
+				}
+			} while(key != dataArray[j]);
+		}
+		return dataArray;
+	}
 }
