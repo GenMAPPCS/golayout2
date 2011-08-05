@@ -28,6 +28,7 @@ import cytoscape.layout.CyLayouts;
 import cytoscape.layout.LayoutProperties;
 import cytoscape.layout.Tunable;
 import cytoscape.layout.TunableListener;
+import cytoscape.task.TaskMonitor;
 import cytoscape.task.ui.JTaskConfig;
 import cytoscape.task.util.TaskManager;
 import java.awt.GridLayout;
@@ -56,7 +57,6 @@ import org.genmapp.golayout.layout.PartitionNetworkVisualStyleFactory;
 public class GOLayoutAlgorithm extends AbstractLayout implements
         TunableListener, ActionListener  {
     protected static final String LAYOUT_NAME = "0-golayout";
-    private static final String HELP = "GOLayout Help";
     private LayoutProperties layoutProperties = null;
     private boolean initializaionTag = false;
 
@@ -205,14 +205,6 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
          * our values based on what we read from the property file
          */
         updateSettings(true);
-
-        // Add help menu item
-        JMenuItem getHelp = new JMenuItem(HELP);
-        getHelp.setToolTipText("Open online help for GOLayout");
-        GetHelpListener getHelpListener = new GetHelpListener();
-        getHelp.addActionListener(getHelpListener);
-        Cytoscape.getDesktop().getCyMenus().getHelpMenu().add(getHelp);
-
     }
 
     private List<String> checkMappingResources(String species){
@@ -809,6 +801,7 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
         if (null != CellAlgorithm.attributeName) {
             PartitionAlgorithm.layoutName = CellAlgorithm.LAYOUT_NAME;
         }
+        System.out.println(PartitionNetworkVisualStyleFactory.attributeName);
         CyLayoutAlgorithm layout = CyLayouts.getLayout("partition");
         layout.doLayout(Cytoscape.getCurrentNetworkView(), taskMonitor);
     }
@@ -850,11 +843,11 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
                 jTaskConfig.setMillisToPopup(100);
                 AnnotationDialog task = new AnnotationDialog(localDerbyDB,
                         localGOslimDB, aAttAnnTunable.getValue().toString(),
-                        aAttTypTunable.getValue().toString(),
+                        aAttTypValues.get(new Integer(aAttTypTunable.getValue().toString()).intValue()).toString(),
                         aAttTypValues.get(findMatchType("Ensembl")).toString());
                 TaskManager.executeTask(task, jTaskConfig);
                 this.annotationLabel = "Re-annotate";
-                checkDownloadStatus();
+                checkAnnotationStatus();//checkDownloadStatus();
             } else {
                 System.out.println("Retrive species error!");
             }            
@@ -864,15 +857,4 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
                     "Warning", JOptionPane.CLOSED_OPTION, JOptionPane.WARNING_MESSAGE);
         }
     }
-}
-
-/**
- * This class direct a browser to the help manual web page.
- */
-class GetHelpListener implements ActionListener {
-	private String helpURL = "http://genmapp.org/GOLayout/GOLayout.html";
-
-	public void actionPerformed(ActionEvent ae) {
-		cytoscape.util.OpenBrowser.openURL(helpURL);
-	}
 }

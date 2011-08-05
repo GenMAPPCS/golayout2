@@ -73,6 +73,7 @@ public class PartitionAlgorithm extends AbstractLayout implements
 	private static final int SUBNETWORK_COUNT_WARNING = 30; // will warn if >
 	public static final String SUBNETWORK_CONNECTIONS = "_subnetworkConnections";
 	public static final String SUBNETWORK_SIZE = "_subnetworkSize";
+    public Map<String, String> goDescMappingFile = new HashMap<String, String>();
 
 	/**
 	 * Creates a new PartitionAlgorithm object.
@@ -169,13 +170,22 @@ public class PartitionAlgorithm extends AbstractLayout implements
 		Map attrMap = CyAttributesUtils.getAttribute(attributeName, attribs);
 		Collection values = attrMap.values();
 		ArrayList<Object> uniqueValueList = new ArrayList<Object>();
-
+        
 		// key will be a List attribute value, so we need to pull out individual
 		// list items
 		if (attribs.getType(attributeName) == CyAttributes.TYPE_SIMPLE_LIST) {
 			for (Object o : values) {
+//                String[] oList = o.toString().split(",");
+//                for (String jObj:oList) {
+//                    jObj = jObj.trim();
+//                    if (jObj != null) {
+//						if (!uniqueValueList.contains(jObj)) {
+//							uniqueValueList.add(jObj);
+//						}
+//					}
+//				}
 				List oList = (List) o;
-				for (int j = 0; j < oList.size(); j++) {
+                for (int j = 0; j < oList.size(); j++) {
 					Object jObj = oList.get(j);
 					if (jObj != null) {
 						if (!uniqueValueList.contains(jObj)) {
@@ -228,12 +238,9 @@ public class PartitionAlgorithm extends AbstractLayout implements
 						overview_network.addEdge(ce);
 						if (null != eAttributes.getDoubleAttribute(ce
 								.getIdentifier(), SUBNETWORK_CONNECTIONS)) {
-							eAttributes
-									.setAttribute(ce.getIdentifier(),
-											SUBNETWORK_CONNECTIONS,
-											eAttributes.getDoubleAttribute(ce
-													.getIdentifier(),
-													SUBNETWORK_CONNECTIONS) + 1.0);
+							eAttributes.setAttribute(ce.getIdentifier(), SUBNETWORK_CONNECTIONS,
+                                    eAttributes.getDoubleAttribute(ce.getIdentifier(),
+                                    SUBNETWORK_CONNECTIONS) + 1.0);
 
 						} else { // first pass; thus create attribute
 							//use double so you can passThrough to Edge Line Width
@@ -254,7 +261,7 @@ public class PartitionAlgorithm extends AbstractLayout implements
 		Iterator<CyNode> nodeIt = overview_network.nodesIterator();
 		while (nodeIt.hasNext()) {
 			String nodeId = nodeIt.next().getIdentifier();
-			nAttributes.setAttribute(nodeId, SUBNETWORK_SIZE,
+            nAttributes.setAttribute(nodeId, SUBNETWORK_SIZE,
 					attributeValueNodeMap.get(nodeId).size());
 		}
 
@@ -319,7 +326,7 @@ public class PartitionAlgorithm extends AbstractLayout implements
 			if ((!(val == null) && (!val.equals("null")) && (val.length() > 0))) {
 
 				for (Object o : nodeAttributeValues) {
-					if (val.indexOf(o.toString()) >= 0) {
+                    if (val.indexOf(o.toString()) >= 0) {
 						selectedNodes = attributeValueNodeMap.get(o);
 						if (selectedNodes == null) {
 							selectedNodes = new ArrayList<CyNode>();
@@ -392,24 +399,24 @@ public class PartitionAlgorithm extends AbstractLayout implements
 			return;
 		}
         
-		//System.out.println("SIZE: " +attributeValue +": "+ nodes.size());
+		//System.out.println("**************SIZE: "+ nodes.size()+"**************");
         //System.out.println(goInfo[1].toString().trim()+":"+Cytoscape.viewExists(goInfo[1].toString().trim()));
         if(goInfo[1]!="root") {
-            parentNet = getParentNetwork(goInfo[1].toString().trim());
+            parentNet = getParentNetwork(goDescMappingFile.get(goInfo[1].toString().trim()));
             //System.out.println("aaa:"+parentNet.getIdentifier());
         } else {
             parentNet = current_network;
         }
-
+        //System.out.println(current_network.getConnectingEdges(new ArrayList(nodes)).size());
 		CyNetwork new_network = Cytoscape.createNetwork(nodes, current_network
 				.getConnectingEdges(new ArrayList(nodes)),
 		// CyNetworkNaming.getSuggestedSubnetworkTitle(current_network),
-				goInfo[0].toString(), // for network title
+				goInfo[4].toString(), // for network title
 				parentNet, (nodes.size() >= NETWORK_LIMIT_MIN)
 						&& nodes.size() <= NETWORK_LIMIT_MAX);
 		// optional create network view
         //new_network.setIdentifier(goInfo[0].toString().trim());
-        //System.out.println(parentNet.getIdentifier()+"\t"+new_network.getIdentifier()+"\t"+new_network.);
+        //System.out.println(parentNet.getTitle()+"\t"+new_network.getTitle());
 		CyNetworkView new_view = Cytoscape.getNetworkView(new_network
 				.getIdentifier());
 //        for(CyNetwork c:Cytoscape.getNetworkSet())
@@ -531,8 +538,8 @@ public class PartitionAlgorithm extends AbstractLayout implements
 	 * The layout protocol...
 	 */
 	public void construct() {
-        System.out.println("*************PartitionAlgorithm******************");
-        System.out.println(attributeName);
+        System.out.println("*******************PartitionAlgorithm******************");
+        System.out.println("Partition Attribute:" +attributeName);
 		// if "(none)" was selected in setting, then skip partitioning
 		if (null == attributeName) {
 
@@ -596,7 +603,6 @@ public class PartitionAlgorithm extends AbstractLayout implements
 				int nbrProcesses = attributeValues.size();
 				int count = 0;
 
-                System.out.println("******************************************");
                 Object[][] networkTreeObjArray = buildNetworkTreeMap(attributeValues);
                 for (int i=0;i<networkTreeObjArray.length;i++) {
 					count++;
@@ -613,21 +619,23 @@ public class PartitionAlgorithm extends AbstractLayout implements
 //					taskMonitor.setStatus("building subnetwork for " + val);
 //					buildSubNetwork(net, val.toString());
 //				}
-				buildSubnetworkOverview(net);
+				System.out.println("*******************Build sub network overview***********************");
+                buildSubnetworkOverview(net);
 				tileNetworkViews(); // tile and fit content in each view
-                System.out.println("******************************************");
+                System.out.println("*******************End***********************");
                 Set<CyNetwork> aaa = Cytoscape.getNetworkSet();
                 //System.out.println(Cytoscape.getNetworkSet());
-                for(CyNetwork a:aaa)
-                    System.out.println(a.getIdentifier()+" : "+a.getTitle()+" : "+Cytoscape.viewExists(a.getIdentifier()));
-                System.out.println("en_network"+" : "+Cytoscape.viewExists("en_network"));
+                //for(CyNetwork a:aaa)
+                //    System.out.println(a.getIdentifier()+" : "+a.getTitle()+" : "+Cytoscape.viewExists(a.getIdentifier()));
+                //System.out.println("en_network"+" : "+Cytoscape.viewExists("en_network"));
 			}
 		}
 	}
 
     public Object[][] buildNetworkTreeMap(Set<Object> attributeValues) {
         Object[] goTermList = attributeValues.toArray();
-        Map<String, String> readMappingFile = GOLayoutUtil.readMappingFile(this.getClass().getResource(GOLayoutStaticValues.BP_GO_PathFile), attributeValues);
+        Map<String, String> readMappingFile = GOLayoutUtil.readGOMappingFile(this.getClass().getResource(GOLayoutStaticValues.BP_GO_PathFile), attributeValues);
+        goDescMappingFile = GOLayoutUtil.readMappingFile(this.getClass().getResource(GOLayoutStaticValues.GO_DescFile), attributeValues, 0);
         Map<String, String> pathTermMap = new HashMap<String, String>();
         ArrayList<String> pathList = new ArrayList(readMappingFile.keySet());
         for(String gopath:pathList) {
@@ -643,36 +651,52 @@ public class PartitionAlgorithm extends AbstractLayout implements
         }
         Map<String, String> termTreeMap = new HashMap<String, String>();
         for(int i=0;i<goTermList.length;i++) {
-            String queryPath = pathTermMap.get(goTermList[i].toString());
-            int queryPathLevel = queryPath.trim().length()-queryPath.replace(".", "").trim().length();
-            for(int j=0;j<goTermList.length;j++) {
-                if(j!=i) {
-                    String targetPath = pathTermMap.get(goTermList[j].toString());
-                    int targetPathLevel = targetPath.trim().length()-targetPath.replace(".", "").trim().length();
-                    if(queryPathLevel>targetPathLevel){
-                        if(targetPath.equals(queryPath.substring(0, targetPath.length()))) {
-                            if(termTreeMap.containsKey(goTermList[i].toString())) {
-                                String currentPath = pathTermMap.get(termTreeMap.get(goTermList[i].toString()));
-                                int currentGoPathLevel = currentPath.trim().length()-currentPath.replace(".", "").trim().length();
-                                if(targetPathLevel>currentGoPathLevel)
-                                    termTreeMap.put(goTermList[i].toString(), goTermList[j].toString());
-                            } else {
-                                termTreeMap.put(goTermList[i].toString(), goTermList[j].toString());
+            if(pathTermMap.containsKey(goTermList[i].toString())) {
+                String queryPath = pathTermMap.get(goTermList[i].toString());
+                int queryPathLevel = queryPath.trim().length()-queryPath.replace(".", "").trim().length();
+                for(int j=0;j<goTermList.length;j++) {
+                    if(j!=i) {
+                        if(pathTermMap.containsKey(goTermList[j].toString())) {
+                            String targetPath = pathTermMap.get(goTermList[j].toString());
+                            int targetPathLevel = targetPath.trim().length()-targetPath.replace(".", "").trim().length();
+                            if(queryPathLevel>targetPathLevel){
+                                if(targetPath.equals(queryPath.substring(0, targetPath.length()))) {
+                                    if(termTreeMap.containsKey(goTermList[i].toString())) {
+                                        String currentPath = pathTermMap.get(termTreeMap.get(goTermList[i].toString()));
+                                        int currentGoPathLevel = currentPath.trim().length()-currentPath.replace(".", "").trim().length();
+                                        if(targetPathLevel>currentGoPathLevel)
+                                            termTreeMap.put(goTermList[i].toString(), goTermList[j].toString());
+                                    } else {
+                                        termTreeMap.put(goTermList[i].toString(), goTermList[j].toString());
+                                    }
+                                }
                             }
                         }
                     }
                 }
+            } else {
+                System.out.println(goTermList[i].toString()+" doesn't has GO path!");
             }
             if(!termTreeMap.containsKey(goTermList[i].toString())) {
                 termTreeMap.put(goTermList[i].toString(), "root");
             }
         }
-        Object[][] networkTreeArray = new String[attributeValues.size()][4];
+        Object[][] networkTreeArray = new String[attributeValues.size()][5];
         for(int i=0;i<goTermList.length;i++) {
             networkTreeArray[i][0] = goTermList[i];
             networkTreeArray[i][1] = termTreeMap.get(goTermList[i].toString());
-            networkTreeArray[i][2] = pathTermMap.get(goTermList[i].toString());
-            networkTreeArray[i][3] = (networkTreeArray[i][2].toString().trim().length()- networkTreeArray[i][2].toString().replace(".", "").trim().length()+1)+"";
+            if(pathTermMap.containsKey(goTermList[i].toString())) {
+                networkTreeArray[i][2] = pathTermMap.get(goTermList[i].toString());
+                networkTreeArray[i][3] = (networkTreeArray[i][2].toString().trim().length()- networkTreeArray[i][2].toString().replace(".", "").trim().length()+1)+"";
+            } else {
+                networkTreeArray[i][2] = "";
+                networkTreeArray[i][3] = "100";
+            }
+            if(goDescMappingFile.containsKey(goTermList[i].toString())) {
+                networkTreeArray[i][4] = goDescMappingFile.get(goTermList[i].toString());
+            } else {
+                networkTreeArray[i][4] = goTermList[i].toString();
+            }
         }
         networkTreeArray = GOLayoutUtil.dataSort(networkTreeArray, 3);
         return networkTreeArray;

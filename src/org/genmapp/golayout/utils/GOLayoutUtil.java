@@ -229,7 +229,30 @@ public class GOLayoutUtil {
      * @param filename
      * @return
      */
-    public static Map<String, String> readMappingFile(final URL filename, Set<Object> secondAttributeList) {
+    public static Map<String, String> readMappingFile(final URL filename, Set<Object> firstAttributeList, int index) {
+        final Map<String, String> ret = new HashMap<String, String>();
+        try {
+            BufferedReader in = new BufferedReader(new InputStreamReader(filename.openStream()));
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                String[] retail = inputLine.split("\t");
+                if(retail.length>=2) {
+                    if(firstAttributeList.contains(retail[index].trim()))
+                        ret.put(retail[0].trim(), retail[1].trim());
+                }
+            }
+            in.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ret;
+    }
+
+    /**
+     * @param filename
+     * @return
+     */
+    public static Map<String, String> readGOMappingFile(final URL filename, Set<Object> secondAttributeList) {
         final Map<String, String> ret = new HashMap<String, String>();
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(filename.openStream()));

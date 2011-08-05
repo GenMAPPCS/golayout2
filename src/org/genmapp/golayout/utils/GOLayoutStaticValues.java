@@ -34,4 +34,5 @@ public class GOLayoutStaticValues {
     public static final String BP_GO_PathFile = "/resources/annotation.GO BIOLOGICAL_PROCESS";
     public static final String CC_GO_PathFile = "/resources/annotation.GO CELLULAR_COMPONENT";
     public static final String MF_GO_PathFile = "/resources/annotation.GO MOLECULAR_FUNCTION";
+    public static final String GO_DescFile = "/resources/GO_Desc.txt";
 }

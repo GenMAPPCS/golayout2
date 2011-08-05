@@ -42,12 +42,18 @@ public class AnnotationDialog implements Task {
             taskMonitor.setStatus("Annotating current network ......");
             taskMonitor.setPercentCompleted(-1);
             long start=System.currentTimeMillis();
-            if(this.selectedMappingType.indexOf("ensembl")!=-1) {
-                IdMapping.mapID(this.localDerbyDBPath, this.selectedMappingID, this.ensemblIDType);
-                IdMapping.mapAnnotation(this.localGOslimDBPath, this.ensemblIDType);
-            } else {
-                IdMapping.mapAnnotation(this.localGOslimDBPath, this.selectedMappingID);
-            }
+            System.out.println("--------------"+this.selectedMappingType+"-----------------");
+            IdMapping idMapper = new IdMapping();
+            idMapper.mapID(this.localDerbyDBPath, this.localGOslimDBPath,
+                    this.selectedMappingID, this.selectedMappingType, this.ensemblIDType);
+//            if(this.selectedMappingType.indexOf("ensembl")==-1) {
+//                System.out.println("--------------Mapping Other ID-----------------");
+//                IdMapping.mapID(this.localDerbyDBPath, this.selectedMappingID, this.ensemblIDType);
+//                IdMapping.mapAnnotation(this.localGOslimDBPath, this.ensemblIDType);
+//            } else {
+//                System.out.println("--------------Mapping Ensembl-----------------");
+//                IdMapping.mapAnnotation(this.localGOslimDBPath, this.selectedMappingID);
+//            }
             long pause=System.currentTimeMillis();
             System.out.println("Running time:"+(pause-start)/1000/60+"min "+(pause-start)/1000%60+"sec");
             taskMonitor.setStatus("Done");

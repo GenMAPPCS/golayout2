@@ -15,6 +15,7 @@
  ******************************************************************************/
 package org.genmapp.golayout;
 
+import cytoscape.CyNetwork;
 import org.genmapp.golayout.partition.PartitionAlgorithm;
 import org.genmapp.golayout.layout.PartitionNetworkVisualStyleFactory;
 import org.genmapp.golayout.layout.CellAlgorithm;
@@ -27,6 +28,10 @@ import cytoscape.Cytoscape;
 import cytoscape.layout.CyLayouts;
 import cytoscape.plugin.CytoscapePlugin;
 import cytoscape.plugin.PluginManager;
+import cytoscape.task.Task;
+import cytoscape.task.TaskMonitor;
+import cytoscape.task.ui.JTaskConfig;
+import cytoscape.task.util.TaskManager;
 import cytoscape.view.CyNetworkView;
 import cytoscape.view.NetworkPanel;
 import cytoscape.view.cytopanels.CytoPanel;
@@ -34,9 +39,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.ImageIcon;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
 //import org.genmapp.golayout.tree.WorkspacesPanel;
 import org.genmapp.golayout.partition.GOLayoutNetworkPanel;
+import org.genmapp.golayout.setting.GOLayoutSettingDialog;
 import org.genmapp.golayout.utils.GOLayoutUtil;
 
 
@@ -50,12 +59,13 @@ public class GOLayout extends CytoscapePlugin{
     public static List<String> derbyRemotelist = new ArrayList<String>();
     public static List<String> goslimRemotelist = new ArrayList<String>();
     public static List<String> speciesMappinglist = new ArrayList<String>();
+    private static final String HELP = "GOLayout Help";
 	
     /**
      * The constructor registers our layout algorithm. The CyLayouts mechanism
      * will worry about how to get it in the right menu, etc.
      */
-    public GOLayout() {
+    public GOLayout(){
         try {
             GOLayoutBaseDir = PluginManager.getPluginManager().getPluginManageDirectory().getCanonicalPath() + "/GOLayout/";
         } catch (IOException e) {
@@ -84,13 +94,19 @@ public class GOLayout extends CytoscapePlugin{
         CyLayouts.addLayout(new PartitionAlgorithm(), null);
         CyLayouts.addLayout(new CellAlgorithm(), null);
         //CyLayouts.addLayout(new IdMapping(), "IdMapping");
+        // Add GOLayout menu item
+        JMenuItem item = new JMenuItem("GOLayout");
+        JMenu layoutMenu = Cytoscape.getDesktop().getCyMenus().getMenuBar()
+                .getMenu("Plugins");
+        item.addActionListener(new GOLayoutPluginActionListener(this));
+        layoutMenu.add(item);
+        // Add help menu item
+        JMenuItem getHelp = new JMenuItem(HELP);
+        getHelp.setToolTipText("Open online help for GOLayout");
+        GetHelpListener getHelpListener = new GetHelpListener();
+        getHelp.addActionListener(getHelpListener);
+        Cytoscape.getDesktop().getCyMenus().getHelpMenu().add(getHelp);
 
-        // JMenuItem item = new JMenuItem("Add GO-slim annotations");
-        // JMenu layoutMenu = Cytoscape.getDesktop().getCyMenus().getMenuBar()
-        // .getMenu("Layout");
-        // item.addActionListener(new AddAnnotationCommandListener());
-        //
-        // layoutMenu.add(item);
         // create workspaces panel
         CytoPanel cytoPanel1 = Cytoscape.getDesktop().getCytoPanel(
                 SwingConstants.WEST);
@@ -118,4 +134,111 @@ public class GOLayout extends CytoscapePlugin{
     public static void createVisualStyle(CyNetworkView view) {
         PartitionNetworkVisualStyleFactory.createVisualStyle(view);
     }    
+}
+
+// Handles the top-level menu selection event from Cytoscape
+class GOLayoutPluginActionListener implements ActionListener {
+    GOLayout plugin = null;
+
+    public GOLayoutPluginActionListener(GOLayout plugin_) {
+        plugin = plugin_;
+    }
+
+    public void actionPerformed(ActionEvent evt_) {
+        try {
+            if(Cytoscape.getNetworkSet().size()>0) {
+                NewDialogTask task = new NewDialogTask();
+
+                final JTaskConfig jTaskConfig = new JTaskConfig();
+                jTaskConfig.setOwner(Cytoscape.getDesktop());
+                jTaskConfig.displayCloseButton(false);
+                jTaskConfig.displayCancelButton(false);
+                jTaskConfig.displayStatus(true);
+                jTaskConfig.setAutoDispose(true);
+                jTaskConfig.setMillisToPopup(100); // always pop the task
+
+                // Execute Task in New Thread; pop open JTask Dialog Box.
+                TaskManager.executeTask(task, jTaskConfig);
+
+                final GOLayoutSettingDialog dialog = task.dialog();
+                dialog.setVisible(true);
+            } else {
+                JOptionPane.showMessageDialog(Cytoscape.getDesktop(),
+                        "Please load a network first!", "GOLayout",
+                        JOptionPane.WARNING_MESSAGE);
+            }
+        } catch (Exception e) {
+            System.out.println("Exception: " + e);
+        }
+    }
+}
+
+class NewDialogTask implements Task {
+    private TaskMonitor taskMonitor;
+    private GOLayoutSettingDialog dialog;
+
+    public NewDialogTask() {
+    }
+
+    /**
+     * Executes Task.
+     */
+    //@Override
+    public void run() {
+        try {
+            taskMonitor.setStatus("Initializing...");
+            dialog = new GOLayoutSettingDialog(Cytoscape.getDesktop(), true);
+            dialog.setLocationRelativeTo(Cytoscape.getDesktop());
+            taskMonitor.setPercentCompleted(100);
+        } catch (Exception e) {
+            taskMonitor.setPercentCompleted(100);
+            taskMonitor.setStatus("Failed.\n");
+            e.printStackTrace();
+        }
+    }
+
+    public GOLayoutSettingDialog dialog() {
+        return dialog;
+    }
+
+
+    /**
+     * Halts the Task: Not Currently Implemented.
+     */
+    //@Override
+    public void halt() {
+
+    }
+
+    /**
+     * Sets the Task Monitor.
+     *
+     * @param taskMonitor
+     *            TaskMonitor Object.
+     */
+    //@Override
+    public void setTaskMonitor(TaskMonitor taskMonitor) throws IllegalThreadStateException {
+        this.taskMonitor = taskMonitor;
+    }
+
+    /**
+     * Gets the Task Title.
+     *
+     * @return Task Title.
+     */
+    //@Override
+    public String getTitle() {
+        return "Initializing...";
+    }
+}
+
+/**
+ * This class direct a browser to the help manual web page.
+ */
+class GetHelpListener implements ActionListener {
+	private String helpURL = "http://genmapp.org/GOLayout/GOLayout.html";
+
+	public void actionPerformed(ActionEvent ae) {
+		cytoscape.util.OpenBrowser.openURL(helpURL);
+	}
 }
