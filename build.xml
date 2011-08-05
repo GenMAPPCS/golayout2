@@ -13,11 +13,11 @@
         <!-- The name is used to create the plugin JAR file -->
         <property name="plugin.name" value="GOLayout"/>
         <!-- The directory containing source code -->
-        <property name="src.dir" location="src"/>
-        <property name="images" location="images"/>
+    	<property name="src.dir" value="src" />
+        <property name="images" value="images"/>
         <!-- The directory containing resource files -->
-        <property name="files.dir" location="resources"/>
-        <property name="pluginlib.dir" location="lib"/>
+        <property name="files.dir" value="resources"/>
+        <property name="pluginlib.dir" value="lib"/>
         <property name="doc.dir" value="doc"/>
         <property name="plugindata.dir" value="data"/>
         <!-- Check out this folder and reference *.jar in build path -->
@@ -28,10 +28,10 @@
         <property name="cytoroot.dir" value="/Applications/Cytoscape_v2.8.2"/>
         <property name="release.dir" value="/Applications/Cytoscape_v2.8.2"/>
         <!-- Temporary build directories -->
-        <property name="build.dir" location="build"/>
-        <property name="build.classes" location="${build.dir}/classes"/>
-        <property name="build.images" location="${build.classes}/images"/>
-        <property name="build.files" location="${build.classes}/files"/>
+        <property name="build.dir" value="build"/>
+        <property name="build.classes" value="${build.dir}/classes"/>
+        <property name="build.images" value="${build.classes}/images"/>
+        <property name="build.files" value="${build.classes}/files"/>
 
         <!-- Classpath with all lib JAR Files and all Cytoscape Core classes -->
         <path id="classpath">
@@ -49,7 +49,7 @@
     </target>
 
     <!-- Target to create the build directories prior to compilation -->
-    <target name="prepare">
+    <target name="prepare" depends="init">
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${build.classes}"/>
         <mkdir dir="${build.files}"/>
