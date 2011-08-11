@@ -92,7 +92,8 @@ public class GOLayoutSettingDialog extends JDialog
             rAnnSpeComboBox.setModel(new DefaultComboBoxModel(speciesValues.toArray()));
             rAnnSpeComboBox.setSelectedIndex(speciesValues.indexOf(defaultSpecies[0]));
             downloadDBList = checkMappingResources(annotationSpeciesCode);
-            checkDownloadStatus();
+            System.out.println(downloadDBList);
+            //checkDownloadStatus();
             rAnnIdeValues.add("ID");
             rAnnIdeValues.addAll(currentAttributeList);
             rAnnIdeComboBox.setModel(new DefaultComboBoxModel(rAnnIdeValues.toArray()));
@@ -110,6 +111,8 @@ public class GOLayoutSettingDialog extends JDialog
 
         //updates ui based on current network attributes
         checkAnnotationStatus();
+        //checkDownloadStatus();
+            
         aAttParComboBox.setModel(new DefaultComboBoxModel(
                 checkAttributes(GOLayoutStaticValues.BP_ATTNAME).toArray()));
         aAttParComboBox.setSelectedItem(GOLayoutStaticValues.BP_ATTNAME);
@@ -226,7 +229,8 @@ public class GOLayoutSettingDialog extends JDialog
                 rAnnMesLabel.setText("Please check internet connection!");
                 rAnnMesLabel.setForeground(Color.RED);
             } else {
-                rAnnMesButton.setText("Download!");
+                System.out.println("it is right");
+                rAnnMesButton.setText("Download");
                 rAnnMesButton.setForeground(Color.RED);
                 rAnnMesLabel.setText("You need to first download necessary databases for selected species!");
                 rAnnMesLabel.setForeground(Color.RED);
@@ -291,7 +295,7 @@ public class GOLayoutSettingDialog extends JDialog
         aAttParTextField.setText(checkAnnotationRate(partitionAttr)+"/"+numberOfNodes+" attribute values");
         aAttLayTextField.setText(checkAnnotationRate(layoutAttr)+"/"+numberOfNodes+" attribute values");
         aAttNodTextField.setText(checkAnnotationRate(colorAttr)+"/"+numberOfNodes+" attribute values");
-        //checkDownloadStatus();
+        checkDownloadStatus();
     }
     
     private boolean isGOAttr(String selectedAttribute) {
@@ -855,11 +859,22 @@ public class GOLayoutSettingDialog extends JDialog
     private void rAnnMesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rAnnMesButtonActionPerformed
         // TODO add your handling code here:
         if(((JButton)evt.getSource()).getText().equals("Download")) {
-            FileDownloadDialog annDownloadDialog
-                = new FileDownloadDialog(Cytoscape.getDesktop(), downloadDBList);
-            annDownloadDialog.setLocationRelativeTo(Cytoscape.getDesktop());
-            annDownloadDialog.setSize(450, 100);
-            annDownloadDialog.setVisible(true);
+            System.out.println("download buttion on click");
+//            FileDownloadDialog annDownloadDialog
+//                = new FileDownloadDialog(Cytoscape.getDesktop(), downloadDBList);
+//            annDownloadDialog.setLocationRelativeTo(Cytoscape.getDesktop());
+//            annDownloadDialog.setSize(450, 100);
+//            annDownloadDialog.setVisible(true);
+            final JTaskConfig jTaskConfig = new JTaskConfig();
+            jTaskConfig.setOwner(cytoscape.Cytoscape.getDesktop());
+            jTaskConfig.displayCloseButton(true);
+            jTaskConfig.displayCancelButton(false);
+            jTaskConfig.displayStatus(true);
+            jTaskConfig.setAutoDispose(true);
+            jTaskConfig.setMillisToPopup(100);
+            FileDownloadDialog task
+                = new FileDownloadDialog(downloadDBList);
+            TaskManager.executeTask(task, jTaskConfig);
             downloadDBList = checkMappingResources(annotationSpeciesCode);
             checkDownloadStatus();
             if(downloadDBList.isEmpty()) {
@@ -870,7 +885,7 @@ public class GOLayoutSettingDialog extends JDialog
                 rAnnTypComboBox.setModel(new DefaultComboBoxModel(idMappingTypeValues.toArray()));
             }
             rAnnIdeComboBox.setSelectedItem("ID");
-            setDefaultAttType("ID");
+            setDefaultAttType("ID");            
         } else if (((JButton)evt.getSource()).getText().equals(this.annotationButtonLabel)) {
             String[] selectSpecies = getSpeciesCommonName(rAnnSpeComboBox.getSelectedItem().toString());
             //annotationSpeciesCode = speciesCode[1];
@@ -1062,7 +1077,8 @@ public class GOLayoutSettingDialog extends JDialog
                 try {
                     taskMonitor.setStatus("Runing partition...");
                     CyLayoutAlgorithm layout = CyLayouts.getLayout("partition");
-                    layout.doLayout(Cytoscape.getCurrentNetworkView(), taskMonitor);
+                    //layout.doLayout(Cytoscape.getCurrentNetworkView(), taskMonitor);
+                    layout.doLayout(Cytoscape.getCurrentNetworkView());
                     taskMonitor.setPercentCompleted(100);
                 } catch (Exception e) {
                         taskMonitor.setPercentCompleted(100);

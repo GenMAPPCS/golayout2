@@ -31,9 +31,9 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="1" max="-2" attributes="0">
                   <Component id="sParPanel" alignment="0" max="32767" attributes="1"/>
-                  <Component id="lTepPanel" alignment="0" max="32767" attributes="1"/>
+                  <Component id="lTepPanel" alignment="0" pref="650" max="32767" attributes="1"/>
                   <Component id="rAnnPanel" alignment="0" pref="650" max="32767" attributes="1"/>
-                  <Component id="aSelPanel" alignment="0" max="32767" attributes="1"/>
+                  <Component id="aSelPanel" alignment="0" pref="650" max="32767" attributes="1"/>
                   <Component id="ButtonPanel" alignment="0" max="32767" attributes="1"/>
               </Group>
               <EmptySpace max="32767" attributes="0"/>
@@ -48,7 +48,7 @@
               <EmptySpace max="-2" attributes="0"/>
               <Component id="rAnnPanel" min="-2" pref="132" max="-2" attributes="1"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="sParPanel" min="-2" pref="102" max="-2" attributes="1"/>
+              <Component id="sParPanel" min="-2" max="-2" attributes="1"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="lTepPanel" min="-2" max="-2" attributes="1"/>
               <EmptySpace max="-2" attributes="0"/>
@@ -218,7 +218,7 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <Component id="rAnnMesLabel" min="-2" pref="389" max="-2" attributes="0"/>
-                  <EmptySpace pref="152" max="32767" attributes="0"/>
+                  <EmptySpace pref="156" max="32767" attributes="0"/>
                   <Component id="rAnnMesButton" min="-2" pref="93" max="-2" attributes="0"/>
               </Group>
               <Group type="102" alignment="0" attributes="0">
@@ -233,7 +233,7 @@
                       <Component id="rAnnIdeComboBox" alignment="0" min="-2" max="-2" attributes="0"/>
                       <Component id="rAnnTypComboBox" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace pref="303" max="32767" attributes="0"/>
+                  <EmptySpace pref="307" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -520,7 +520,7 @@
                           <Component id="sParFewTextField" alignment="0" pref="48" max="32767" attributes="1"/>
                       </Group>
                   </Group>
-                  <EmptySpace pref="56" max="32767" attributes="0"/>
+                  <EmptySpace pref="60" max="32767" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="sParSpaLabel" min="-2" max="-2" attributes="0"/>
                       <Component id="sParPatLabel" min="-2" max="-2" attributes="0"/>

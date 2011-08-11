@@ -15,92 +15,63 @@
  ******************************************************************************/
 package org.genmapp.golayout.setting;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.net.MalformedURLException;
+import cytoscape.task.Task;
+import cytoscape.task.TaskMonitor;
 import java.util.List;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 import org.genmapp.golayout.utils.download.Downloader;
 
 /**
  *
  * @author Chao
  */
-public class FileDownloadDialog extends JDialog implements ActionListener {
+public class FileDownloadDialog implements Task {
     public  List<String> downloadFileList;
-    private JPanel optionPane;
-    public  JLabel messageLabel;
-    public  JButton comfirmButton;
-
-    public FileDownloadDialog(JFrame aFrame, List<String> downloadDBList) {
-        super(aFrame, true);
+    private TaskMonitor taskMonitor;
+    private boolean success = false;
+    
+    public FileDownloadDialog(List<String> downloadDBList) {
         downloadFileList = downloadDBList;
-        setTitle("Downloading databases");
-
-        optionPane = new JPanel();
-        messageLabel = new JLabel();
-        optionPane.add(messageLabel);
-        comfirmButton = new JButton("Please wait ......");
-        comfirmButton.setEnabled(false);
-        comfirmButton.addActionListener(this);
-        optionPane.add(comfirmButton);
-        this.add(optionPane);
-        //Handle window closing correctly.
-        this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        new DownloadThread(this).start();
-    }
-
-    /** This method handles events for the text field. */
-    public void actionPerformed(ActionEvent e) {
-        this.dispose();
-    }
-}
-
-/**
- *
- * @author Anurag Sharma
- */
-class DownloadThread extends Thread {
-
-    private FileDownloadDialog sp;
-
-    public DownloadThread(FileDownloadDialog sp) {
-        this.sp = sp;
     }
 
     public void run() {
         try {
-            System.out.println("starting download");
-            for(String fileName:sp.downloadFileList) {
+            taskMonitor.setStatus("Downloading databases ...");
+            taskMonitor.setPercentCompleted(-1);
+            for(String fileName:this.downloadFileList) {
                 Downloader d = new Downloader();
                 d.download(fileName);
                 int progress = d.getProgress();
                 while (progress < 99) {
-                    System.out.println(fileName + ": " + progress + "%");
-                    sp.messageLabel.setText(fileName + ": " + progress + "%");
-                    Thread.sleep(500);
+                    taskMonitor.setStatus(fileName + ": " + progress + "% ...");
+                    //System.out.println(fileName + ": " + progress + "%");
+                    Thread.sleep(250);
                     progress = d.getProgress();
-
                 }
-                sp.messageLabel.setText(fileName + ": 100%");
-                sp.messageLabel.setText("Uncompressing " + fileName + "...");
-                
                 // must wait for completion of uncompression before giving up thread
                 d.waitFor();
             }
-            sp.comfirmButton.setText("Finished!");
-            sp.comfirmButton.setEnabled(true);
-        } catch (MalformedURLException e1) {
-            e1.printStackTrace();
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        } catch (InterruptedException e) {
+            taskMonitor.setStatus("Done");
+            taskMonitor.setPercentCompleted(100);
+            success = true;
+        } catch (Exception e) {
+            taskMonitor.setPercentCompleted(100);
+            taskMonitor.setStatus("failed.\n");
             e.printStackTrace();
         }
+    }
+    
+    public boolean success() {
+        return success;
+    }
+
+    public void halt() {
+    }
+
+    public void setTaskMonitor(TaskMonitor taskMonitor){
+        this.taskMonitor = taskMonitor;
+    }
+
+    public String getTitle() {
+        return new String("Downloading databases");
     }
 }

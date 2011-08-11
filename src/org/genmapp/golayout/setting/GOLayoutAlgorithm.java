@@ -28,7 +28,6 @@ import cytoscape.layout.CyLayouts;
 import cytoscape.layout.LayoutProperties;
 import cytoscape.layout.Tunable;
 import cytoscape.layout.TunableListener;
-import cytoscape.task.TaskMonitor;
 import cytoscape.task.ui.JTaskConfig;
 import cytoscape.task.util.TaskManager;
 import java.awt.GridLayout;
@@ -41,7 +40,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JButton;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import org.genmapp.golayout.layout.CellAlgorithm;
@@ -50,10 +48,6 @@ import org.genmapp.golayout.utils.GOLayoutStaticValues;
 import org.genmapp.golayout.partition.PartitionAlgorithm;
 import org.genmapp.golayout.layout.PartitionNetworkVisualStyleFactory;
 
-/**
- *
- * @author Chao
- */
 public class GOLayoutAlgorithm extends AbstractLayout implements
         TunableListener, ActionListener  {
     protected static final String LAYOUT_NAME = "0-golayout";
@@ -808,11 +802,21 @@ public class GOLayoutAlgorithm extends AbstractLayout implements
 
     public void actionPerformed(ActionEvent e) {
         if(((JButton)e.getSource()).getText().equals("Download")) {
-            FileDownloadDialog annDownloadDialog
-                = new FileDownloadDialog(Cytoscape.getDesktop(), downloadDBList);
-            annDownloadDialog.setLocationRelativeTo(Cytoscape.getDesktop());
-            annDownloadDialog.setSize(450, 100);
-            annDownloadDialog.setVisible(true);
+//            FileDownloadDialog annDownloadDialog
+//                = new FileDownloadDialog(Cytoscape.getDesktop(), downloadDBList);
+//            annDownloadDialog.setLocationRelativeTo(Cytoscape.getDesktop());
+//            annDownloadDialog.setSize(450, 100);
+//            annDownloadDialog.setVisible(true);
+            final JTaskConfig jTaskConfig = new JTaskConfig();
+            jTaskConfig.setOwner(cytoscape.Cytoscape.getDesktop());
+            jTaskConfig.displayCloseButton(true);
+            jTaskConfig.displayCancelButton(false);
+            jTaskConfig.displayStatus(true);
+            jTaskConfig.setAutoDispose(true);
+            jTaskConfig.setMillisToPopup(100);
+            FileDownloadDialog task
+                = new FileDownloadDialog(downloadDBList);
+            TaskManager.executeTask(task, jTaskConfig);
             downloadDBList = checkMappingResources(annotationSpeciesCode);
             checkDownloadStatus();
             if(downloadDBList.isEmpty())
