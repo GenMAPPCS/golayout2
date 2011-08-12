@@ -54,6 +54,7 @@
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${build.classes}"/>
         <mkdir dir="${build.resources}"/>
+        <mkdir dir="${build.images}"/>
     </target>
 
     <!--  Target to clean out all directories -->
@@ -90,6 +91,9 @@
         <copy file="plugin.props" todir="${build.classes}/org/genmapp/golayout/"/>
         <copy todir="${build.resources}">
             <fileset dir="${resources.dir}"/>
+        </copy>
+        <copy todir="${build.images}">
+            <fileset dir="${images}"/>
         </copy>
         <unjar dest="${build.classes}">
          <fileset dir="${pluginlib.dir}"/>
