@@ -53,6 +53,7 @@
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${build.classes}"/>
         <mkdir dir="${build.files}"/>
+        <mkdir dir="${build.images}"/>
     <!-- copy over images -->
             <!-- <mkdir dir="${dist.dir}"/> -->
             <!-- <mkdir dir="${doc.dir}"/> -->
@@ -90,7 +91,10 @@
         <copy file="plugin.props" todir="${build.classes}/org/genmapp/golayout/"/>
         <copy todir="${build.files}">
             <fileset dir="${files.dir}"/>
-        </copy>        	
+        </copy>
+        <copy todir="${build.images}">
+            <fileset dir="${images}"/>
+        </copy>
         <unjar dest="${build.classes}">
          <fileset dir="${pluginlib.dir}"/>
         </unjar>		
