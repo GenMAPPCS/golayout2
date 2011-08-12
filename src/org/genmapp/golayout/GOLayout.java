@@ -26,6 +26,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import cytoscape.Cytoscape;
 import cytoscape.layout.CyLayouts;
+import cytoscape.logger.CyLogger;
 import cytoscape.plugin.CytoscapePlugin;
 import cytoscape.plugin.PluginManager;
 import cytoscape.task.Task;
@@ -50,6 +51,7 @@ import org.genmapp.golayout.utils.GOLayoutUtil;
 
 
 public class GOLayout extends CytoscapePlugin{
+    private CyLogger logger;
     public static String GOLayoutBaseDir;
     public static String GOLayoutDatabaseDir;
     public static boolean tagInternetConn;
@@ -66,6 +68,8 @@ public class GOLayout extends CytoscapePlugin{
      * will worry about how to get it in the right menu, etc.
      */
     public GOLayout(){
+        logger = CyLogger.getLogger(GOLayout.class);
+		logger.setDebug(true);
         try {
             GOLayoutBaseDir = PluginManager.getPluginManager().getPluginManageDirectory().getCanonicalPath() + "/GOLayout/";
         } catch (IOException e) {
@@ -111,7 +115,8 @@ public class GOLayout extends CytoscapePlugin{
         CytoPanel cytoPanel1 = Cytoscape.getDesktop().getCytoPanel(
                 SwingConstants.WEST);
         //WorkspacesPanel wsPanel = new WorkspacesPanel();
-        GOLayoutNetworkPanel wsPanel = new GOLayoutNetworkPanel(Cytoscape.getDesktop());
+        //GOLayoutNetworkPanel wsPanel = new GOLayoutNetworkPanel(Cytoscape.getDesktop());
+        GOLayoutNetworkPanel wsPanel = new GOLayoutNetworkPanel(logger);
         cytoPanel1.add("GOLayout", null, wsPanel, "GOLayout Panel", 1);
 //        cytoPanel1.add("GenMAPP-CS", new ImageIcon(getClass().getResource(
 //                "images/genmappcs.png")), wsPanel, "Workspaces Panel", 0);

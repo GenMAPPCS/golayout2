@@ -2,7 +2,7 @@ package org.genmapp.golayout.partition;
 
 import cytoscape.view.NetworkTreeNode;
 
-public class GOLayoutNetworkTreeNode extends NetworkTreeNode {	
+public class GOLayoutNetworkTreeNode extends NetworkTreeNode {
 	private String network_uid;
 
 	public GOLayoutNetworkTreeNode(Object userobj, String id) {

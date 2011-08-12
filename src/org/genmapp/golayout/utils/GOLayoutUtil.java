@@ -256,7 +256,7 @@ public class GOLayoutUtil {
         final Map<String, String> ret = new HashMap<String, String>();
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(filename.openStream()));
-            String inputLine;
+            String inputLine=in.readLine();
             while ((inputLine = in.readLine()) != null) {
                 String[] retail = inputLine.split("\t");
                 if(retail.length>=2) {
