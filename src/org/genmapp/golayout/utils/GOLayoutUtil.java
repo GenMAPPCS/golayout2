@@ -75,6 +75,16 @@ public class GOLayoutUtil {
         }
     }
 
+    /**
+     * @param filePath
+     * @return
+     */
+    public static void checkFolder(String filePath) {
+        File dir = new File(filePath);
+        if (!dir.exists()) {
+            dir.mkdir();
+        }
+    }
 
     /**
      * @param strUrl

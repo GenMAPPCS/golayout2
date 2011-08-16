@@ -77,7 +77,9 @@ public class GOLayout extends CytoscapePlugin{
             GOLayoutBaseDir = "/GOLayout/";
             e.printStackTrace();
         }
+        GOLayoutUtil.checkFolder(GOLayoutBaseDir);
         GOLayoutDatabaseDir=GOLayoutBaseDir+"/DB/";
+        GOLayoutUtil.checkFolder(GOLayoutDatabaseDir);
         speciesMappinglist = GOLayoutUtil.readResource(this.getClass().getResource(GOLayoutStaticValues.bridgedbSpecieslist));
         //Check internet connection
         GOLayout.tagInternetConn = GOLayoutUtil.checkConnection();
