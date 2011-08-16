@@ -103,23 +103,24 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
 	private JMenuItem destroyNetworkItem;
 	private JMenuItem editNetworkTitle;
     private JMenuItem destroyALLNetworkItem;
-    private JMenuItem partitionNetworkItem;
-	private JMenuItem applyVisualStyleMenu;
+    private JMenu partitionNetworkMenu;
+	private JMenu applyVisualStyleMenu;
 
 	private boolean doNotEnterValueChanged = false;
-
 	public final NetworkTreeTableModel networkTreeTableModel;
 
 	private CyLogger logger;
+    private PartitionAlgorithm partitionObject;
 
 	/**
 	 * Constructor for the Network Panel.
 	 *
 	 * @param desktop
 	 */
-	public GOLayoutNetworkPanel(CyLogger cyLogger) {
+	public GOLayoutNetworkPanel(CyLogger cyLogger, PartitionAlgorithm partitionObject) {
 		super();
 		this.logger = cyLogger;
+        this.partitionObject = partitionObject;
 
 		root = new GOLayoutNetworkTreeNode("Network Root", "nroot");
 		networkTreeTableModel = new NetworkTreeTableModel(root);
@@ -215,7 +216,7 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
 		destroyViewItem = new JMenuItem(PopupActionListener.DESTROY_VIEW);
 		destroyNetworkItem = new JMenuItem(PopupActionListener.DESTROY_NETWORK);
         destroyALLNetworkItem = new JMenuItem(PopupActionListener.DESTROY_ALL);
-        partitionNetworkItem = new JMenuItem(PopupActionListener.PARTITION_NETWORK);
+        partitionNetworkMenu = new JMenu(PopupActionListener.PARTITION_NETWORK);
 		applyVisualStyleMenu = new JMenu(PopupActionListener.APPLY_VISUAL_STYLE);
 
 		// action listener which performs the tasks associated with the popup
@@ -226,14 +227,14 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
 		destroyViewItem.addActionListener(popupActionListener);
 		destroyNetworkItem.addActionListener(popupActionListener);
         destroyALLNetworkItem.addActionListener(popupActionListener);
-        partitionNetworkItem.addActionListener(popupActionListener);
+        partitionNetworkMenu.addActionListener(popupActionListener);
 		applyVisualStyleMenu.addActionListener(popupActionListener);
 		popup.add(editNetworkTitle);
 		popup.add(createViewItem);
 		popup.add(destroyViewItem);
 		popup.add(destroyNetworkItem);
         popup.add(destroyALLNetworkItem);
-        popup.add(partitionNetworkItem);
+        popup.add(partitionNetworkMenu);
 		popup.addSeparator();
 		popup.add(applyVisualStyleMenu);
 	}
@@ -523,19 +524,16 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
 					final int selectedItemCount = nselected.length;
 					CyNetwork cyNetwork = null;
 					final JTree tree = treeTable.getTree();
-					for (int i = 0; i < selectedItemCount; i++) {
+					final TreePath treePath = tree
+                            .getPathForRow(nselected[0]);
+                    final String networkID = (String) ((GOLayoutNetworkTreeNode) treePath
+                            .getLastPathComponent()).getNetworkID();
 
-						final TreePath treePath = tree
-								.getPathForRow(nselected[i]);
-						final String networkID = (String) ((GOLayoutNetworkTreeNode) treePath
-								.getLastPathComponent()).getNetworkID();
-
-						cyNetwork = Cytoscape.getNetwork(networkID);
-						if (Cytoscape.viewExists(networkID)) {
-							enableViewRelatedMenu = true;
-						}
-					}
-
+                    cyNetwork = Cytoscape.getNetwork(networkID);
+                    if (Cytoscape.viewExists(networkID)) {
+                        enableViewRelatedMenu = true;
+                    }
+                    
 					logger.debug(selectedItemCount
 							+ " networks selected, with view?: "
 							+ enableViewRelatedMenu);
@@ -562,7 +560,31 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
 //						viewMetanodesAsSubMenu.setEnabled(false);
 						applyVisualStyleMenu.setEnabled(false);
 					}
-
+                    String goTerm = partitionObject.getGOTerm(cyNetwork.getTitle());
+                    ArrayList<String> unbuildChildList = partitionObject.getUnbuildChildList(goTerm);
+                    if(unbuildChildList.size()>0) {
+                        partitionNetworkMenu.setEnabled(true);
+                        partitionNetworkMenu.removeAll();
+                        JMenuItem styleMenu = new JMenuItem("ALL");
+                        //styleMenu.setAction(partitionObject.buildSubnetwork(goTerm, unbuildChildList));
+                        styleMenu.addActionListener(popupActionListener);
+                        partitionNetworkMenu.add(styleMenu);
+                        partitionNetworkMenu.addSeparator();
+                        for (String subnetworkName : unbuildChildList) {
+                            styleMenu = new JMenuItem(subnetworkName);
+                            styleMenu.addActionListener(popupActionListener);
+                            //styleMenu.setAction(new ApplyVisualStyleAction(name));
+                            partitionNetworkMenu.add(styleMenu);
+                        }
+                    } else {
+                        partitionNetworkMenu.setEnabled(false);
+                    }
+                    ArrayList<String> existChildList = partitionObject.getExistChildList(goTerm);
+                    if(existChildList.size()>0)
+                        destroyALLNetworkItem.setEnabled(true);
+                    else
+                        destroyALLNetworkItem.setEnabled(false);
+                    System.out.println(cyNetwork.getTitle());
 					popup.show(e.getComponent(), e.getX(), e.getY());
 				}
 			}
@@ -640,181 +662,44 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
 								.createViewFromCurrentNetwork(network);
 				}
 			} else if (DESTROY_NETWORK.equals(label)) {
-				final List<CyNetwork> selected = Cytoscape
-						.getSelectedNetworks();
-				for (CyNetwork network : selected)
-					Cytoscape.destroyNetwork(network);
+                CyNetwork selectedNetwork = Cytoscape.getSelectedNetworks().get(0);
+                String networkID = partitionObject.getGOTerm(selectedNetwork.getTitle());
+                if(!networkID.equals(""))
+                    partitionObject.destroyAllSubNet(networkID,networkID);
+                else
+                    partitionObject.destroyAllSubNet("root","root");
+				Cytoscape.destroyNetwork(selectedNetwork);
+                partitionObject.resetNetworkID(selectedNetwork);
+                partitionObject.updateOverview();
 			} else if (EDIT_NETWORK_TITLE.equals(label)) {
 				CyNetworkNaming.editNetworkTitle(cyNetwork);
 				Cytoscape.getDesktop().getNetworkPanel().updateTitle(cyNetwork);
-//			} else if (METANODES_COLLAPSED.equals(label)) {
-//				JProgressBar progress = GenMAPPWorkspaces.wsPanel
-//						.getProgressBar();
-//				progress.setVisible(true);
-//				progress.setValue(0);
-//				progress.setStringPainted(true);
-//
-//				progress.setString("Collapsing metanodes");
-//				WorkspacesCommandHandler.setDefaultMetanodeAppearance(false,
-//						100.0, null, null);
-//				final List<CyNetwork> selected = Cytoscape
-//						.getSelectedNetworks();
-//				for (final CyNetwork network : selected) {
-//					if (Cytoscape.viewExists(network.getIdentifier())) {
-//						List<CyNode> nodes = new ArrayList<CyNode>(network
-//								.getSelectedNodes());
-//						if (nodes.size() > 0) { // operate on selected metanodes
-//							List<CyNode> mnlist = identifyMetanodes(nodes);
-//							if (mnlist.size() > 0)
-//								WorkspacesCommandHandler
-//										.applyMetanodeSettings(WorkspacesCommandHandler.SELECTED_METANODES);
-//							for (CyNode gn : mnlist) {
-//								int i = 0;
-//								i++;
-//								// 10 -> 100
-//								int prog = 10 + 90 * i / mnlist.size();
-//								progress.setValue(prog);
-//								progress.setString("Collapsing metanodes: "
-//										+ gn.getIdentifier());
-//
-//								WorkspacesCommandHandler.metanodeOperation(
-//										network.getIdentifier(), gn
-//												.getIdentifier(),
-//										WorkspacesCommandHandler.EXPAND);
-//								WorkspacesCommandHandler.metanodeOperation(
-//										network.getIdentifier(), gn
-//												.getIdentifier(),
-//										WorkspacesCommandHandler.COLLAPSE);
-//
-//							}
-//						} else { // operate on all metanodes
-//							progress.setValue(10);
-//							WorkspacesCommandHandler
-//									.applyMetanodeSettings(WorkspacesCommandHandler.ALL_METANODES);
-//							WorkspacesCommandHandler.allMetanodesOperation(
-//									network.getIdentifier(),
-//									WorkspacesCommandHandler.EXPAND_ALL);
-//							progress.setValue(60);
-//							if (Cytoscape.viewExists(network.getIdentifier())) {
-//								// view on nested may be destroyed during this
-//								// operation
-//								WorkspacesCommandHandler.allMetanodesOperation(
-//										network.getIdentifier(),
-//										WorkspacesCommandHandler.COLLAPSE_ALL);
-//							}
-//							progress.setValue(100);
-//						}
-//					}
-//				}
-//				progress.setVisible(false);
-//			} else if (METANODES_NESTED.equals(label)) {
-//				JProgressBar progress = GenMAPPWorkspaces.wsPanel
-//						.getProgressBar();
-//				progress.setVisible(true);
-//				progress.setValue(0);
-//				progress.setStringPainted(true);
-//
-//				progress.setString("Nesting metanodes");
-//				WorkspacesCommandHandler.setDefaultMetanodeAppearance(true,
-//						0.0, null, null);
-//				final List<CyNetwork> selected = Cytoscape
-//						.getSelectedNetworks();
-//				for (final CyNetwork network : selected) {
-//					if (Cytoscape.viewExists(network.getIdentifier())) {
-//						List<CyNode> nodes = new ArrayList<CyNode>(network
-//								.getSelectedNodes());
-//						if (nodes.size() > 0) { // operate on selected metanodes
-//							List<CyNode> mnlist = identifyMetanodes(nodes);
-//							if (mnlist.size() > 0)
-//								WorkspacesCommandHandler
-//										.applyMetanodeSettings(WorkspacesCommandHandler.SELECTED_METANODES);
-//							for (CyNode gn : mnlist) {
-//								int i = 0;
-//								i++;
-//								// 10 -> 100
-//								int prog = 10 + 90 * i / mnlist.size();
-//								progress.setValue(prog);
-//								progress.setString("Nesting metanodes: "
-//										+ gn.getIdentifier());
-//								WorkspacesCommandHandler.metanodeOperation(
-//										network.getIdentifier(), gn
-//												.getIdentifier(),
-//										WorkspacesCommandHandler.EXPAND);
-//
-//								WorkspacesCommandHandler.metanodeOperation(
-//										network.getIdentifier(), gn
-//												.getIdentifier(),
-//										WorkspacesCommandHandler.COLLAPSE);
-//
-//							}
-//						} else { // operate on all metanodes
-//							progress.setValue(10);
-//							WorkspacesCommandHandler
-//									.applyMetanodeSettings(WorkspacesCommandHandler.ALL_METANODES);
-//							WorkspacesCommandHandler.allMetanodesOperation(
-//									network.getIdentifier(),
-//									WorkspacesCommandHandler.EXPAND_ALL);
-//							progress.setValue(60);
-//							/*
-//							 * View on nested may be destroyed during this
-//							 * operation
-//							 */
-//							if (Cytoscape.viewExists(network.getIdentifier())) {
-//								WorkspacesCommandHandler.allMetanodesOperation(
-//										network.getIdentifier(),
-//										WorkspacesCommandHandler.COLLAPSE_ALL);
-//							}
-//							progress.setValue(100);
-//						}
-//					}
-//				}
-//				progress.setVisible(false);
-//			} else if (METANODES_EXPANDED.equals(label)) {
-//				JProgressBar progress = GenMAPPWorkspaces.wsPanel
-//						.getProgressBar();
-//				progress.setVisible(true);
-//				progress.setValue(0);
-//				progress.setStringPainted(true);
-//
-//				progress.setString("Expanding metanodes");
-//				final List<CyNetwork> selected = Cytoscape
-//						.getSelectedNetworks();
-//				for (final CyNetwork network : selected) {
-//					if (Cytoscape.viewExists(network.getIdentifier())) {
-//						List<CyNode> nodes = new ArrayList<CyNode>(network
-//								.getSelectedNodes());
-//						if (nodes.size() > 0) { // operate on selected metanodes
-//							List<CyNode> mnlist = identifyMetanodes(nodes);
-//							if (mnlist.size() > 0)
-//								WorkspacesCommandHandler
-//										.applyMetanodeSettings(WorkspacesCommandHandler.SELECTED_METANODES);
-//							for (CyNode gn : mnlist) {
-//								int i = 0;
-//								i++;
-//								// 10 -> 100
-//								int prog = 10 + 90 * i / mnlist.size();
-//								progress.setValue(prog);
-//								progress.setString("Expanding metanodes: "
-//										+ gn.getIdentifier());
-//								WorkspacesCommandHandler.metanodeOperation(
-//										network.getIdentifier(), gn
-//												.getIdentifier(),
-//										WorkspacesCommandHandler.EXPAND);
-//
-//							}
-//						} else { // operate on all metanodes
-//							progress.setValue(10);
-//							WorkspacesCommandHandler.allMetanodesOperation(
-//									network.getIdentifier(),
-//									WorkspacesCommandHandler.EXPAND_ALL);
-//							progress.setValue(100);
-//						}
-//					}
-//				}
-//				progress.setVisible(false);
+            } else if (DESTROY_ALL.equals(label)) {
+				CyNetwork selectedNetwork = Cytoscape.getSelectedNetworks().get(0);
+                String networkID = partitionObject.getGOTerm(selectedNetwork.getTitle());
+                if(!networkID.equals(""))
+                    partitionObject.destroyAllSubNet(networkID,networkID);
+                else
+                    partitionObject.destroyAllSubNet("root","root");
+                partitionObject.updateOverview();
+//            } else if (PARTITION_NETWORK.equals(label)) {
+//				System.out.println("PARTITION_NETWORK");
 			} else {
-				CyLogger.getLogger().warn(
+                System.out.println(label);
+                if(!label.equals("")) {
+                    CyNetwork selectedNetwork = Cytoscape.getSelectedNetworks().get(0);
+                    String goTerm = partitionObject.getGOTerm(selectedNetwork.getTitle());
+                    ArrayList<String> unbuildChildList = new ArrayList();
+                    if(label.equals("ALL"))
+                        unbuildChildList = partitionObject.getUnbuildChildList(goTerm);
+                    else
+                        unbuildChildList.add(label);
+                    partitionObject.partitionSubnetwork(goTerm, unbuildChildList);
+                    partitionObject.updateOverview();
+                } else {
+                    CyLogger.getLogger().warn(
 						"Unexpected network panel popup option");
+                }
 			}
 		}
 

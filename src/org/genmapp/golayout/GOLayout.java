@@ -62,6 +62,7 @@ public class GOLayout extends CytoscapePlugin{
     public static List<String> goslimRemotelist = new ArrayList<String>();
     public static List<String> speciesMappinglist = new ArrayList<String>();
     private static final String HELP = "GOLayout Help";
+    private PartitionAlgorithm partitionObject;
 	
     /**
      * The constructor registers our layout algorithm. The CyLayouts mechanism
@@ -93,9 +94,9 @@ public class GOLayout extends CytoscapePlugin{
 //            if(new File(GOLayoutBaseDir+"goslimDBList.txt").exists())
 //                goslimRemotelist = GOLayoutUtil.readFile(GOLayoutBaseDir+"goslimDBList.txt");
 //        }
-        
+        partitionObject = new PartitionAlgorithm();
         CyLayouts.addLayout(new GOLayoutAlgorithm(), "GO Layout");
-        CyLayouts.addLayout(new PartitionAlgorithm(), null);
+        CyLayouts.addLayout(partitionObject, null);
         CyLayouts.addLayout(new CellAlgorithm(), null);
         //CyLayouts.addLayout(new IdMapping(), "IdMapping");
         // Add GOLayout menu item
@@ -116,7 +117,7 @@ public class GOLayout extends CytoscapePlugin{
                 SwingConstants.WEST);
         //WorkspacesPanel wsPanel = new WorkspacesPanel();
         //GOLayoutNetworkPanel wsPanel = new GOLayoutNetworkPanel(Cytoscape.getDesktop());
-        GOLayoutNetworkPanel wsPanel = new GOLayoutNetworkPanel(logger);
+        GOLayoutNetworkPanel wsPanel = new GOLayoutNetworkPanel(logger, partitionObject);
         cytoPanel1.add("GOLayout", null, wsPanel, "GOLayout Panel", 1);
 //        cytoPanel1.add("GenMAPP-CS", new ImageIcon(getClass().getResource(
 //                "images/genmappcs.png")), wsPanel, "Workspaces Panel", 0);

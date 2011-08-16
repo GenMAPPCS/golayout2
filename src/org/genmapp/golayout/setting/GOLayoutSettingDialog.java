@@ -569,7 +569,7 @@ public class GOLayoutSettingDialog extends JDialog
             rAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(rAnnPanelLayout.createSequentialGroup()
                 .addComponent(rAnnMesLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 389, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 152, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 156, Short.MAX_VALUE)
                 .addComponent(rAnnMesButton, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addGroup(rAnnPanelLayout.createSequentialGroup()
                 .addGroup(rAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -581,7 +581,7 @@ public class GOLayoutSettingDialog extends JDialog
                     .addComponent(rAnnSpeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(rAnnIdeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(rAnnTypComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(303, Short.MAX_VALUE))
+                .addContainerGap(307, Short.MAX_VALUE))
         );
         rAnnPanelLayout.setVerticalGroup(
             rAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -715,7 +715,7 @@ public class GOLayoutSettingDialog extends JDialog
         sParMorTextField.setColumns(5);
         sParMorTextField.setText("200");
 
-        sParLevComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Deepest Level" }));
+        sParLevComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Deepest Level", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14" }));
 
         sParPatComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Relative Path", "Absolute Path" }));
 
@@ -741,7 +741,7 @@ public class GOLayoutSettingDialog extends JDialog
                     .addGroup(sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                         .addComponent(sParMorTextField, javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(sParFewTextField, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 48, Short.MAX_VALUE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 56, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 60, Short.MAX_VALUE)
                 .addGroup(sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(sParSpaLabel)
                     .addComponent(sParPatLabel)
@@ -775,7 +775,7 @@ public class GOLayoutSettingDialog extends JDialog
                     .addComponent(sParLevComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(sParPatLabel)
                     .addComponent(sParPatComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(3, 3, 3))
+                .addGap(11, 11, 11))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -786,9 +786,9 @@ public class GOLayoutSettingDialog extends JDialog
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                     .addComponent(sParPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lTepPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lTepPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 650, Short.MAX_VALUE)
                     .addComponent(rAnnPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 650, Short.MAX_VALUE)
-                    .addComponent(aSelPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(aSelPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 650, Short.MAX_VALUE)
                     .addComponent(ButtonPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -800,7 +800,7 @@ public class GOLayoutSettingDialog extends JDialog
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(rAnnPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(sParPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(sParPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lTepPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -939,15 +939,15 @@ public class GOLayoutSettingDialog extends JDialog
 //        CyLayoutAlgorithm layout = CyLayouts.getLayout("partition");
 //        layout.doLayout(Cytoscape.getCurrentNetworkView(), taskMonitor);
         final JTaskConfig jTaskConfig = new JTaskConfig();
-            jTaskConfig.setOwner(Cytoscape.getDesktop());
-            jTaskConfig.displayCloseButton(false);
-            jTaskConfig.displayCancelButton(false);
-            jTaskConfig.displayStatus(true);
-            jTaskConfig.setAutoDispose(true);
-            jTaskConfig.setMillisToPopup(100); // always pop the task
+        jTaskConfig.setOwner(Cytoscape.getDesktop());
+        jTaskConfig.displayCloseButton(false);
+        jTaskConfig.displayCancelButton(false);
+        jTaskConfig.displayStatus(true);
+        jTaskConfig.setAutoDispose(true);
+        jTaskConfig.setMillisToPopup(100); // always pop the task
 
-            // Execute Task in New Thread; pop open JTask Dialog Box.
-            TaskManager.executeTask(new RunLayout(), jTaskConfig);
+        // Execute Task in New Thread; pop open JTask Dialog Box.
+        TaskManager.executeTask(new RunLayout(), jTaskConfig);
     }//GEN-LAST:event_submitButtonActionPerformed
 
     private void lTepPreRadioButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_lTepPreRadioButtonActionPerformed
@@ -1061,6 +1061,11 @@ public class GOLayoutSettingDialog extends JDialog
         PartitionAlgorithm.NETWORK_LIMIT_MAX = new Integer(sParMorTextField.getText()).intValue();
         CellAlgorithm.distanceBetweenNodes = new Double(sParSpaTextField.getText()).doubleValue();
         CellAlgorithm.pruneEdges = sParCroCheckBox.isSelected();
+        if(sParLevComboBox.getSelectedItem().equals("Deepest Level")) {
+            PartitionAlgorithm.GO_LEVEL = 100;
+        } else {
+            PartitionAlgorithm.GO_LEVEL = new Integer(sParLevComboBox.getSelectedItem().toString()).intValue();
+        }
     }
 
     private class RunLayout implements Task {
