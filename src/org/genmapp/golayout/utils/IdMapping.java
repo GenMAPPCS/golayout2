@@ -43,7 +43,7 @@ public class IdMapping {
         Map<String, Object> args = new HashMap<String, Object>();
         args.put("classpath", "org.bridgedb.rdb.IDMapperRdb");
         args.put("connstring", "idmapper-pgdb:"+derbyFilePath);
-        args.put("displayname", "DerbyDatabase");
+        args.put("displayname", derbyFilePath);
         connectFileDB(args);
         Map<String, Object> noargs = new HashMap<String, Object>();
         CyCommandResult result = null;
@@ -75,7 +75,7 @@ public class IdMapping {
 //        Map<String, Object> args = new HashMap<String, Object>();
 //        args.put("classpath", "org.bridgedb.rdb.IDMapperRdb");
 //        args.put("connstring", "idmapper-pgdb:"+derbyFilePath);
-//        args.put("displayname", "DerbyDatabase");
+//        args.put("displayname", derbyFilePath);
 //        //CyDataset d
 //        connectFileDB(args);
 //        CyNetwork currentNetwork = Cytoscape.getCurrentNetwork();
@@ -116,7 +116,7 @@ public class IdMapping {
         Map<String, Object> args = new HashMap<String, Object>();
         args.put("classpath", "org.bridgedb.file.IDMapperText");
         args.put("connstring", "idmapper-text:dssep=	,transitivity=false@file:/"+GOSlimFilePath);
-        args.put("displayname", "fileGOslim");
+        args.put("displayname", GOSlimFilePath);
         connectFileDB(args);
     }
 
@@ -124,7 +124,7 @@ public class IdMapping {
         Map<String, Object> args = new HashMap<String, Object>();
         args.put("classpath", "org.bridgedb.rdb.IDMapperRdb");
         args.put("connstring", "idmapper-pgdb:"+derbyFilePath);
-        args.put("displayname", "DerbyDatabase");
+        args.put("displayname", derbyFilePath);
         connectFileDB(args);
     }
 
@@ -197,7 +197,7 @@ public class IdMapping {
 //        Map<String, Object> args = new HashMap<String, Object>();
 //        args.put("classpath", "org.bridgedb.rdb.IDMapperRdb");
 //        args.put("connstring", "idmapper-pgdb:"+derbyFilePath);
-//        args.put("displayname", "DerbyDatabase");
+//        args.put("displayname", derbyFilePath);
 //        //CyDataset d
 //        connectFileDB(args);
 //        CyNetwork currentNetwork = Cytoscape.getCurrentNetwork();
