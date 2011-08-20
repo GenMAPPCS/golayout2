@@ -113,6 +113,9 @@ public class IdMapping {
     }
 
     private void connectGOSlimSource(String GOSlimFilePath) {
+        //Remove one '/' to fit MacOS
+        if(GOSlimFilePath.charAt(0)=='/')
+            GOSlimFilePath = GOSlimFilePath.substring(1, GOSlimFilePath.length());
         Map<String, Object> args = new HashMap<String, Object>();
         args.put("classpath", "org.bridgedb.file.IDMapperText");
         args.put("connstring", "idmapper-text:dssep=	,transitivity=false@file:/"+GOSlimFilePath);
