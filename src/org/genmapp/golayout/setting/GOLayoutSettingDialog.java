@@ -82,6 +82,9 @@ public class GOLayoutSettingDialog extends JDialog
         currentAttributeList = Arrays.asList(cytoscape.Cytoscape
                 .getNodeAttributes().getAttributeNames());
         Collections.sort(currentAttributeList);
+        rAnnIdeValues.add("ID");
+        rAnnIdeValues.addAll(currentAttributeList);
+        rAnnIdeComboBox.setModel(new DefaultComboBoxModel(rAnnIdeValues.toArray()));
         
         //Guess species of current network for annotation
         String[] defaultSpecies = getSpeciesCommonName(CytoscapeInit
@@ -94,17 +97,15 @@ public class GOLayoutSettingDialog extends JDialog
             downloadDBList = checkMappingResources(annotationSpeciesCode);
             System.out.println(downloadDBList);
             //checkDownloadStatus();
-            rAnnIdeValues.add("ID");
-            rAnnIdeValues.addAll(currentAttributeList);
-            rAnnIdeComboBox.setModel(new DefaultComboBoxModel(rAnnIdeValues.toArray()));
-            if(downloadDBList.isEmpty()) {
-                idMappingTypeValues = IdMapping.getSourceTypes(GOLayout.GOLayoutDatabaseDir
-                        +identifyLatestVersion(GOLayoutUtil.retrieveLocalFiles(
-                        GOLayout.GOLayoutDatabaseDir), annotationSpeciesCode+
-                        "_Derby", ".bridge")+".bridge");
-                rAnnTypComboBox.setModel(new DefaultComboBoxModel(idMappingTypeValues.toArray()));
-                setDefaultAttType("ID");
-            }            
+//
+//            if(downloadDBList.isEmpty()) {
+//                idMappingTypeValues = IdMapping.getSourceTypes(GOLayout.GOLayoutDatabaseDir
+//                        +identifyLatestVersion(GOLayoutUtil.retrieveLocalFiles(
+//                        GOLayout.GOLayoutDatabaseDir), annotationSpeciesCode+
+//                        "_Derby", ".bridge")+".bridge");
+//                rAnnTypComboBox.setModel(new DefaultComboBoxModel(idMappingTypeValues.toArray()));
+//                setDefaultAttType("ID");
+//            }
         }
 //        rAnnIdeComboBox.setEnabled(false);
 //        rAnnTypComboBox.setEnabled(false);
@@ -229,7 +230,6 @@ public class GOLayoutSettingDialog extends JDialog
                 rAnnMesLabel.setText("Please check internet connection!");
                 rAnnMesLabel.setForeground(Color.RED);
             } else {
-                System.out.println("it is right");
                 rAnnMesButton.setText("Download");
                 rAnnMesButton.setForeground(Color.RED);
                 rAnnMesLabel.setText("You need to first download necessary databases for selected species!");
@@ -836,6 +836,7 @@ public class GOLayoutSettingDialog extends JDialog
     private void rAnnSpeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rAnnSpeComboBoxActionPerformed
         // TODO add your handling code here:
         //Regenerate list of ID types when user select another species.
+        System.out.println("change species");
         String[] speciesCode = getSpeciesCommonName(rAnnSpeComboBox.getSelectedItem().toString());
         annotationSpeciesCode = speciesCode[1];
         downloadDBList = checkMappingResources(annotationSpeciesCode);
