@@ -197,6 +197,7 @@ class NewDialogTask implements Task {
             taskMonitor.setStatus("Initializing...");
             dialog = new GOLayoutSettingDialog(Cytoscape.getDesktop(), true);
             dialog.setLocationRelativeTo(Cytoscape.getDesktop());
+            dialog.setResizable(true);
             taskMonitor.setPercentCompleted(100);
         } catch (Exception e) {
             taskMonitor.setPercentCompleted(100);

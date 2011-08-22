@@ -70,7 +70,7 @@ public class GOLayoutSettingDialog extends JDialog
         initComponents();
         initValues();
 //        this.repaint();
-//        this.pack();
+        this.pack();
     }
 
     private void loadCurrentValues() {       
@@ -292,9 +292,9 @@ public class GOLayoutSettingDialog extends JDialog
             rAnnMesLabel.setForeground(Color.BLACK);
         }
 
-        aAttParTextField.setText(checkAnnotationRate(partitionAttr)+"/"+numberOfNodes+" attribute values");
-        aAttLayTextField.setText(checkAnnotationRate(layoutAttr)+"/"+numberOfNodes+" attribute values");
-        aAttNodTextField.setText(checkAnnotationRate(colorAttr)+"/"+numberOfNodes+" attribute values");
+        aAttParRateLabel.setText(checkAnnotationRate(partitionAttr)+"/"+numberOfNodes+" attribute values");
+        aAttLayRateLabel.setText(checkAnnotationRate(layoutAttr)+"/"+numberOfNodes+" attribute values");
+        aAttNodRateLabel.setText(checkAnnotationRate(colorAttr)+"/"+numberOfNodes+" attribute values");
         checkDownloadStatus();
     }
     
@@ -350,11 +350,18 @@ public class GOLayoutSettingDialog extends JDialog
     }
     
     private void setDefaultAttType(String idName) {
+        
         String sampleID = Cytoscape.getCurrentNetwork().nodesList().get(0)
                 .toString();
-        if(!idName.equals("ID"))
-            sampleID = Cytoscape.getNodeAttributes().getAttribute(sampleID,
-                    idName).toString();
+        if(!idName.equals("ID")) {
+            CyAttributes attribs = Cytoscape.getNodeAttributes();
+            if (attribs.getType(idName) == CyAttributes.TYPE_SIMPLE_LIST) {
+                List<Object> attList = attribs.getListAttribute(sampleID, idName);
+                sampleID = attList.get(0).toString();
+            } else {
+                sampleID = Cytoscape.getNodeAttributes().getAttribute(sampleID, idName).toString();
+            }
+        }
         Set<String> guessResult = IdMapping.guessIdType(sampleID);
         if(guessResult.isEmpty()) {
             rAnnTypComboBox.setSelectedIndex(findMatchType("Ensembl"));
@@ -396,9 +403,9 @@ public class GOLayoutSettingDialog extends JDialog
         aAttParComboBox = new javax.swing.JComboBox();
         aAttLayComboBox = new javax.swing.JComboBox();
         aAttNodComboBox = new javax.swing.JComboBox();
-        aAttParTextField = new javax.swing.JTextField();
-        aAttLayTextField = new javax.swing.JTextField();
-        aAttNodTextField = new javax.swing.JTextField();
+        aAttParRateLabel = new javax.swing.JLabel();
+        aAttLayRateLabel = new javax.swing.JLabel();
+        aAttNodRateLabel = new javax.swing.JLabel();
         rAnnPanel = new javax.swing.JPanel();
         rAnnMesLabel = new javax.swing.JLabel();
         rAnnMesButton = new javax.swing.JButton();
@@ -463,25 +470,14 @@ public class GOLayoutSettingDialog extends JDialog
             }
         });
 
-        aAttParTextField.setColumns(20);
-        aAttParTextField.setEditable(false);
-        aAttParTextField.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        aAttParTextField.setText(" 0/100000 attribute values");
-        aAttParTextField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                aAttParTextFieldActionPerformed(evt);
-            }
-        });
+        aAttParRateLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        aAttParRateLabel.setText("0/0 attribute values");
 
-        aAttLayTextField.setColumns(20);
-        aAttLayTextField.setEditable(false);
-        aAttLayTextField.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        aAttLayTextField.setText("0/100000 attribute values");
+        aAttLayRateLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        aAttLayRateLabel.setText("0/0 attribute values");
 
-        aAttNodTextField.setColumns(20);
-        aAttNodTextField.setEditable(false);
-        aAttNodTextField.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
-        aAttNodTextField.setText("0/100000 attribute values");
+        aAttNodRateLabel.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        aAttNodRateLabel.setText("0/0 attribute values");
 
         javax.swing.GroupLayout aSelPanelLayout = new javax.swing.GroupLayout(aSelPanel);
         aSelPanel.setLayout(aSelPanelLayout);
@@ -489,45 +485,46 @@ public class GOLayoutSettingDialog extends JDialog
             aSelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(aSelPanelLayout.createSequentialGroup()
                 .addGroup(aSelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(aAttParLabel)
-                    .addComponent(aAttLayLabel)
-                    .addComponent(aAttNodLabel))
+                    .addComponent(aAttParLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(aAttLayLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(aAttNodLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
-                .addGroup(aSelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(aAttNodTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(aAttLayTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(aAttParTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(aSelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(aAttParComboBox, 0, 262, Short.MAX_VALUE)
+                    .addComponent(aAttLayComboBox, 0, 262, Short.MAX_VALUE)
+                    .addComponent(aAttNodComboBox, 0, 262, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
-                .addGroup(aSelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(aAttParComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 262, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(aAttNodComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 262, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(aAttLayComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 262, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGroup(aSelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(aAttParRateLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE)
+                    .addComponent(aAttLayRateLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE)
+                    .addComponent(aAttNodRateLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE))
+                .addContainerGap())
         );
         aSelPanelLayout.setVerticalGroup(
             aSelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(aSelPanelLayout.createSequentialGroup()
                 .addGroup(aSelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(aAttParLabel)
-                    .addComponent(aAttParTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(aAttParComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(aAttParComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(aAttParRateLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(aSelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(aAttLayLabel)
-                    .addComponent(aAttLayTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(aAttLayComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(aAttLayComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(aAttLayRateLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(aSelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(aAttNodLabel)
-                    .addComponent(aAttNodTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(aAttNodComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(aAttNodComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(aAttNodRateLabel))
                 .addContainerGap())
         );
 
-        rAnnPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Retrieve GO-Slim Annotations (Optional)"));
-        rAnnPanel.setPreferredSize(new java.awt.Dimension(562, 139));
+        rAnnPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Retrieve GO-Slim Annotations"));
+        rAnnPanel.setPreferredSize(new java.awt.Dimension(660, 139));
 
         rAnnMesLabel.setForeground(java.awt.Color.red);
-        rAnnMesLabel.setText("You need to first annotate this network with the GO-Slim terms selected above!");
+        rAnnMesLabel.setText("You need to first annotate this network with the GO-Slim terms!");
 
         rAnnMesButton.setForeground(java.awt.Color.red);
         rAnnMesButton.setText("Annotate");
@@ -567,21 +564,22 @@ public class GOLayoutSettingDialog extends JDialog
         rAnnPanel.setLayout(rAnnPanelLayout);
         rAnnPanelLayout.setHorizontalGroup(
             rAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(rAnnPanelLayout.createSequentialGroup()
-                .addComponent(rAnnMesLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 389, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 156, Short.MAX_VALUE)
-                .addComponent(rAnnMesButton, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, rAnnPanelLayout.createSequentialGroup()
+                .addComponent(rAnnMesLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 541, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(rAnnMesButton, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE)
+                .addGap(10, 10, 10))
             .addGroup(rAnnPanelLayout.createSequentialGroup()
                 .addGroup(rAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(rAnnIdeLabel)
-                    .addComponent(rAnnTypLabel)
-                    .addComponent(rAnnSpeLabel))
+                    .addComponent(rAnnIdeLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(rAnnTypLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(rAnnSpeLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(26, 26, 26)
                 .addGroup(rAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(rAnnSpeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(rAnnIdeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(rAnnTypComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(307, Short.MAX_VALUE))
+                    .addComponent(rAnnSpeComboBox, 0, 94, Short.MAX_VALUE)
+                    .addComponent(rAnnIdeComboBox, 0, 94, Short.MAX_VALUE)
+                    .addComponent(rAnnTypComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(317, Short.MAX_VALUE))
         );
         rAnnPanelLayout.setVerticalGroup(
             rAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -601,7 +599,7 @@ public class GOLayoutSettingDialog extends JDialog
                 .addGroup(rAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(rAnnTypLabel)
                     .addComponent(rAnnTypComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(19, Short.MAX_VALUE))
         );
 
         lTepPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Select Layout Template"));
@@ -637,15 +635,16 @@ public class GOLayoutSettingDialog extends JDialog
             lTepPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(lTepPanelLayout.createSequentialGroup()
                 .addGroup(lTepPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(lTepCusRadioButton)
-                    .addComponent(lTepPreRadioButton))
+                    .addComponent(lTepCusRadioButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lTepPreRadioButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(10, 10, 10)
                 .addGroup(lTepPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(lTepPanelLayout.createSequentialGroup()
-                        .addComponent(lTepCusTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 408, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lTepCusTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 408, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lTepCusButton))
-                    .addComponent(lTepPreComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 479, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(lTepCusButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(lTepPreComboBox, 0, 479, Short.MAX_VALUE))
+                .addContainerGap(14, Short.MAX_VALUE))
         );
         lTepPanelLayout.setVerticalGroup(
             lTepPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -657,7 +656,8 @@ public class GOLayoutSettingDialog extends JDialog
                 .addGroup(lTepPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lTepCusTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(lTepCusRadioButton)
-                    .addComponent(lTepCusButton)))
+                    .addComponent(lTepCusButton))
+                .addContainerGap(11, Short.MAX_VALUE))
         );
 
         submitButton.setText("Run");
@@ -672,16 +672,21 @@ public class GOLayoutSettingDialog extends JDialog
 
         cancelButton.setText("Cancel");
         cancelButton.setPreferredSize(new java.awt.Dimension(70, 23));
+        cancelButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cancelButtonActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout ButtonPanelLayout = new javax.swing.GroupLayout(ButtonPanel);
         ButtonPanel.setLayout(ButtonPanelLayout);
         ButtonPanelLayout.setHorizontalGroup(
             ButtonPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, ButtonPanelLayout.createSequentialGroup()
-                .addContainerGap(482, Short.MAX_VALUE)
-                .addComponent(submitButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(492, Short.MAX_VALUE)
+                .addComponent(submitButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
-                .addComponent(cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(cancelButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
         ButtonPanelLayout.setVerticalGroup(
@@ -702,7 +707,7 @@ public class GOLayoutSettingDialog extends JDialog
 
         sParLevLabel.setText("The deepest level of GO term for partition");
 
-        sParPatLabel.setText("Path type");
+        sParPatLabel.setText("GO hierarchy type");
 
         sParFewTextField.setColumns(5);
         sParFewTextField.setText("5");
@@ -717,7 +722,7 @@ public class GOLayoutSettingDialog extends JDialog
 
         sParLevComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Deepest Level", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14" }));
 
-        sParPatComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Relative Path", "Absolute Path" }));
+        sParPatComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Relative", "Absolute" }));
 
         sParSpaLabel.setText("Spacing between nodes");
 
@@ -732,25 +737,24 @@ public class GOLayoutSettingDialog extends JDialog
             sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(sParPanelLayout.createSequentialGroup()
                 .addGroup(sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sParFewLabel)
-                    .addComponent(sParMorLabel)
-                    .addComponent(sParLevLabel))
+                    .addComponent(sParFewLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(sParMorLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)
+                    .addComponent(sParLevLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sParLevComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(sParMorTextField, javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(sParFewTextField, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 48, Short.MAX_VALUE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 60, Short.MAX_VALUE)
+                    .addComponent(sParLevComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(sParMorTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE)
+                    .addComponent(sParFewTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE))
+                .addGap(95, 95, 95)
                 .addGroup(sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sParSpaLabel)
-                    .addComponent(sParPatLabel)
-                    .addComponent(sParCroLabel))
+                    .addComponent(sParSpaLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
+                    .addComponent(sParPatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
+                    .addComponent(sParCroLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(25, 25, 25)
                 .addGroup(sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sParSpaTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(sParCroCheckBox)
-                    .addComponent(sParPatComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(sParSpaTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 67, Short.MAX_VALUE)
+                    .addComponent(sParCroCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, 67, Short.MAX_VALUE)
+                    .addComponent(sParPatComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
         sParPanelLayout.setVerticalGroup(
             sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -775,44 +779,41 @@ public class GOLayoutSettingDialog extends JDialog
                     .addComponent(sParLevComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(sParPatLabel)
                     .addComponent(sParPatComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(11, 11, 11))
+                .addGap(19, 19, 19))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(sParPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lTepPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 650, Short.MAX_VALUE)
-                    .addComponent(rAnnPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 650, Short.MAX_VALUE)
-                    .addComponent(aSelPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 650, Short.MAX_VALUE)
-                    .addComponent(ButtonPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(rAnnPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lTepPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(aSelPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(ButtonPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(sParPanel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(aSelPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap()
+                .addComponent(aSelPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(rAnnPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(rAnnPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 147, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(sParPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(sParPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 118, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lTepPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(lTepPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(ButtonPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(ButtonPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void aAttParTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aAttParTextFieldActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_aAttParTextFieldActionPerformed
 
     private void sParFewTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sParFewTextFieldActionPerformed
         // TODO add your handling code here:
@@ -937,6 +938,7 @@ public class GOLayoutSettingDialog extends JDialog
             PartitionAlgorithm.layoutName = CellAlgorithm.LAYOUT_NAME;
         }
         System.out.println(PartitionNetworkVisualStyleFactory.attributeName);
+        this.dispose();
 //        CyLayoutAlgorithm layout = CyLayouts.getLayout("partition");
 //        layout.doLayout(Cytoscape.getCurrentNetworkView(), taskMonitor);
         final JTaskConfig jTaskConfig = new JTaskConfig();
@@ -977,6 +979,11 @@ public class GOLayoutSettingDialog extends JDialog
         }
     }//GEN-LAST:event_lTepCusRadioButtonActionPerformed
 
+    private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
+        // TODO add your handling code here:
+        this.dispose();
+    }//GEN-LAST:event_cancelButtonActionPerformed
+
     /**
     * @param args the command line arguments
     */
@@ -998,13 +1005,13 @@ public class GOLayoutSettingDialog extends JDialog
     private javax.swing.JPanel ButtonPanel;
     private javax.swing.JComboBox aAttLayComboBox;
     private javax.swing.JLabel aAttLayLabel;
-    private javax.swing.JTextField aAttLayTextField;
+    private javax.swing.JLabel aAttLayRateLabel;
     private javax.swing.JComboBox aAttNodComboBox;
     private javax.swing.JLabel aAttNodLabel;
-    private javax.swing.JTextField aAttNodTextField;
+    private javax.swing.JLabel aAttNodRateLabel;
     private javax.swing.JComboBox aAttParComboBox;
     private javax.swing.JLabel aAttParLabel;
-    private javax.swing.JTextField aAttParTextField;
+    private javax.swing.JLabel aAttParRateLabel;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JButton cancelButton;
     private javax.swing.JButton lTepCusButton;
