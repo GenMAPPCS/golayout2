@@ -53,7 +53,7 @@ public class CellAlgorithm extends AbstractLayout {
 	protected static final String REGION_ATT = "_cellularLayoutRegion";
 	// store whether a node is copied
 	protected static final String NODE_COPIED = "_isInMultipleRegions";
-	// store whether a node is copied
+	// store whether edge goes to an unassigned node
 	protected static final String UNASSIGNED_EDGE_ATT = "_isEdgeToUnassigned";
 
 	/**
@@ -144,7 +144,7 @@ public class CellAlgorithm extends AbstractLayout {
 	 */
 	public void construct() {
 
-		// if "(none)" was selected in setting, then skip partitioning
+		// if "(none)" was selected in setting, then skip cellular layout
 		if (null == attributeName) {
 			// skip the whole ordeal
 		} else {
@@ -165,9 +165,9 @@ public class CellAlgorithm extends AbstractLayout {
 			taskMonitor.setPercentCompleted(1);
 			if (!valid) {
 				RegionManager.clearAll();
-				//(java.awt.Window) taskMonitor
+				// (java.awt.Window) taskMonitor
 				JOptionPane.showMessageDialog(Cytoscape.getDesktop(),
-						"Selected attribute does not match floorplan");
+						"Selected attribute does not match layout template");
 			} else {
 
 				if (PartitionNetworkVisualStyleFactory.attributeName != null) {
@@ -181,8 +181,8 @@ public class CellAlgorithm extends AbstractLayout {
 							PartitionNetworkVisualStyleFactory.attributeName);
 				}
 
-				taskMonitor.setStatus("Sizing up floorplan regions");
-				//taskMonitor.setPercentCompleted(1);
+				taskMonitor.setStatus("Sizing up layout regions");
+				// taskMonitor.setPercentCompleted(1);
 
 				List<NodeView> nvRegList = new ArrayList<NodeView>();
 
@@ -222,23 +222,22 @@ public class CellAlgorithm extends AbstractLayout {
 						// TODO: doesn't work!
 						lockNode(regNv);
 						switch (j) {
-						case 0:
-							regNv
-									.setOffset(r.getRegionLeft(), r
-											.getRegionTop());
-							break;
-						case 1:
-							regNv.setOffset(r.getRegionLeft(), r
-									.getRegionBottom());
-							break;
-						case 2:
-							regNv.setOffset(r.getRegionRight(), r
-									.getRegionTop());
-							break;
-						case 3:
-							regNv.setOffset(r.getRegionRight(), r
-									.getRegionBottom());
-							break;
+							case 0 :
+								regNv.setOffset(r.getRegionLeft(), r
+										.getRegionTop());
+								break;
+							case 1 :
+								regNv.setOffset(r.getRegionLeft(), r
+										.getRegionBottom());
+								break;
+							case 2 :
+								regNv.setOffset(r.getRegionRight(), r
+										.getRegionTop());
+								break;
+							case 3 :
+								regNv.setOffset(r.getRegionRight(), r
+										.getRegionBottom());
+								break;
 						}
 
 					}
@@ -247,6 +246,8 @@ public class CellAlgorithm extends AbstractLayout {
 					nodeCount = r.getNodeCount();
 
 					/*
+					 * BALANCED GRID LAYOUT
+					 * 
 					 * start x at left plus spacer start y at center minus half
 					 * of the number of rows rounded down, e.g., if the linear
 					 * layout of nodes is 2.8 times the width of the scaled
@@ -508,7 +509,15 @@ public class CellAlgorithm extends AbstractLayout {
 						regionNodes.clear();
 					}
 
-					// oil & water
+					/*
+					 * OIL & WATER
+					 * 
+					 * This procedure excludes nodes that are "behind"
+					 * overlapping regions by shifting them towards the nearest
+					 * border of the overlapping region. E.g., to shift
+					 * cytoplasm nodes out of the nucleus region, where they
+					 * overlap.
+					 */
 					if (r.getRegionsOverlapped().size() > 0) {
 						List<NodeView> nvToCheck = new ArrayList<NodeView>();
 						List<NodeView> nvToMove = new ArrayList<NodeView>();
@@ -772,7 +781,7 @@ public class CellAlgorithm extends AbstractLayout {
 
 					String cleanOldId = n.getIdentifier();
 					if (oldId.contains("__1")) {
-						// clean up name from prior runs of GO Layout
+						// clean up name from prior runs of algorithm
 						cleanOldId = n.getIdentifier().substring(0,
 								oldId.lastIndexOf("__1"));
 					}
@@ -808,7 +817,7 @@ public class CellAlgorithm extends AbstractLayout {
 						}
 					}
 				}
-				
+
 				// prune and annotate edges
 				List<Integer> edgesToRemove = new ArrayList<Integer>();
 				CyAttributes nAttributes = Cytoscape.getNodeAttributes();
@@ -842,9 +851,11 @@ public class CellAlgorithm extends AbstractLayout {
 						eAttributes.setAttribute(edgeId, UNASSIGNED_EDGE_ATT,
 								false);
 					}
-					
-		            /* Delete edge anchors */
-					Cytoscape.getCurrentNetworkView().getEdgeView(Cytoscape.getRootGraph().getEdge(edgeInt)).getBend().removeAllHandles();
+
+					/* Delete edge anchors */
+					Cytoscape.getCurrentNetworkView().getEdgeView(
+							Cytoscape.getRootGraph().getEdge(edgeInt))
+							.getBend().removeAllHandles();
 
 					if (pruneEdges) {
 						taskMonitor.setStatus("Pruning cross-region edges");
@@ -954,9 +965,10 @@ public class CellAlgorithm extends AbstractLayout {
 				}
 
 				Cytoscape.getCurrentNetworkView().redrawGraph(true, true);
-				
+
 				// update quick find indexes
-				Cytoscape.firePropertyChange(Cytoscape.NETWORK_MODIFIED, "GO Layout", Cytoscape.getCurrentNetwork());
+				Cytoscape.firePropertyChange(Cytoscape.NETWORK_MODIFIED,
+						"GO Layout", Cytoscape.getCurrentNetwork());
 			}
 		}
 	}
@@ -973,8 +985,8 @@ public class CellAlgorithm extends AbstractLayout {
 			String terms[] = new String[1];
 			// add support for parsing List type attributes
 			if (attribs.getType(attributeName) == CyAttributes.TYPE_SIMPLE_LIST) {
-				 valList = attribs.getListAttribute(node
-						.getIdentifier(), attributeName);
+				valList = attribs.getListAttribute(node.getIdentifier(),
+						attributeName);
 				// iterate through all elements in the list
 				if (valList != null && valList.size() > 0) {
 					terms = new String[valList.size()];
