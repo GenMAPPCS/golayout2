@@ -36,6 +36,8 @@ import cytoscape.task.util.TaskManager;
 import cytoscape.view.CyNetworkView;
 import cytoscape.view.NetworkPanel;
 import cytoscape.view.cytopanels.CytoPanel;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,9 +50,11 @@ import javax.swing.SwingConstants;
 import org.genmapp.golayout.partition.GOLayoutNetworkPanel;
 import org.genmapp.golayout.setting.GOLayoutSettingDialog;
 import org.genmapp.golayout.utils.GOLayoutUtil;
+import org.genmapp.golayout.utils.IdMapping;
 
 
 public class GOLayout extends CytoscapePlugin{
+    public static final String pluginName = "Mosaic";
     private CyLogger logger;
     public static String GOLayoutBaseDir;
     public static String GOLayoutDatabaseDir;
@@ -61,7 +65,7 @@ public class GOLayout extends CytoscapePlugin{
     public static List<String> derbyRemotelist = new ArrayList<String>();
     public static List<String> goslimRemotelist = new ArrayList<String>();
     public static List<String> speciesMappinglist = new ArrayList<String>();
-    private static final String HELP = "GOLayout Help";
+    private static final String HELP = pluginName + " Help";
     private PartitionAlgorithm partitionObject;
 	
     /**
@@ -74,7 +78,7 @@ public class GOLayout extends CytoscapePlugin{
         try {
             GOLayoutBaseDir = PluginManager.getPluginManager().getPluginManageDirectory().getCanonicalPath() + "/GOLayout/";
         } catch (IOException e) {
-            GOLayoutBaseDir = "/GOLayout/";
+            GOLayoutBaseDir = "/"+pluginName+"/";
             e.printStackTrace();
         }
         GOLayoutUtil.checkFolder(GOLayoutBaseDir);
@@ -97,19 +101,19 @@ public class GOLayout extends CytoscapePlugin{
 //                goslimRemotelist = GOLayoutUtil.readFile(GOLayoutBaseDir+"goslimDBList.txt");
 //        }
         partitionObject = new PartitionAlgorithm();
-        CyLayouts.addLayout(new GOLayoutAlgorithm(), "GO Layout");
+        //CyLayouts.addLayout(new GOLayoutAlgorithm(), "GO Layout");
         CyLayouts.addLayout(partitionObject, null);
         CyLayouts.addLayout(new CellAlgorithm(), null);
         //CyLayouts.addLayout(new IdMapping(), "IdMapping");
         // Add GOLayout menu item
-        JMenuItem item = new JMenuItem("GOLayout");
+        JMenuItem item = new JMenuItem(pluginName);
         JMenu layoutMenu = Cytoscape.getDesktop().getCyMenus().getMenuBar()
                 .getMenu("Plugins");
         item.addActionListener(new GOLayoutPluginActionListener(this));
         layoutMenu.add(item);
         // Add help menu item
         JMenuItem getHelp = new JMenuItem(HELP);
-        getHelp.setToolTipText("Open online help for GOLayout");
+        getHelp.setToolTipText("Open online help for " + pluginName);
         GetHelpListener getHelpListener = new GetHelpListener();
         getHelp.addActionListener(getHelpListener);
         Cytoscape.getDesktop().getCyMenus().getHelpMenu().add(getHelp);
@@ -120,7 +124,7 @@ public class GOLayout extends CytoscapePlugin{
         //WorkspacesPanel wsPanel = new WorkspacesPanel();
         //GOLayoutNetworkPanel wsPanel = new GOLayoutNetworkPanel(Cytoscape.getDesktop());
         GOLayoutNetworkPanel wsPanel = new GOLayoutNetworkPanel(logger, partitionObject);
-        cytoPanel1.add("GOLayout", null, wsPanel, "GOLayout Panel", 1);
+        cytoPanel1.add(pluginName, null, wsPanel, pluginName+" Panel", 1);
 //        cytoPanel1.add("GenMAPP-CS", new ImageIcon(getClass().getResource(
 //                "images/genmappcs.png")), wsPanel, "Workspaces Panel", 0);
         cytoPanel1.setSelectedIndex(0);
@@ -169,10 +173,18 @@ class GOLayoutPluginActionListener implements ActionListener {
                 TaskManager.executeTask(task, jTaskConfig);
 
                 final GOLayoutSettingDialog dialog = task.dialog();
+                dialog.addWindowListener(new WindowAdapter(){
+                    public void windowClosed(WindowEvent e){
+                        IdMapping.disConnectDerbyFileSource(GOLayout.GOLayoutDatabaseDir
+                    +dialog.identifyLatestVersion(GOLayoutUtil.retrieveLocalFiles(
+                    GOLayout.GOLayoutDatabaseDir), dialog.annotationSpeciesCode+
+                    "_Derby", ".bridge")+".bridge");
+                    }
+                });
                 dialog.setVisible(true);
             } else {
                 JOptionPane.showMessageDialog(Cytoscape.getDesktop(),
-                        "Please load a network first!", "GOLayout",
+                        "Please load a network first!", GOLayout.pluginName,
                         JOptionPane.WARNING_MESSAGE);
             }
         } catch (Exception e) {
@@ -245,7 +257,8 @@ class NewDialogTask implements Task {
  * This class direct a browser to the help manual web page.
  */
 class GetHelpListener implements ActionListener {
-	private String helpURL = "http://genmapp.org/GOLayout/GOLayout.html";
+	//private String helpURL = "http://genmapp.org/GOLayout/GOLayout.html";
+    private String helpURL = "http://pinscher.ucsf.edu/meta/trunk/mosaic/index.html";
 
 	public void actionPerformed(ActionEvent ae) {
 		cytoscape.util.OpenBrowser.openURL(helpURL);

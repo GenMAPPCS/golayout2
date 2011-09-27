@@ -25,10 +25,12 @@ import cytoscape.data.CyAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import org.genmapp.golayout.GOLayout;
 
 /**
  *
@@ -39,12 +41,7 @@ public class IdMapping {
     public IdMapping() {
     }
 
-    public static List<String> getSourceTypes(String derbyFilePath) {
-        Map<String, Object> args = new HashMap<String, Object>();
-        args.put("classpath", "org.bridgedb.rdb.IDMapperRdb");
-        args.put("connstring", "idmapper-pgdb:"+derbyFilePath);
-        args.put("displayname", derbyFilePath);
-        connectFileDB(args);
+    public static List<String> getSourceTypes() {
         Map<String, Object> noargs = new HashMap<String, Object>();
         CyCommandResult result = null;
         try {
@@ -59,15 +56,33 @@ public class IdMapping {
         }
         List<String> sourceIDTypes = new ArrayList<String>();
         if (null != result) {
+            System.out.println(result.getResult().toString());
             Set<String> idTypes = (Set<String>) result.getResult();
             for(String t : idTypes) {
                 sourceIDTypes.add(t);
             }
         }
-        args = new HashMap<String, Object>();
-        args.put("connstring", "idmapper-pgdb:"+derbyFilePath);
-        //disConnectFileDB(args);
         return sourceIDTypes;
+    }
+    
+    public static Set<String> guessIdType(String sampleId){
+        Map<String, Object> args = new HashMap<String, Object>();
+        Set<String> idTypes;
+        args.put("sourceid", sampleId);
+        try {
+            CyCommandResult result = CyCommandManager.execute(
+                    "idmapping", "guess id type", args);
+            idTypes = (Set<String>) result.getResult();
+        } catch (CyCommandException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return null;
+        } catch (RuntimeException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return null;
+        }
+        return idTypes;
     }
     
 //    public static boolean mapID(String derbyFilePath, String sourceIDName, String targetIDName) {
@@ -123,12 +138,31 @@ public class IdMapping {
         connectFileDB(args);
     }
 
-    private void connectDerbyFileSource(String derbyFilePath) {
+    private void disConnectGOSlimSource(String GOSlimFilePath) {
+        //Remove one '/' to fit MacOS
+        if(GOSlimFilePath.charAt(0)=='/')
+            GOSlimFilePath = GOSlimFilePath.substring(1, GOSlimFilePath.length());
+        Map<String, Object> args = new HashMap<String, Object>();
+        args.put("classpath", "org.bridgedb.file.IDMapperText");
+        args.put("connstring", "idmapper-text:dssep=	,transitivity=false@file:/"+GOSlimFilePath);
+        args.put("displayname", GOSlimFilePath);
+        disConnectFileDB(args);
+    }
+
+    public static void connectDerbyFileSource(String derbyFilePath) {
         Map<String, Object> args = new HashMap<String, Object>();
         args.put("classpath", "org.bridgedb.rdb.IDMapperRdb");
         args.put("connstring", "idmapper-pgdb:"+derbyFilePath);
         args.put("displayname", derbyFilePath);
         connectFileDB(args);
+    }
+
+    public static void disConnectDerbyFileSource(String derbyFilePath) {
+        Map<String, Object> args = new HashMap<String, Object>();
+        args.put("classpath", "org.bridgedb.rdb.IDMapperRdb");
+        args.put("connstring", "idmapper-pgdb:"+derbyFilePath);
+        args.put("displayname", derbyFilePath);
+        disConnectFileDB(args);
     }
 
     /**
@@ -160,39 +194,148 @@ public class IdMapping {
         return secondaryKeyMap;
     }
 
+    private List<String> convertSetMapValueToList(Map<String, Set<String>> stringSetMap) {
+        Set<String> sumValue = new HashSet();
+        List<String> results = new ArrayList<String>();
+        for(Object keyID : stringSetMap.keySet().toArray()) {
+            System.out.println(keyID);
+            Set<String> valueSet = stringSetMap.get(keyID);
+            for(String value:valueSet) {
+                if(value.trim().length()>0) {
+                    String[] multValues = value.split(",");
+                    for(String eachValue:multValues)
+                        sumValue.add(eachValue.trim());
+                    
+                }
+            }
+            System.out.println(sumValue.toString());
+        }
+        if(sumValue.size()<1)
+            results.add("unassigned");
+        else if(sumValue.size()>1)
+            results = new Vector(sumValue);
+        else
+            results = Arrays.asList(sumValue.toArray()[0].toString().trim().split(","));
+        return results;
+    }
+
     public boolean mapID(String derbyFilePath, String GOSlimFilePath,
             String sourceIDName, String sourceType, String targetType) {
         Map<String, Set<String>> idGOMap = new HashMap<String, Set<String>>();
         CyNetwork currentNetwork = Cytoscape.getCurrentNetwork();
+        CyAttributes nodeAttrs = Cytoscape.getNodeAttributes();
         List<String> nodeIds = new ArrayList<String>();
         for (CyNode cn : (List<CyNode>) currentNetwork.nodesList()) {
             nodeIds.add(cn.getIdentifier());
         }
-        System.out.println("Call ID mapping success!");
         if(sourceIDName == null ? "ID" == null : sourceIDName.equals("ID")) {
             if(sourceType.toLowerCase().indexOf("ensembl")==-1) {
-                System.out.println("Non ensembl ID!");
+                System.out.println("IdMapping:mapID: ID & Non-Ensembl");
+                //Finished at 2011-09-21, for non-"Ensembl" & ID. ticket 3 for idmapping
                 connectDerbyFileSource(derbyFilePath);
                 Map<String, Set<String>> idEnMap = mapAttribute(nodeIds, sourceType, targetType);
-                setGOAttribute(idEnMap, "test");
-                //unfinished, ticket 3 for idmapping
-            } else {
-                System.out.println("Ensembl ID!");                
+                setGOAttribute(idEnMap, GOLayout.pluginName+"_Ensembl");
+                disConnectDerbyFileSource(derbyFilePath);
                 connectGOSlimSource(GOSlimFilePath);
-                idGOMap = mapAttribute(nodeIds, targetType, GOLayoutStaticValues.BP_ATTNAME);
+                for (CyNode cn : (List<CyNode>) currentNetwork.nodesList()) {
+                    String keyID = cn.getIdentifier();
+                    if(idEnMap.containsKey(keyID)) {
+                        List<String> keyEnsemblSet = new ArrayList<String>(idEnMap.get(keyID));
+                        if(keyEnsemblSet.size()>0) {
+                            idGOMap = mapAttribute(keyEnsemblSet, "Ensembl", GOLayoutStaticValues.BP_ATTNAME);
+                            nodeAttrs.setListAttribute(keyID.toString(), GOLayoutStaticValues.BP_ATTNAME, convertSetMapValueToList(idGOMap));
+                            idGOMap = mapAttribute(keyEnsemblSet, "Ensembl", GOLayoutStaticValues.CC_ATTNAME);
+                            nodeAttrs.setListAttribute(keyID.toString(), GOLayoutStaticValues.CC_ATTNAME, convertSetMapValueToList(idGOMap));
+                            idGOMap = mapAttribute(keyEnsemblSet, "Ensembl", GOLayoutStaticValues.MF_ATTNAME);
+                            nodeAttrs.setListAttribute(keyID.toString(), GOLayoutStaticValues.MF_ATTNAME, convertSetMapValueToList(idGOMap));
+                        } else {
+                            List<String> valueList = new ArrayList<String>();
+                            valueList.add("unassigned");
+                            nodeAttrs.setListAttribute(keyID.toString(), GOLayoutStaticValues.BP_ATTNAME, valueList);
+                            nodeAttrs.setListAttribute(keyID.toString(), GOLayoutStaticValues.CC_ATTNAME, valueList);
+                            nodeAttrs.setListAttribute(keyID.toString(), GOLayoutStaticValues.MF_ATTNAME, valueList);
+                        }
+                    } else {
+                        List<String> valueList = new ArrayList<String>();
+                        valueList.add("unassigned");
+                        nodeAttrs.setListAttribute(keyID.toString(), GOLayoutStaticValues.BP_ATTNAME, valueList);
+                        nodeAttrs.setListAttribute(keyID.toString(), GOLayoutStaticValues.CC_ATTNAME, valueList);
+                        nodeAttrs.setListAttribute(keyID.toString(), GOLayoutStaticValues.MF_ATTNAME, valueList);
+                    }
+                }
+                disConnectGOSlimSource(GOSlimFilePath);                
+            } else {
+                System.out.println("IdMapping:mapID: ID & Ensembl");
+                //Finished, for "Ensembl" & ID.
+                connectGOSlimSource(GOSlimFilePath);
+                idGOMap = mapAttribute(nodeIds, "Ensembl", GOLayoutStaticValues.BP_ATTNAME);
                 setGOAttribute(idGOMap, GOLayoutStaticValues.BP_ATTNAME);
-                idGOMap = mapAttribute(nodeIds, targetType, GOLayoutStaticValues.CC_ATTNAME);
+                idGOMap = mapAttribute(nodeIds, "Ensembl", GOLayoutStaticValues.CC_ATTNAME);
                 setGOAttribute(idGOMap, GOLayoutStaticValues.CC_ATTNAME);
-                idGOMap = mapAttribute(nodeIds, targetType, GOLayoutStaticValues.MF_ATTNAME);
+                idGOMap = mapAttribute(nodeIds, "Ensembl", GOLayoutStaticValues.MF_ATTNAME);
                 setGOAttribute(idGOMap, GOLayoutStaticValues.MF_ATTNAME);
+                disConnectGOSlimSource(GOSlimFilePath);
             }
         } else {
             if(sourceType.toLowerCase().indexOf("ensembl")==-1) {
-                System.out.println("Non ensembl attribute!");
-                //unfinished, ticket 3 for idmapping
+                System.out.println("IdMapping:mapID: Non-ID & Non-Ensembl");
+                //unfinished, for "Ensembl" & non-ID. ticket 3 for idmapping
+                Map<String, List<String>> idEnMap = new HashMap();
+                connectDerbyFileSource(derbyFilePath);
+                for (CyNode cn : (List<CyNode>) currentNetwork.nodesList()) {
+                    String keyID = cn.getIdentifier();
+                    List<String> attList;
+                    if (nodeAttrs.getType(sourceIDName) == CyAttributes.TYPE_SIMPLE_LIST) {
+                        attList = nodeAttrs.getListAttribute(keyID, sourceIDName);
+                    } else {
+                        attList = new ArrayList<String>();
+                        attList.add(nodeAttrs.getAttribute(keyID, sourceIDName).toString());
+                    }
+                    idGOMap = mapAttribute(attList, sourceType, targetType);
+                    idEnMap.put(keyID, convertSetMapValueToList(idGOMap));                    
+                }
+                disConnectDerbyFileSource(derbyFilePath);
+                connectGOSlimSource(GOSlimFilePath);
+                for (CyNode cn : (List<CyNode>) currentNetwork.nodesList()) {
+                    String keyID = cn.getIdentifier();
+                    List<String> attList = idEnMap.get(keyID);
+                    if(attList.size()>0) {
+                        idGOMap = mapAttribute(attList, "Ensembl", GOLayoutStaticValues.BP_ATTNAME);
+                        nodeAttrs.setListAttribute(keyID.toString(), GOLayoutStaticValues.BP_ATTNAME, convertSetMapValueToList(idGOMap));
+                        idGOMap = mapAttribute(attList, "Ensembl", GOLayoutStaticValues.CC_ATTNAME);
+                        nodeAttrs.setListAttribute(keyID.toString(), GOLayoutStaticValues.CC_ATTNAME, convertSetMapValueToList(idGOMap));
+                        idGOMap = mapAttribute(attList, "Ensembl", GOLayoutStaticValues.MF_ATTNAME);
+                        nodeAttrs.setListAttribute(keyID.toString(), GOLayoutStaticValues.MF_ATTNAME, convertSetMapValueToList(idGOMap));
+                    } else {
+                        List<String> valueList = new ArrayList<String>();
+                        valueList.add("unassigned");
+                        nodeAttrs.setListAttribute(keyID.toString(), GOLayoutStaticValues.BP_ATTNAME, valueList);
+                        nodeAttrs.setListAttribute(keyID.toString(), GOLayoutStaticValues.CC_ATTNAME, valueList);
+                        nodeAttrs.setListAttribute(keyID.toString(), GOLayoutStaticValues.MF_ATTNAME, valueList);
+                    }
+                }
+                disConnectGOSlimSource(GOSlimFilePath);
             } else {
-                System.out.println("Ensembl attribute!");
-                //unfinished, ticket 3 for idmapping
+                System.out.println("IdMapping:mapID: Non-ID & Ensembl");
+                //Finished at 2011-09-21, for non-"Ensembl" & non-ID. ticket 3 for idmapping
+                connectGOSlimSource(GOSlimFilePath);
+                for (CyNode cn : (List<CyNode>) currentNetwork.nodesList()) {
+                    String keyID = cn.getIdentifier();
+                    List<String> ensemblList;
+                    if (nodeAttrs.getType(sourceIDName) == CyAttributes.TYPE_SIMPLE_LIST) {
+                        ensemblList = nodeAttrs.getListAttribute(keyID, sourceIDName);                        
+                    } else {
+                        ensemblList = new ArrayList<String>();
+                        ensemblList.add(nodeAttrs.getAttribute(keyID, sourceIDName).toString());
+                    }
+                    idGOMap = mapAttribute(ensemblList, "Ensembl", GOLayoutStaticValues.BP_ATTNAME);
+                    nodeAttrs.setListAttribute(keyID.toString(), GOLayoutStaticValues.BP_ATTNAME, convertSetMapValueToList(idGOMap));
+                    idGOMap = mapAttribute(ensemblList, "Ensembl", GOLayoutStaticValues.CC_ATTNAME);
+                    nodeAttrs.setListAttribute(keyID.toString(), GOLayoutStaticValues.CC_ATTNAME, convertSetMapValueToList(idGOMap));
+                    idGOMap = mapAttribute(ensemblList, "Ensembl", GOLayoutStaticValues.MF_ATTNAME);
+                    nodeAttrs.setListAttribute(keyID.toString(), GOLayoutStaticValues.MF_ATTNAME, convertSetMapValueToList(idGOMap));
+                }
+                disConnectGOSlimSource(GOSlimFilePath);
             }
         }
         
@@ -278,26 +421,6 @@ public class IdMapping {
 //        //disConnectFileDB(args);
 //        return true;
 //    }
-
-    public static Set<String> guessIdType(String sampleId){
-        Set<String> idTypes;
-        Map<String, Object> args = new HashMap<String, Object>();
-        args.put("sourceid", sampleId);
-        try {
-            CyCommandResult result = CyCommandManager.execute(
-                    "idmapping", "guess id type", args);
-            idTypes = (Set<String>) result.getResult();
-        } catch (CyCommandException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            return null;
-        } catch (RuntimeException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            return null;
-        }
-        return idTypes;
-    }
 
     /**
      *
@@ -425,15 +548,12 @@ public class IdMapping {
         CyCommandResult result = null;
         try {
             result = CyCommandManager.execute("idmapping",
-                    "unregister resource", args);
+                    "deselect resource", args);
+                    //"unregister resource", args);
             List<String> results = result.getMessages();
             if (results.size() > 0) {
                 for (String re : results) {
-                    if (re.contains("Success")) {
-                        System.out.println("Success");
-                    } else {
-                        System.out.println("no Success");
-                    }
+                    System.out.println(re);
                 }
             } else {
                 System.out.println("Failed to connect!");

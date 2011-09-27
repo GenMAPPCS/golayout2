@@ -54,7 +54,7 @@ import org.genmapp.golayout.utils.IdMapping;
  */
 public class GOLayoutSettingDialog extends JDialog
         implements ActionListener {
-    private String annotationSpeciesCode = "";
+    public String annotationSpeciesCode = "";
     private String annotationButtonLabel = "Annotate";
     private List<String> speciesValues = new ArrayList<String>();
     private List<String> downloadDBList = new ArrayList<String>();
@@ -65,7 +65,7 @@ public class GOLayoutSettingDialog extends JDialog
     /** Creates new form GOLayoutSettingPanel */
     public GOLayoutSettingDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
-        this.setTitle("GOLayout Settings");
+        this.setTitle(GOLayout.pluginName+" Settings");
         loadCurrentValues();
         initComponents();
         initValues();
@@ -73,11 +73,13 @@ public class GOLayoutSettingDialog extends JDialog
         this.pack();
     }
 
-    private void loadCurrentValues() {       
+    private void loadCurrentValues() {
     }
 
     private void initValues() {
         System.out.println("**************initialize values*************");
+        //rAnnSpeComboBox.removeAll();
+        //rAnnTypComboBox.removeAll();
         speciesValues = Arrays.asList(GOLayoutStaticValues.speciesList);
         currentAttributeList = Arrays.asList(cytoscape.Cytoscape
                 .getNodeAttributes().getAttributeNames());
@@ -85,7 +87,7 @@ public class GOLayoutSettingDialog extends JDialog
         rAnnIdeValues.add("ID");
         rAnnIdeValues.addAll(currentAttributeList);
         rAnnIdeComboBox.setModel(new DefaultComboBoxModel(rAnnIdeValues.toArray()));
-        
+        System.out.println("Current species: "+annotationSpeciesCode);
         //Guess species of current network for annotation
         String[] defaultSpecies = getSpeciesCommonName(CytoscapeInit
                 .getProperties().getProperty("defaultSpeciesName"));
@@ -96,16 +98,13 @@ public class GOLayoutSettingDialog extends JDialog
             rAnnSpeComboBox.setSelectedIndex(speciesValues.indexOf(defaultSpecies[0]));
             downloadDBList = checkMappingResources(annotationSpeciesCode);
             System.out.println(downloadDBList);
-            //checkDownloadStatus();
-//
-//            if(downloadDBList.isEmpty()) {
-//                idMappingTypeValues = IdMapping.getSourceTypes(GOLayout.GOLayoutDatabaseDir
-//                        +identifyLatestVersion(GOLayoutUtil.retrieveLocalFiles(
-//                        GOLayout.GOLayoutDatabaseDir), annotationSpeciesCode+
-//                        "_Derby", ".bridge")+".bridge");
-//                rAnnTypComboBox.setModel(new DefaultComboBoxModel(idMappingTypeValues.toArray()));
-//                setDefaultAttType("ID");
-//            }
+            checkDownloadStatus();
+
+            if(downloadDBList.isEmpty()) {
+                idMappingTypeValues = IdMapping.getSourceTypes();
+                rAnnTypComboBox.setModel(new DefaultComboBoxModel(idMappingTypeValues.toArray()));
+                setDefaultAttType("ID");
+            }
         }
 //        rAnnIdeComboBox.setEnabled(false);
 //        rAnnTypComboBox.setEnabled(false);
@@ -132,6 +131,15 @@ public class GOLayoutSettingDialog extends JDialog
             lTepCusTextField.setEnabled(false);
             lTepCusButton.setEnabled(false);
         }
+        //2011-09-14
+        //Temporarily comment those unimplemented functions
+        lTepPanel.setVisible(false);
+        sParSpaLabel.setVisible(false);
+        sParSpaTextField.setVisible(false);
+        sParCroLabel.setVisible(false);
+        sParCroCheckBox.setVisible(false);
+        sParPatLabel.setVisible(false);
+        sParPatComboBox.setVisible(false);
     }
 
     private String[] getSpeciesCommonName(String speName) {
@@ -183,7 +191,7 @@ public class GOLayoutSettingDialog extends JDialog
         return downloadList;
     }
 
-    private String identifyLatestVersion(List<String> dbList, String prefix, String surfix) {
+    public String identifyLatestVersion(List<String> dbList, String prefix, String surfix) {
         String result = "";
         int latestdate = 0;
         for (String filename : dbList) {
@@ -349,20 +357,25 @@ public class GOLayoutSettingDialog extends JDialog
         return result;
     }
     
-    private void setDefaultAttType(String idName) {
-        
+    private void setDefaultAttType(String idName) {        
         String sampleID = Cytoscape.getCurrentNetwork().nodesList().get(0)
                 .toString();
         if(!idName.equals("ID")) {
             CyAttributes attribs = Cytoscape.getNodeAttributes();
             if (attribs.getType(idName) == CyAttributes.TYPE_SIMPLE_LIST) {
                 List<Object> attList = attribs.getListAttribute(sampleID, idName);
-                sampleID = attList.get(0).toString();
+                for(int i=0;i<attList.size();i++) {
+                    if(attList.get(i) != null) {
+                        sampleID = attList.get(i).toString();
+                        break;
+                    }
+                }                
             } else {
                 sampleID = Cytoscape.getNodeAttributes().getAttribute(sampleID, idName).toString();
             }
         }
         Set<String> guessResult = IdMapping.guessIdType(sampleID);
+        //System.out.println("GOLayoutSettingDialog:setDefaultAttType: Guess ID Type - "+guessResult.toString());
         if(guessResult.isEmpty()) {
             rAnnTypComboBox.setSelectedIndex(findMatchType("Ensembl"));
         } else {
@@ -484,10 +497,10 @@ public class GOLayoutSettingDialog extends JDialog
         aSelPanelLayout.setHorizontalGroup(
             aSelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(aSelPanelLayout.createSequentialGroup()
-                .addGroup(aSelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(aSelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(aAttParLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(aAttLayLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(aAttNodLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(aAttLayLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE)
+                    .addComponent(aAttNodLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
                 .addGroup(aSelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(aAttParComboBox, 0, 262, Short.MAX_VALUE)
@@ -539,6 +552,7 @@ public class GOLayoutSettingDialog extends JDialog
         rAnnSpeLabel.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
 
         rAnnSpeComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Yeast" }));
+        rAnnSpeComboBox.setMinimumSize(new java.awt.Dimension(89, 18));
         rAnnSpeComboBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 rAnnSpeComboBoxActionPerformed(evt);
@@ -546,6 +560,7 @@ public class GOLayoutSettingDialog extends JDialog
         });
 
         rAnnIdeComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "ID" }));
+        rAnnIdeComboBox.setMinimumSize(new java.awt.Dimension(89, 18));
         rAnnIdeComboBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 rAnnIdeComboBoxActionPerformed(evt);
@@ -554,7 +569,7 @@ public class GOLayoutSettingDialog extends JDialog
 
         rAnnTypComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Ensembl Yeast" }));
 
-        rAnnIdeLabel.setText("The identifier to use for annotation retrieval");
+        rAnnIdeLabel.setText("Identifier for annotation retrieval");
         rAnnIdeLabel.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
 
         rAnnTypLabel.setText("Type of identifier, e.g., Entrez Gene");
@@ -570,16 +585,16 @@ public class GOLayoutSettingDialog extends JDialog
                 .addComponent(rAnnMesButton, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE)
                 .addGap(10, 10, 10))
             .addGroup(rAnnPanelLayout.createSequentialGroup()
-                .addGroup(rAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(rAnnIdeLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(rAnnTypLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(rAnnSpeLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(26, 26, 26)
+                .addGroup(rAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(rAnnIdeLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 233, Short.MAX_VALUE)
+                    .addComponent(rAnnSpeLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 233, Short.MAX_VALUE)
+                    .addComponent(rAnnTypLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 233, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(rAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(rAnnSpeComboBox, 0, 94, Short.MAX_VALUE)
                     .addComponent(rAnnIdeComboBox, 0, 94, Short.MAX_VALUE)
                     .addComponent(rAnnTypComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(317, Short.MAX_VALUE))
+                .addGap(317, 317, 317))
         );
         rAnnPanelLayout.setVerticalGroup(
             rAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -599,7 +614,7 @@ public class GOLayoutSettingDialog extends JDialog
                 .addGroup(rAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(rAnnTypLabel)
                     .addComponent(rAnnTypComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(19, Short.MAX_VALUE))
+                .addContainerGap(29, Short.MAX_VALUE))
         );
 
         lTepPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Select Layout Template"));
@@ -705,7 +720,7 @@ public class GOLayoutSettingDialog extends JDialog
 
         sParMorLabel.setText("Don't show subnetworks with more nodes than");
 
-        sParLevLabel.setText("The deepest level of GO term for partition");
+        sParLevLabel.setText("GO level cutoff for partition");
 
         sParPatLabel.setText("GO hierarchy type");
 
@@ -747,14 +762,14 @@ public class GOLayoutSettingDialog extends JDialog
                     .addComponent(sParFewTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE))
                 .addGap(95, 95, 95)
                 .addGroup(sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sParSpaLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
-                    .addComponent(sParPatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
-                    .addComponent(sParCroLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(sParSpaLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 132, Short.MAX_VALUE)
+                    .addComponent(sParPatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 132, Short.MAX_VALUE)
+                    .addComponent(sParCroLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 132, Short.MAX_VALUE))
                 .addGap(25, 25, 25)
                 .addGroup(sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sParSpaTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 67, Short.MAX_VALUE)
-                    .addComponent(sParCroCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, 67, Short.MAX_VALUE)
-                    .addComponent(sParPatComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(sParSpaTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 65, Short.MAX_VALUE)
+                    .addComponent(sParCroCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, 65, Short.MAX_VALUE)
+                    .addComponent(sParPatComboBox, 0, 65, Short.MAX_VALUE)))
         );
         sParPanelLayout.setVerticalGroup(
             sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -802,9 +817,9 @@ public class GOLayoutSettingDialog extends JDialog
                 .addContainerGap()
                 .addComponent(aSelPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(rAnnPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 147, Short.MAX_VALUE)
+                .addComponent(rAnnPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(sParPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 118, Short.MAX_VALUE)
+                .addComponent(sParPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lTepPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -838,17 +853,24 @@ public class GOLayoutSettingDialog extends JDialog
         // TODO add your handling code here:
         //Regenerate list of ID types when user select another species.
         System.out.println("change species");
-        String[] speciesCode = getSpeciesCommonName(rAnnSpeComboBox.getSelectedItem().toString());
-        annotationSpeciesCode = speciesCode[1];
-        downloadDBList = checkMappingResources(annotationSpeciesCode);
-        checkDownloadStatus();
-        if(downloadDBList.isEmpty()) {
-            idMappingTypeValues = IdMapping.getSourceTypes(GOLayout.GOLayoutDatabaseDir
+        IdMapping.disConnectDerbyFileSource(GOLayout.GOLayoutDatabaseDir
                     +identifyLatestVersion(GOLayoutUtil.retrieveLocalFiles(
                     GOLayout.GOLayoutDatabaseDir), annotationSpeciesCode+
                     "_Derby", ".bridge")+".bridge");
+        String[] speciesCode = getSpeciesCommonName(rAnnSpeComboBox.getSelectedItem().toString());
+        annotationSpeciesCode = speciesCode[1];        
+        downloadDBList = checkMappingResources(annotationSpeciesCode);
+        checkDownloadStatus();
+        if(downloadDBList.isEmpty()) {
+            IdMapping.connectDerbyFileSource(GOLayout.GOLayoutDatabaseDir
+                    +identifyLatestVersion(GOLayoutUtil.retrieveLocalFiles(
+                    GOLayout.GOLayoutDatabaseDir), annotationSpeciesCode+
+                    "_Derby", ".bridge")+".bridge");
+            idMappingTypeValues = IdMapping.getSourceTypes();
+            System.out.println("No. of types "+ idMappingTypeValues.size());
+            rAnnTypComboBox.removeAllItems();
             rAnnTypComboBox.setModel(new DefaultComboBoxModel(idMappingTypeValues.toArray()));
-            }
+        }
         rAnnIdeComboBox.setSelectedItem("ID");
         setDefaultAttType("ID");
     }//GEN-LAST:event_rAnnSpeComboBoxActionPerformed
@@ -880,10 +902,12 @@ public class GOLayoutSettingDialog extends JDialog
             downloadDBList = checkMappingResources(annotationSpeciesCode);
             checkDownloadStatus();
             if(downloadDBList.isEmpty()) {
-                idMappingTypeValues = IdMapping.getSourceTypes(GOLayout.GOLayoutDatabaseDir
-                        +identifyLatestVersion(GOLayoutUtil.retrieveLocalFiles(
-                        GOLayout.GOLayoutDatabaseDir), annotationSpeciesCode+
-                        "_Derby", ".bridge")+".bridge");
+                IdMapping.connectDerbyFileSource(GOLayout.GOLayoutDatabaseDir
+                    +identifyLatestVersion(GOLayoutUtil.retrieveLocalFiles(
+                    GOLayout.GOLayoutDatabaseDir), annotationSpeciesCode+
+                    "_Derby", ".bridge")+".bridge");
+                idMappingTypeValues = IdMapping.getSourceTypes();
+                System.out.println(idMappingTypeValues.toString());            
                 rAnnTypComboBox.setModel(new DefaultComboBoxModel(idMappingTypeValues.toArray()));
             }
             rAnnIdeComboBox.setSelectedItem("ID");
@@ -938,6 +962,10 @@ public class GOLayoutSettingDialog extends JDialog
             PartitionAlgorithm.layoutName = CellAlgorithm.LAYOUT_NAME;
         }
         System.out.println(PartitionNetworkVisualStyleFactory.attributeName);
+        IdMapping.disConnectDerbyFileSource(GOLayout.GOLayoutDatabaseDir
+                    +identifyLatestVersion(GOLayoutUtil.retrieveLocalFiles(
+                    GOLayout.GOLayoutDatabaseDir), annotationSpeciesCode+
+                    "_Derby", ".bridge")+".bridge");
         this.dispose();
 //        CyLayoutAlgorithm layout = CyLayouts.getLayout("partition");
 //        layout.doLayout(Cytoscape.getCurrentNetworkView(), taskMonitor);
@@ -981,25 +1009,12 @@ public class GOLayoutSettingDialog extends JDialog
 
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
         // TODO add your handling code here:
+        IdMapping.disConnectDerbyFileSource(GOLayout.GOLayoutDatabaseDir
+                    +identifyLatestVersion(GOLayoutUtil.retrieveLocalFiles(
+                    GOLayout.GOLayoutDatabaseDir), annotationSpeciesCode+
+                    "_Derby", ".bridge")+".bridge");
         this.dispose();
     }//GEN-LAST:event_cancelButtonActionPerformed
-
-    /**
-    * @param args the command line arguments
-    */
-    public static void main(String args[]) {
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                GOLayoutSettingDialog dialog = new GOLayoutSettingDialog(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel ButtonPanel;
@@ -1088,7 +1103,7 @@ public class GOLayoutSettingDialog extends JDialog
         //@Override
         public void run() {
                 try {
-                    taskMonitor.setStatus("Runing partition...");
+                    taskMonitor.setStatus("Running partition...");
                     CyLayoutAlgorithm layout = CyLayouts.getLayout("partition");
                     //layout.doLayout(Cytoscape.getCurrentNetworkView(), taskMonitor);
                     layout.doLayout(Cytoscape.getCurrentNetworkView());

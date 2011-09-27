@@ -34,7 +34,11 @@ public class AnnotationDialog implements Task {
         localGOslimDBPath = localGOslimDB;
         selectedMappingID = mappingID;
         selectedMappingType = mappingType;
-        ensemblIDType = ensemblType;        
+        ensemblIDType = ensemblType;
+//        if(ensemblType.toString().toLowerCase().indexOf("ensembl")!=-1) {
+//            ensemblIDType = "Ensembl";
+//        } else
+//            ensemblIDType = ensemblType;
     }
 
     public void run() {

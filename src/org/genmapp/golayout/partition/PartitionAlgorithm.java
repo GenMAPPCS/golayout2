@@ -630,8 +630,10 @@ public class PartitionAlgorithm extends AbstractLayout implements
 //					taskMonitor.setStatus("building subnetwork for " + val);
 //					buildSubNetwork(net, val.toString());
 //				}
+                //2011-09-14
+                //Temporarily comment those unimplemented functions
 				System.out.println("*******************Build sub network overview***********************");
-                buildSubnetworkOverview(net);
+                //buildSubnetworkOverview(net);
 				tileNetworkViews(); // tile and fit content in each view
                 System.out.println("*******************End***********************");
                 Set<CyNetwork> aaa = Cytoscape.getNetworkSet();
@@ -752,7 +754,7 @@ public class PartitionAlgorithm extends AbstractLayout implements
     public void updateOverview(){
         Cytoscape.destroyNetwork(getNetworkByTitle("Overview"));
         CyNetwork net = Cytoscape.getCurrentNetwork();
-        buildSubnetworkOverview(rootNetwork);
+        //buildSubnetworkOverview(rootNetwork);
         tileNetworkViews();
     }
 
