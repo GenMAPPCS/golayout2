@@ -20,7 +20,6 @@ import org.genmapp.golayout.partition.PartitionAlgorithm;
 import org.genmapp.golayout.layout.PartitionNetworkVisualStyleFactory;
 import org.genmapp.golayout.layout.CellAlgorithm;
 import org.genmapp.golayout.utils.GOLayoutStaticValues;
-import org.genmapp.golayout.setting.GOLayoutAlgorithm;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
