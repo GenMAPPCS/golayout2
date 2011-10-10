@@ -134,10 +134,10 @@ public class GOLayoutSettingDialog extends JDialog
         //2011-09-14
         //Temporarily comment those unimplemented functions
         lTepPanel.setVisible(false);
-        sParSpaLabel.setVisible(false);
-        sParSpaTextField.setVisible(false);
-        sParCroLabel.setVisible(false);
-        sParCroCheckBox.setVisible(false);
+        //sParSpaLabel.setVisible(false);
+        //sParSpaTextField.setVisible(false);
+        //sParCroLabel.setVisible(false);
+        //sParCroCheckBox.setVisible(false);
         sParPatLabel.setVisible(false);
         sParPatComboBox.setVisible(false);
     }
@@ -497,20 +497,20 @@ public class GOLayoutSettingDialog extends JDialog
         aSelPanelLayout.setHorizontalGroup(
             aSelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(aSelPanelLayout.createSequentialGroup()
+                .addGroup(aSelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(aAttNodLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 234, Short.MAX_VALUE)
+                    .addComponent(aAttLayLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 234, Short.MAX_VALUE)
+                    .addComponent(aAttParLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 234, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(aSelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(aAttParLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(aAttLayLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE)
-                    .addComponent(aAttNodLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
-                .addGroup(aSelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(aAttParComboBox, 0, 262, Short.MAX_VALUE)
-                    .addComponent(aAttLayComboBox, 0, 262, Short.MAX_VALUE)
-                    .addComponent(aAttNodComboBox, 0, 262, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
+                    .addComponent(aAttLayComboBox, 0, 182, Short.MAX_VALUE)
+                    .addComponent(aAttParComboBox, 0, 182, Short.MAX_VALUE)
+                    .addComponent(aAttNodComboBox, 0, 182, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(aSelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(aAttParRateLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE)
-                    .addComponent(aAttLayRateLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE)
-                    .addComponent(aAttNodRateLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE))
+                    .addComponent(aAttParRateLabel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE)
+                    .addComponent(aAttLayRateLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE)
+                    .addComponent(aAttNodRateLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 214, Short.MAX_VALUE))
                 .addContainerGap())
         );
         aSelPanelLayout.setVerticalGroup(
@@ -518,18 +518,18 @@ public class GOLayoutSettingDialog extends JDialog
             .addGroup(aSelPanelLayout.createSequentialGroup()
                 .addGroup(aSelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(aAttParLabel)
-                    .addComponent(aAttParComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(aAttParRateLabel))
+                    .addComponent(aAttParRateLabel)
+                    .addComponent(aAttParComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(aSelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(aAttLayLabel)
-                    .addComponent(aAttLayComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(aAttLayRateLabel))
+                    .addComponent(aAttLayRateLabel)
+                    .addComponent(aAttLayComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(aSelPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(aAttNodLabel)
-                    .addComponent(aAttNodComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(aAttNodRateLabel))
+                    .addComponent(aAttNodRateLabel)
+                    .addComponent(aAttNodComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -585,16 +585,16 @@ public class GOLayoutSettingDialog extends JDialog
                 .addComponent(rAnnMesButton, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE)
                 .addGap(10, 10, 10))
             .addGroup(rAnnPanelLayout.createSequentialGroup()
-                .addGroup(rAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(rAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(rAnnIdeLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 233, Short.MAX_VALUE)
                     .addComponent(rAnnSpeLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 233, Short.MAX_VALUE)
-                    .addComponent(rAnnTypLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 233, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(rAnnTypLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 233, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(rAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(rAnnSpeComboBox, 0, 94, Short.MAX_VALUE)
-                    .addComponent(rAnnIdeComboBox, 0, 94, Short.MAX_VALUE)
-                    .addComponent(rAnnTypComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(317, 317, 317))
+                    .addComponent(rAnnIdeComboBox, 0, 106, Short.MAX_VALUE)
+                    .addComponent(rAnnTypComboBox, 0, 106, Short.MAX_VALUE)
+                    .addComponent(rAnnSpeComboBox, 0, 106, Short.MAX_VALUE))
+                .addGap(305, 305, 305))
         );
         rAnnPanelLayout.setVerticalGroup(
             rAnnPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -723,6 +723,7 @@ public class GOLayoutSettingDialog extends JDialog
         sParLevLabel.setText("GO level cutoff for partition");
 
         sParPatLabel.setText("GO hierarchy type");
+        sParPatLabel.setOpaque(true);
 
         sParFewTextField.setColumns(5);
         sParFewTextField.setText("5");
@@ -740,36 +741,42 @@ public class GOLayoutSettingDialog extends JDialog
         sParPatComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Relative", "Absolute" }));
 
         sParSpaLabel.setText("Spacing between nodes");
+        sParSpaLabel.setOpaque(true);
 
         sParSpaTextField.setColumns(5);
         sParSpaTextField.setText("30.0");
 
         sParCroLabel.setText("Prune cross- region edges?");
+        sParCroLabel.setOpaque(true);
 
         javax.swing.GroupLayout sParPanelLayout = new javax.swing.GroupLayout(sParPanel);
         sParPanel.setLayout(sParPanelLayout);
         sParPanelLayout.setHorizontalGroup(
             sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(sParPanelLayout.createSequentialGroup()
-                .addGroup(sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sParFewLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(sParMorLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)
-                    .addComponent(sParLevLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE))
+                .addGroup(sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(sParFewLabel)
+                    .addComponent(sParMorLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(sParLevLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 228, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sParLevComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(sParMorTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE)
-                    .addComponent(sParFewTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 93, Short.MAX_VALUE))
-                .addGap(95, 95, 95)
+                    .addComponent(sParLevComboBox, 0, 106, Short.MAX_VALUE)
+                    .addComponent(sParMorTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE)
+                    .addComponent(sParFewTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 106, Short.MAX_VALUE))
+                .addGap(50, 50, 50)
+                .addGroup(sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(sParSpaLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 148, Short.MAX_VALUE)
+                    .addComponent(sParPatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 148, Short.MAX_VALUE)
+                    .addComponent(sParCroLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 148, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sParSpaLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 132, Short.MAX_VALUE)
-                    .addComponent(sParPatLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 132, Short.MAX_VALUE)
-                    .addComponent(sParCroLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 132, Short.MAX_VALUE))
-                .addGap(25, 25, 25)
-                .addGroup(sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(sParSpaTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 65, Short.MAX_VALUE)
-                    .addComponent(sParCroCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, 65, Short.MAX_VALUE)
-                    .addComponent(sParPatComboBox, 0, 65, Short.MAX_VALUE)))
+                    .addComponent(sParCroCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, 102, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, sParPanelLayout.createSequentialGroup()
+                        .addComponent(sParSpaTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 92, Short.MAX_VALUE)
+                        .addContainerGap())
+                    .addGroup(sParPanelLayout.createSequentialGroup()
+                        .addComponent(sParPatComboBox, 0, 92, Short.MAX_VALUE)
+                        .addContainerGap())))
         );
         sParPanelLayout.setVerticalGroup(
             sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -788,12 +795,16 @@ public class GOLayoutSettingDialog extends JDialog
                         .addComponent(sParMorTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(sParCroLabel))
                     .addComponent(sParCroCheckBox))
-                .addGap(5, 5, 5)
-                .addGroup(sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(sParLevLabel)
-                    .addComponent(sParLevComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(sParPatLabel)
-                    .addComponent(sParPatComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(sParPanelLayout.createSequentialGroup()
+                        .addGap(5, 5, 5)
+                        .addGroup(sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(sParLevLabel)
+                            .addComponent(sParLevComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(sParPatComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(sParPanelLayout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(sParPatLabel)))
                 .addGap(19, 19, 19))
         );
 
@@ -819,7 +830,7 @@ public class GOLayoutSettingDialog extends JDialog
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(rAnnPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(sParPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(sParPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 118, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lTepPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -955,8 +966,9 @@ public class GOLayoutSettingDialog extends JDialog
     private void submitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitButtonActionPerformed
         // TODO add your handling code here:
         beforeSubmit();
-        CellAlgorithm.attributeName = null;
-        PartitionNetworkVisualStyleFactory.attributeName = null;
+        // Comment CellAlgorithm for testing partitioning, 07/10/2011
+        //CellAlgorithm.attributeName = null;
+        //PartitionNetworkVisualStyleFactory.attributeName = null;
 
         if (null != CellAlgorithm.attributeName) {
             PartitionAlgorithm.layoutName = CellAlgorithm.LAYOUT_NAME;

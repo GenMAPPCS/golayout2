@@ -48,7 +48,7 @@
               <EmptySpace max="-2" attributes="0"/>
               <Component id="rAnnPanel" min="-2" pref="157" max="-2" attributes="2"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="sParPanel" max="32767" attributes="2"/>
+              <Component id="sParPanel" pref="118" max="32767" attributes="2"/>
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Component id="lTepPanel" max="32767" attributes="2"/>
               <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -76,22 +76,22 @@
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" attributes="0">
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="aAttParLabel" alignment="0" max="32767" attributes="2"/>
-                      <Component id="aAttLayLabel" alignment="0" pref="170" max="32767" attributes="2"/>
-                      <Component id="aAttNodLabel" alignment="0" pref="170" max="32767" attributes="2"/>
+                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                      <Component id="aAttNodLabel" pref="234" max="32767" attributes="1"/>
+                      <Component id="aAttLayLabel" alignment="0" pref="234" max="32767" attributes="1"/>
+                      <Component id="aAttParLabel" alignment="0" pref="234" max="32767" attributes="1"/>
                   </Group>
-                  <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="aAttParComboBox" pref="262" max="32767" attributes="2"/>
-                      <Component id="aAttLayComboBox" pref="262" max="32767" attributes="2"/>
-                      <Component id="aAttNodComboBox" pref="262" max="32767" attributes="2"/>
+                      <Component id="aAttLayComboBox" alignment="0" pref="182" max="32767" attributes="2"/>
+                      <Component id="aAttParComboBox" alignment="0" pref="182" max="32767" attributes="2"/>
+                      <Component id="aAttNodComboBox" pref="182" max="32767" attributes="2"/>
                   </Group>
-                  <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="1" attributes="0">
-                      <Component id="aAttParRateLabel" alignment="0" pref="170" max="32767" attributes="2"/>
-                      <Component id="aAttLayRateLabel" alignment="1" pref="170" max="32767" attributes="0"/>
-                      <Component id="aAttNodRateLabel" alignment="1" pref="170" max="32767" attributes="0"/>
+                      <Component id="aAttParRateLabel" alignment="0" pref="214" max="32767" attributes="2"/>
+                      <Component id="aAttLayRateLabel" alignment="1" pref="214" max="32767" attributes="0"/>
+                      <Component id="aAttNodRateLabel" alignment="1" pref="214" max="32767" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
               </Group>
@@ -102,20 +102,20 @@
               <Group type="102" attributes="0">
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="aAttParLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="aAttParComboBox" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="aAttParRateLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="aAttParComboBox" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="aAttLayLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="aAttLayComboBox" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="aAttLayRateLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="aAttLayComboBox" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="aAttNodLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="aAttNodComboBox" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="aAttNodRateLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="aAttNodComboBox" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
               </Group>
@@ -216,18 +216,18 @@
                   <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
               </Group>
               <Group type="102" alignment="0" attributes="0">
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="rAnnIdeLabel" alignment="0" pref="233" max="32767" attributes="2"/>
-                      <Component id="rAnnSpeLabel" alignment="0" pref="233" max="32767" attributes="2"/>
-                      <Component id="rAnnTypLabel" alignment="0" min="-2" pref="233" max="-2" attributes="2"/>
+                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                      <Component id="rAnnIdeLabel" alignment="0" pref="233" max="32767" attributes="1"/>
+                      <Component id="rAnnSpeLabel" alignment="0" pref="233" max="32767" attributes="1"/>
+                      <Component id="rAnnTypLabel" alignment="0" pref="233" max="32767" attributes="1"/>
                   </Group>
                   <EmptySpace min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="rAnnSpeComboBox" alignment="0" pref="94" max="32767" attributes="0"/>
-                      <Component id="rAnnIdeComboBox" alignment="0" pref="94" max="32767" attributes="0"/>
-                      <Component id="rAnnTypComboBox" alignment="0" max="32767" attributes="0"/>
+                      <Component id="rAnnIdeComboBox" alignment="0" pref="106" max="32767" attributes="0"/>
+                      <Component id="rAnnTypComboBox" alignment="0" pref="106" max="32767" attributes="0"/>
+                      <Component id="rAnnSpeComboBox" alignment="0" pref="106" max="32767" attributes="0"/>
                   </Group>
-                  <EmptySpace min="-2" pref="317" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="305" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -512,28 +512,34 @@
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" attributes="0">
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="sParFewLabel" alignment="0" max="32767" attributes="0"/>
-                      <Component id="sParMorLabel" alignment="0" pref="228" max="32767" attributes="0"/>
-                      <Component id="sParLevLabel" alignment="0" pref="228" max="32767" attributes="0"/>
+                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                      <Component id="sParFewLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Component id="sParMorLabel" alignment="0" min="-2" pref="228" max="-2" attributes="0"/>
+                      <Component id="sParLevLabel" alignment="0" min="-2" pref="228" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="sParLevComboBox" max="32767" attributes="0"/>
-                      <Component id="sParMorTextField" alignment="0" pref="93" max="32767" attributes="2"/>
-                      <Component id="sParFewTextField" alignment="0" pref="93" max="32767" attributes="2"/>
+                      <Component id="sParLevComboBox" pref="106" max="32767" attributes="0"/>
+                      <Component id="sParMorTextField" alignment="0" pref="106" max="32767" attributes="2"/>
+                      <Component id="sParFewTextField" alignment="0" pref="106" max="32767" attributes="2"/>
                   </Group>
-                  <EmptySpace min="-2" pref="95" max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="sParSpaLabel" pref="132" max="32767" attributes="0"/>
-                      <Component id="sParPatLabel" pref="132" max="32767" attributes="0"/>
-                      <Component id="sParCroLabel" pref="132" max="32767" attributes="0"/>
+                  <EmptySpace min="-2" pref="50" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="1" attributes="0">
+                      <Component id="sParSpaLabel" pref="148" max="32767" attributes="1"/>
+                      <Component id="sParPatLabel" alignment="1" pref="148" max="32767" attributes="1"/>
+                      <Component id="sParCroLabel" alignment="1" pref="148" max="32767" attributes="1"/>
                   </Group>
-                  <EmptySpace min="-2" pref="25" max="-2" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="sParSpaTextField" pref="65" max="32767" attributes="0"/>
-                      <Component id="sParCroCheckBox" alignment="0" pref="65" max="32767" attributes="0"/>
-                      <Component id="sParPatComboBox" alignment="0" pref="65" max="32767" attributes="0"/>
+                      <Component id="sParCroCheckBox" alignment="0" pref="102" max="32767" attributes="0"/>
+                      <Group type="102" alignment="1" attributes="0">
+                          <Component id="sParSpaTextField" pref="92" max="32767" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                      </Group>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="sParPatComboBox" pref="92" max="32767" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                      </Group>
                   </Group>
               </Group>
           </Group>
@@ -560,12 +566,19 @@
                       </Group>
                       <Component id="sParCroCheckBox" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="3" attributes="0">
-                      <Component id="sParLevLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="sParLevComboBox" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="sParPatLabel" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="sParPatComboBox" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="0" attributes="0">
+                      <Group type="102" attributes="0">
+                          <EmptySpace min="-2" pref="5" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="sParLevLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="sParLevComboBox" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="sParPatComboBox" alignment="3" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
+                      <Group type="102" alignment="0" attributes="0">
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="sParPatLabel" min="-2" max="-2" attributes="0"/>
+                      </Group>
                   </Group>
                   <EmptySpace min="-2" pref="19" max="-2" attributes="0"/>
               </Group>
@@ -591,6 +604,7 @@
         <Component class="javax.swing.JLabel" name="sParPatLabel">
           <Properties>
             <Property name="text" type="java.lang.String" value="GO hierarchy type"/>
+            <Property name="opaque" type="boolean" value="true"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="sParFewTextField">
@@ -643,6 +657,7 @@
         <Component class="javax.swing.JLabel" name="sParSpaLabel">
           <Properties>
             <Property name="text" type="java.lang.String" value="Spacing between nodes"/>
+            <Property name="opaque" type="boolean" value="true"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="sParSpaTextField">
@@ -656,6 +671,7 @@
         <Component class="javax.swing.JLabel" name="sParCroLabel">
           <Properties>
             <Property name="text" type="java.lang.String" value="Prune cross- region edges?"/>
+            <Property name="opaque" type="boolean" value="true"/>
           </Properties>
         </Component>
       </SubComponents>

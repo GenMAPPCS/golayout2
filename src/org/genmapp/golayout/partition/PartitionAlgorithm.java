@@ -166,43 +166,6 @@ public class PartitionAlgorithm extends AbstractLayout implements
 		return null;
 	}
 
-	/**
-	 * Generate the unique value list of the selected attribute
-	 */
-	public ArrayList<Object> setupNodeAttributeValues() {
-		CyAttributes attribs = Cytoscape.getNodeAttributes();
-		Map attrMap = CyAttributesUtils.getAttribute(attributeName, attribs);
-		Collection values = attrMap.values();
-		ArrayList<Object> uniqueValueList = new ArrayList<Object>();
-        
-		// key will be a List attribute value, so we need to pull out individual
-		// list items
-		if (attribs.getType(attributeName) == CyAttributes.TYPE_SIMPLE_LIST) {
-			for (Object o : values) {
-//                String[] oList = o.toString().split(",");
-//                for (String jObj:oList) {
-//                    jObj = jObj.trim();
-//                    if (jObj != null) {
-//						if (!uniqueValueList.contains(jObj)) {
-//							uniqueValueList.add(jObj);
-//						}
-//					}
-//				}
-				List oList = (List) o;
-                for (int j = 0; j < oList.size(); j++) {
-					Object jObj = oList.get(j);
-					if (jObj != null) {
-						if (!uniqueValueList.contains(jObj)) {
-							uniqueValueList.add(jObj);
-						}
-					}
-				}
-			}
-		}
-
-		return uniqueValueList;
-	}
-
 	public void buildSubnetworkOverview(CyNetwork net) {
 
 		CyNetwork overview_network = Cytoscape.createNetwork(new int[0],
@@ -548,7 +511,7 @@ public class PartitionAlgorithm extends AbstractLayout implements
         System.out.println("*******************PartitionAlgorithm******************");
         System.out.println("Partition Attribute:" +attributeName);
 		// if "(none)" was selected in setting, then skip partitioning
-		if (null == attributeName) {
+		if (null == attributeName || attributeName=="none") {
 
 			// create visual style if set
 			if (PartitionNetworkVisualStyleFactory.attributeName != null) {
@@ -576,7 +539,7 @@ public class PartitionAlgorithm extends AbstractLayout implements
 			// CyGroupManager.removeGroup(cg);
 			// }
 
-			nodeAttributeValues = setupNodeAttributeValues();
+			nodeAttributeValues = GOLayoutUtil.setupNodeAttributeValues(attributeName);
 			// warn before building more than 100 subnetworks;
 			int response = JOptionPane.YES_OPTION;
 			if (nodeAttributeValues.size() > SUBNETWORK_COUNT_WARNING) {
@@ -633,7 +596,7 @@ public class PartitionAlgorithm extends AbstractLayout implements
                 //2011-09-14
                 //Temporarily comment those unimplemented functions
 				System.out.println("*******************Build sub network overview***********************");
-                //buildSubnetworkOverview(net);
+                buildSubnetworkOverview(net);
 				tileNetworkViews(); // tile and fit content in each view
                 System.out.println("*******************End***********************");
                 Set<CyNetwork> aaa = Cytoscape.getNetworkSet();

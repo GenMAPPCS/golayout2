@@ -15,6 +15,9 @@
  ******************************************************************************/
 package org.genmapp.golayout.utils;
 
+import cytoscape.Cytoscape;
+import cytoscape.data.CyAttributes;
+import cytoscape.data.CyAttributesUtils;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -29,6 +32,7 @@ import java.net.URLConnection;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -346,5 +350,41 @@ public class GOLayoutUtil {
 			} while(key != dataArray[j]);
 		}
 		return dataArray;
+	}
+
+    /**
+	 * Generate the unique value list of the selected attribute
+	 */
+	public static ArrayList<Object> setupNodeAttributeValues(String attributeName) {
+		CyAttributes attribs = Cytoscape.getNodeAttributes();
+		Map attrMap = CyAttributesUtils.getAttribute(attributeName, attribs);
+		Collection values = attrMap.values();
+		ArrayList<Object> uniqueValueList = new ArrayList<Object>();
+
+		// key will be a List attribute value, so we need to pull out individual
+		// list items
+		if (attribs.getType(attributeName) == CyAttributes.TYPE_SIMPLE_LIST) {
+			for (Object o : values) {
+//                String[] oList = o.toString().split(",");
+//                for (String jObj:oList) {
+//                    jObj = jObj.trim();
+//                    if (jObj != null) {
+//						if (!uniqueValueList.contains(jObj)) {
+//							uniqueValueList.add(jObj);
+//						}
+//					}
+//				}
+				List oList = (List) o;
+                for (int j = 0; j < oList.size(); j++) {
+					Object jObj = oList.get(j);
+					if (jObj != null) {
+						if (!uniqueValueList.contains(jObj)) {
+							uniqueValueList.add(jObj);
+						}
+					}
+				}
+			}
+		}
+		return uniqueValueList;
 	}
 }

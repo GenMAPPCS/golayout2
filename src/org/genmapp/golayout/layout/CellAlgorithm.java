@@ -36,8 +36,12 @@ import cytoscape.data.CyAttributes;
 import cytoscape.layout.AbstractLayout;
 import cytoscape.layout.CyLayoutAlgorithm;
 import cytoscape.layout.CyLayouts;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import org.genmapp.golayout.GOLayout;
 import org.genmapp.golayout.color.MFNodeAppearanceCalculator;
+import org.genmapp.golayout.utils.GOLayoutUtil;
 
 /**
  * CellularLayoutAlgorithm will layout nodes according to a template of cellular
@@ -55,7 +59,8 @@ public class CellAlgorithm extends AbstractLayout {
 	protected static final String NODE_COPIED = "_isInMultipleRegions";
 	// store whether edge goes to an unassigned node
 	protected static final String UNASSIGNED_EDGE_ATT = "_isEdgeToUnassigned";
-
+    private ArrayList<Object> nodeAttributeValues = new ArrayList();
+    public static Map<String, String> goDescMappingFile = new HashMap<String, String>();
 	/**
 	 * Creates a new CellularLayoutAlgorithm object.
 	 */
@@ -143,7 +148,9 @@ public class CellAlgorithm extends AbstractLayout {
 	 * The layout protocol...
 	 */
 	public void construct() {
-
+        nodeAttributeValues = GOLayoutUtil.setupNodeAttributeValues(attributeName);
+        Set<Object> attributeValues = new HashSet(nodeAttributeValues);
+        goDescMappingFile = GOLayoutUtil.readMappingFile(this.getClass().getResource(GOLayoutStaticValues.GO_DescFile), attributeValues, 0);
 		// if "(none)" was selected in setting, then skip cellular layout
 		if (null == attributeName) {
 			// skip the whole ordeal
@@ -156,11 +163,11 @@ public class CellAlgorithm extends AbstractLayout {
 			// Check for valid region-annotation mapping
 			boolean valid = false;
 			for (Region r : sra) {
-				if (r.getAttValue() != "unassigned" && r.getNodeCount() > 0) {
+                if (r.getAttValue() != "unassigned" && r.getNodeCount() > 0) {
 					valid = true;
-
 				}
 			}
+            
 			taskMonitor.setStatus("Checking attribute mappings");
 			taskMonitor.setPercentCompleted(1);
 			if (!valid) {
@@ -975,7 +982,7 @@ public class CellAlgorithm extends AbstractLayout {
 
 	public static List<NodeView> populateNodeViews(Region r) {
 		CyAttributes attribs = Cytoscape.getNodeAttributes();
-		// attribs.setUserVisible(REGION_ATT, false);
+        // attribs.setUserVisible(REGION_ATT, false);
 		Iterator<Node> it = Cytoscape.getCurrentNetwork().nodesIterator();
 		List<NodeView> nvList = new ArrayList<NodeView>();
 		while (it.hasNext()) {
@@ -991,8 +998,11 @@ public class CellAlgorithm extends AbstractLayout {
 				if (valList != null && valList.size() > 0) {
 					terms = new String[valList.size()];
 					for (int i = 0; i < valList.size(); i++) {
-						Object o = valList.get(i);
-						terms[i] = o.toString();
+						//Object o = valList.get(i);
+                        //Get the corresponding desc for each go term
+                        Object o = goDescMappingFile.get(valList.get(i));
+                        if(o != null)
+                            terms[i] = o.toString();
 					}
 				}
 				val = join(terms);
@@ -1044,5 +1054,4 @@ public class CellAlgorithm extends AbstractLayout {
 		}
 		return buf.toString();
 	}
-
 }
