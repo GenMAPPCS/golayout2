@@ -174,22 +174,20 @@ public class IdMapping {
         args.put("sourceid", sourceID);
         args.put("sourcetype", sourceType);
         args.put("targettype", targetType);
-        //System.out.println(sourceType+"\t"+targetType);
+        System.out.println(sourceType+"\t"+targetType);
         CyCommandResult result = null;
         try {
             result = CyCommandManager.execute(
                     "idmapping", "general mapping", args);
-        } catch (CyCommandException e) {
+        } catch (Exception e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (RuntimeException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            System.out.println("1"+sourceType+"\t"+targetType);
+            //e.printStackTrace();
         }
         Map<String, Set<String>> secondaryKeyMap = new HashMap<String, Set<String>>();
         if (null != result) {
             secondaryKeyMap= (Map<String, Set<String>>) result.getResult();
-            //System.out.println(secondaryKeyMap.size()+"\t"+secondaryKeyMap);
+            System.out.println(secondaryKeyMap.size()+"\t"+secondaryKeyMap);
         }
         return secondaryKeyMap;
     }
@@ -233,9 +231,13 @@ public class IdMapping {
                 System.out.println("IdMapping:mapID: ID & Non-Ensembl");
                 //Finished at 2011-09-21, for non-"Ensembl" & ID. ticket 3 for idmapping
                 connectDerbyFileSource(derbyFilePath);
+                System.out.println("IdMapping:mapID: connectDerbyFileSource :"+ sourceType+" : "+ targetType);
                 Map<String, Set<String>> idEnMap = mapAttribute(nodeIds, sourceType, targetType);
+                System.out.println("IdMapping:mapID: mapAttribute Ensembl");
                 setGOAttribute(idEnMap, GOLayout.pluginName+"_Ensembl");
+                System.out.println("IdMapping:mapID: setGOAttribute");
                 disConnectDerbyFileSource(derbyFilePath);
+                System.out.println("IdMapping:mapID: disConnectDerbyFileSource");
                 connectGOSlimSource(GOSlimFilePath);
                 for (CyNode cn : (List<CyNode>) currentNetwork.nodesList()) {
                     String keyID = cn.getIdentifier();
