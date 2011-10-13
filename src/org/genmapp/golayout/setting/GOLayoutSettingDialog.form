@@ -48,7 +48,7 @@
               <EmptySpace max="-2" attributes="0"/>
               <Component id="rAnnPanel" min="-2" pref="157" max="-2" attributes="2"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="sParPanel" pref="118" max="32767" attributes="2"/>
+              <Component id="sParPanel" max="32767" attributes="2"/>
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Component id="lTepPanel" max="32767" attributes="2"/>
               <EmptySpace min="-2" max="-2" attributes="0"/>

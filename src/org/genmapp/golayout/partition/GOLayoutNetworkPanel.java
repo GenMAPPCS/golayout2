@@ -45,14 +45,19 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JComboBox;
@@ -74,6 +79,9 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+import org.genmapp.golayout.layout.PartitionNetworkVisualStyleFactory;
+import org.genmapp.golayout.utils.GOLayoutStaticValues;
+import org.genmapp.golayout.utils.GOLayoutUtil;
 
 
 
@@ -94,10 +102,11 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
 	public final JTreeTable treeTable;
 	private final GOLayoutNetworkTreeNode root;
 	private JPanel functionPanel;
+    private JComboBox functionComboBox;
+    private ChangeFunctionListener changeFunctionListener;
 	private JPanel networkTreePanel;
 	private JPopupMenu popup;
 	private PopupActionListener popupActionListener;
-
 	private JMenuItem createViewItem;
 	private JMenuItem destroyViewItem;
 	private JMenuItem destroyNetworkItem;
@@ -112,6 +121,7 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
 	private CyLogger logger;
     private PartitionAlgorithm partitionObject;
 
+    public static Map<String, String> descGOMappingFile = new HashMap<String, String>();
 	/**
 	 * Constructor for the Network Panel.
 	 *
@@ -194,9 +204,12 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
         functionPanel.setMaximumSize(new Dimension(10000, 50));
 		functionPanel.setPreferredSize(new Dimension(PANEL_PREFFERED_WIDTH, 50));
         String[] functionList = {"All functions"};
-        JComboBox functionComboBox = new JComboBox(functionList);
+        functionComboBox = new JComboBox(functionList);
         functionPanel.setLayout(new BoxLayout(functionPanel, BoxLayout.Y_AXIS));
         functionPanel.add(functionComboBox);
+        changeFunctionListener = new ChangeFunctionListener();
+        functionComboBox.addActionListener(changeFunctionListener);
+        functionComboBox.setEnabled(false);
 
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
@@ -247,6 +260,34 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
 		treeTable.getColumn(ColumnTypes.EDGES.getDisplayName())
 				.setPreferredWidth(45);
 		treeTable.setRowHeight(DEF_ROW_HEIGHT);
+	}
+
+    /**
+	 * DOCUMENT ME!
+	 *
+	 * @return DOCUMENT ME!
+	 */
+	public void setFuntionValues(List values) {
+        List result = new ArrayList();
+        result.add("All functions");
+        Collections.sort(values);
+        
+        if(GOLayoutUtil.isValidGOTerm(values)) {
+            Set<Object> attributeValues = new HashSet(values);
+            Map<String, String> goDescMappingFile = GOLayoutUtil.readMappingFile(this.getClass().getResource(GOLayoutStaticValues.GO_DescFile), attributeValues, 0);
+            for(Object o:attributeValues){
+                if(goDescMappingFile.containsKey(o))
+                    descGOMappingFile.put(goDescMappingFile.get(o).toString(), o.toString());
+            }
+            List descList = new ArrayList(descGOMappingFile.keySet());
+            Collections.sort(descList);
+            result.addAll(descList);
+        } else {
+            result.addAll(values);
+        }
+
+        functionComboBox.setModel(new DefaultComboBoxModel(result.toArray()));
+        functionComboBox.setEnabled(true);
 	}
 
 	/**
@@ -491,6 +532,27 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
 		return null;
 	}
 
+    /**
+	 * This class listens to mouse events from the TreeTable, if the mouse event
+	 * is one that is canonically associated with a popup menu (ie, a right
+	 * click) it will pop up the menu with option for destroying view, creating
+	 * view, and destroying network (this is platform specific apparently)
+	 */
+	protected class ChangeFunctionListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            String selectedGOTerm = "";
+            if(descGOMappingFile.isEmpty()) {
+                selectedGOTerm = ((JComboBox)e.getSource()).getSelectedItem().toString();
+            } else {
+                selectedGOTerm = ((JComboBox)e.getSource()).getSelectedItem().toString();
+                if(!selectedGOTerm.equals("All functions"))
+                    selectedGOTerm = descGOMappingFile.get(((JComboBox)e.getSource()).getSelectedItem()).toString();
+            }
+            System.out.println(selectedGOTerm);
+            PartitionNetworkVisualStyleFactory.highlightNodes(selectedGOTerm);
+        }
+    }
+
 	/**
 	 * This class listens to mouse events from the TreeTable, if the mouse event
 	 * is one that is canonically associated with a popup menu (ie, a right
@@ -560,30 +622,35 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
 //						viewMetanodesAsSubMenu.setEnabled(false);
 						applyVisualStyleMenu.setEnabled(false);
 					}
-                    String goTerm = partitionObject.getGOTerm(cyNetwork.getTitle());
-                    ArrayList<String> unbuildChildList = partitionObject.getUnbuildChildList(goTerm);
-                    if(unbuildChildList.size()>0) {
-                        partitionNetworkMenu.setEnabled(true);
-                        partitionNetworkMenu.removeAll();
-                        JMenuItem styleMenu = new JMenuItem("ALL");
-                        //styleMenu.setAction(partitionObject.buildSubnetwork(goTerm, unbuildChildList));
-                        styleMenu.addActionListener(popupActionListener);
-                        partitionNetworkMenu.add(styleMenu);
-                        partitionNetworkMenu.addSeparator();
-                        for (String subnetworkName : unbuildChildList) {
-                            styleMenu = new JMenuItem(subnetworkName);
+                    if(GOLayoutUtil.isValidGOTerm(partitionObject.nodeAttributeValues)) {
+                        String goTerm = partitionObject.getGOTerm(cyNetwork.getTitle());
+                        ArrayList<String> unbuildChildList = partitionObject.getUnbuildChildList(goTerm);
+                        if(unbuildChildList.size()>0) {
+                            partitionNetworkMenu.setEnabled(true);
+                            partitionNetworkMenu.removeAll();
+                            JMenuItem styleMenu = new JMenuItem("ALL");
+                            //styleMenu.setAction(partitionObject.buildSubnetwork(goTerm, unbuildChildList));
                             styleMenu.addActionListener(popupActionListener);
-                            //styleMenu.setAction(new ApplyVisualStyleAction(name));
                             partitionNetworkMenu.add(styleMenu);
+                            partitionNetworkMenu.addSeparator();
+                            for (String subnetworkName : unbuildChildList) {
+                                styleMenu = new JMenuItem(subnetworkName);
+                                styleMenu.addActionListener(popupActionListener);
+                                //styleMenu.setAction(new ApplyVisualStyleAction(name));
+                                partitionNetworkMenu.add(styleMenu);
+                            }
+                        } else {
+                            partitionNetworkMenu.setEnabled(false);
                         }
+                        ArrayList<String> existChildList = partitionObject.getExistChildList(goTerm);
+                        if(existChildList.size()>0)
+                            destroyALLNetworkItem.setEnabled(true);
+                        else
+                            destroyALLNetworkItem.setEnabled(false);
                     } else {
+                        destroyALLNetworkItem.setEnabled(false);
                         partitionNetworkMenu.setEnabled(false);
                     }
-                    ArrayList<String> existChildList = partitionObject.getExistChildList(goTerm);
-                    if(existChildList.size()>0)
-                        destroyALLNetworkItem.setEnabled(true);
-                    else
-                        destroyALLNetworkItem.setEnabled(false);
                     System.out.println(cyNetwork.getTitle());
 					popup.show(e.getComponent(), e.getX(), e.getY());
 				}
@@ -663,13 +730,15 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
 				}
 			} else if (DESTROY_NETWORK.equals(label)) {
                 CyNetwork selectedNetwork = Cytoscape.getSelectedNetworks().get(0);
-                String networkID = partitionObject.getGOTerm(selectedNetwork.getTitle());
-                if(!networkID.equals(""))
-                    partitionObject.destroyAllSubNet(networkID,networkID);
-                else
-                    partitionObject.destroyAllSubNet("root","root");
-				Cytoscape.destroyNetwork(selectedNetwork);
-                partitionObject.resetNetworkID(selectedNetwork);
+                if(GOLayoutUtil.isValidGOTerm(partitionObject.nodeAttributeValues)) {
+                    String networkID = partitionObject.getGOTerm(selectedNetwork.getTitle());
+                    if(!networkID.equals(""))
+                        partitionObject.destroyAllSubNet(networkID,networkID);
+                    else
+                        partitionObject.destroyAllSubNet("root","root");
+                    partitionObject.resetNetworkID(selectedNetwork);
+                }
+				Cytoscape.destroyNetwork(selectedNetwork);                
                 partitionObject.updateOverview();
 			} else if (EDIT_NETWORK_TITLE.equals(label)) {
 				CyNetworkNaming.editNetworkTitle(cyNetwork);

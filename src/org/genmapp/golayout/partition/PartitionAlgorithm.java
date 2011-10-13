@@ -62,7 +62,7 @@ public class PartitionAlgorithm extends AbstractLayout implements
 	LayoutProperties layoutProperties = null;
 
 	public static String layoutName = "force-directed";
-	private ArrayList<Object> nodeAttributeValues = new ArrayList();
+	public ArrayList<Object> nodeAttributeValues = new ArrayList();
 	// private Object[] layoutNames = null;
 	public static String attributeName = GOLayoutStaticValues.BP_ATTNAME;
 	private HashMap<Object, List<CyNode>> attributeValueNodeMap;
@@ -72,7 +72,7 @@ public class PartitionAlgorithm extends AbstractLayout implements
 	public static int NETWORK_LIMIT_MIN = 5; // min to show network
 	public static int NETWORK_LIMIT_MAX = 200;
     public static int GO_LEVEL = 100;
-	private static final int SUBNETWORK_COUNT_WARNING = 30; // will warn if >
+	private static final int SUBNETWORK_COUNT_WARNING = 100; // will warn if >
 	public static final String SUBNETWORK_CONNECTIONS = "_subnetworkConnections";
 	public static final String SUBNETWORK_SIZE = "_subnetworkSize";
     public Map<String, String> goDescMappingFile = new HashMap<String, String>();
@@ -208,6 +208,23 @@ public class PartitionAlgorithm extends AbstractLayout implements
 						overview_network.addNode(cn1);
 						overview_network.addNode(cn2);
 						overview_network.addEdge(ce);
+
+                        if(GOLayoutUtil.isValidGOTerm(nodeAttributeValues)) {
+                            if(goDescMappingFile.containsKey(np1)) {
+                                nAttributes.setAttribute(cn1.getIdentifier(), "canonicalName", goDescMappingFile.get(np1).toString());
+                            } else {
+                                nAttributes.setAttribute(cn1.getIdentifier(), "canonicalName", np1.toString());
+                            }
+                            if(goDescMappingFile.containsKey(np2)) {
+                                nAttributes.setAttribute(cn2.getIdentifier(), "canonicalName", goDescMappingFile.get(np2).toString());
+                            } else {
+                                nAttributes.setAttribute(cn2.getIdentifier(), "canonicalName", np2.toString());
+                            }
+                        } else {
+                            nAttributes.setAttribute(cn1.getIdentifier(), "canonicalName", np1.toString());
+                            nAttributes.setAttribute(cn2.getIdentifier(), "canonicalName", np2.toString());
+						}
+                        
 						if (null != eAttributes.getDoubleAttribute(ce
 								.getIdentifier(), SUBNETWORK_CONNECTIONS)) {
 							eAttributes.setAttribute(ce.getIdentifier(), SUBNETWORK_CONNECTIONS,
@@ -382,10 +399,10 @@ public class PartitionAlgorithm extends AbstractLayout implements
 				networkTreeArray[index][4].toString(), // for network title
 				parentNet, (nodes.size() >= NETWORK_LIMIT_MIN)
 						&& nodes.size() <= NETWORK_LIMIT_MAX);
+        System.out.println(new_network.getTitle()+"\t"+nodes.size());
         networkTreeArray[index][5] = new_network.getIdentifier();
 		// optional create network view
-        //new_network.setIdentifier(goInfo[0].toString().trim());
-        //System.out.println(parentNet.getTitle()+"\t"+new_network.getTitle());
+        //new_network.setIdentifier(goInfo[0].toString().trim());        
 		CyNetworkView new_view = Cytoscape.getNetworkView(new_network
 				.getIdentifier());
 //        for(CyNetwork c:Cytoscape.getNetworkSet())
@@ -422,67 +439,68 @@ public class PartitionAlgorithm extends AbstractLayout implements
 					PartitionNetworkVisualStyleFactory.attributeName);
 		}        
 	}
-//	public void buildSubNetwork(CyNetwork current_network, String attributeValue) {
-//
-//		CyNetworkView current_network_view = null;
-//
-//		if (Cytoscape.viewExists(current_network.getIdentifier())) {
-//			current_network_view = Cytoscape.getNetworkView(current_network
-//					.getIdentifier());
-//		} // end of if ()
-//
-//		List nodes = attributeValueNodeMap.get(attributeValue);
-//		// System.out.println("Got nodes for attributeValue: " + attributeValue
-//		// + " = " + nodes.size());
-//		if (nodes == null) {
-//			return;
-//		}
-//
-//		//System.out.println("SIZE: " +attributeValue +": "+ nodes.size());
-//
-//		CyNetwork new_network = Cytoscape.createNetwork(nodes, current_network
-//				.getConnectingEdges(new ArrayList(nodes)),
-//		// CyNetworkNaming.getSuggestedSubnetworkTitle(current_network),
-//				attributeValue, // for network title
-//				current_network, (nodes.size() >= NETWORK_LIMIT_MIN)
-//						&& nodes.size() <= NETWORK_LIMIT_MAX);
-//		// optional create network view
-//
-//		CyNetworkView new_view = Cytoscape.getNetworkView(new_network
-//				.getIdentifier());
-//
-//		if (new_view == Cytoscape.getNullNetworkView()) {
-//			return;
-//		}
-//
-//		views.add(new_view);
-//
-//		// listen for window maximize or restore.
-//		Cytoscape.getDesktop().getNetworkViewManager().getInternalFrame(
-//				new_view).addPropertyChangeListener(
-//				JInternalFrame.IS_MAXIMUM_PROPERTY, this);
-//
-//		// apply layout
-//		if (current_network_view != Cytoscape.getNullNetworkView()) {
-//
-//			// CyLayoutAlgorithm layout =
-//			// CyLayouts.getLayout("force-directed");
-//			// System.out.println("Layout: " + new_view.getTitle() +" :: "+
-//			// layoutName);
-//
-//			CyLayoutAlgorithm layout = CyLayouts.getLayout(layoutName);
-//			layout.doLayout(new_view);
-//
-//		}
-//
-//		// set graphics level of detail
-//		((DingNetworkView) new_view).setGraphLOD(new CyGraphAllLOD());
-//
-//		if (PartitionNetworkVisualStyleFactory.attributeName != null) {
-//			Cytoscape.getVisualMappingManager().setVisualStyle(
-//					PartitionNetworkVisualStyleFactory.attributeName);
-//		}
-//	}
+    
+	public void buildSubNetwork(CyNetwork current_network, String attributeValue) {
+
+		CyNetworkView current_network_view = null;
+
+		if (Cytoscape.viewExists(current_network.getIdentifier())) {
+			current_network_view = Cytoscape.getNetworkView(current_network
+					.getIdentifier());
+		} // end of if ()
+
+		List nodes = attributeValueNodeMap.get(attributeValue);
+		// System.out.println("Got nodes for attributeValue: " + attributeValue
+		// + " = " + nodes.size());
+		if (nodes == null) {
+			return;
+		}
+
+		//System.out.println("SIZE: " +attributeValue +": "+ nodes.size());
+
+		CyNetwork new_network = Cytoscape.createNetwork(nodes, current_network
+				.getConnectingEdges(new ArrayList(nodes)),
+		// CyNetworkNaming.getSuggestedSubnetworkTitle(current_network),
+				attributeValue, // for network title
+				current_network, (nodes.size() >= NETWORK_LIMIT_MIN)
+						&& nodes.size() <= NETWORK_LIMIT_MAX);
+		// optional create network view
+
+		CyNetworkView new_view = Cytoscape.getNetworkView(new_network
+				.getIdentifier());
+
+		if (new_view == Cytoscape.getNullNetworkView()) {
+			return;
+		}
+
+		views.add(new_view);
+
+		// listen for window maximize or restore.
+		Cytoscape.getDesktop().getNetworkViewManager().getInternalFrame(
+				new_view).addPropertyChangeListener(
+				JInternalFrame.IS_MAXIMUM_PROPERTY, this);
+
+		// apply layout
+		if (current_network_view != Cytoscape.getNullNetworkView()) {
+
+			// CyLayoutAlgorithm layout =
+			// CyLayouts.getLayout("force-directed");
+			// System.out.println("Layout: " + new_view.getTitle() +" :: "+
+			// layoutName);
+
+			CyLayoutAlgorithm layout = CyLayouts.getLayout(layoutName);
+			layout.doLayout(new_view);
+
+		}
+
+		// set graphics level of detail
+		((DingNetworkView) new_view).setGraphLOD(new CyGraphAllLOD());
+
+		if (PartitionNetworkVisualStyleFactory.attributeName != null) {
+			Cytoscape.getVisualMappingManager().setVisualStyle(
+					PartitionNetworkVisualStyleFactory.attributeName);
+		}
+	}
 
 	// }
 
@@ -511,7 +529,7 @@ public class PartitionAlgorithm extends AbstractLayout implements
         System.out.println("*******************PartitionAlgorithm******************");
         System.out.println("Partition Attribute:" +attributeName);
 		// if "(none)" was selected in setting, then skip partitioning
-		if (null == attributeName || attributeName=="none") {
+		if (null == attributeName) {
 
 			// create visual style if set
 			if (PartitionNetworkVisualStyleFactory.attributeName != null) {
@@ -540,17 +558,15 @@ public class PartitionAlgorithm extends AbstractLayout implements
 			// }
 
 			nodeAttributeValues = GOLayoutUtil.setupNodeAttributeValues(attributeName);
+            System.out.println("Partition Attribute number: " +nodeAttributeValues.size());
 			// warn before building more than 100 subnetworks;
 			int response = JOptionPane.YES_OPTION;
 			if (nodeAttributeValues.size() > SUBNETWORK_COUNT_WARNING) {
 				// TODO: add dialog to continue
-				response = JOptionPane
-						.showConfirmDialog(
-								(java.awt.Window) taskMonitor,
-								"Building "
-										+ nodeAttributeValues.size()
-										+ " subnetworks may take a while. Are you sure you want to proceed?",
-								"Warning", JOptionPane.YES_NO_OPTION);
+				response = JOptionPane.showConfirmDialog((java.awt.Window) taskMonitor,
+                        "Building " + nodeAttributeValues.size()
+                        + " subnetworks may take a while. Are you sure you want to proceed?",
+                        "Warning", JOptionPane.YES_NO_OPTION);
 			}
 			if (JOptionPane.YES_OPTION == response) {
 
@@ -561,8 +577,7 @@ public class PartitionAlgorithm extends AbstractLayout implements
 					// coloring
 					// and if not running Floorplan Only
 					//AP: buggy
-//					GOLayout.createVisualStyle(Cytoscape
-//							.getCurrentNetworkView());
+					GOLayout.createVisualStyle(Cytoscape.getCurrentNetworkView());
 				}
 
 				Set<Object> attributeValues = attributeValueNodeMap.keySet();
@@ -574,25 +589,26 @@ public class PartitionAlgorithm extends AbstractLayout implements
 				int nbrProcesses = attributeValues.size();
 				int count = 0;
 
-                //Object[][] networkTreeObjArray = buildNetworkTreeMap(attributeValues);
-                buildNetworkTreeMap(attributeValues);
-                for (int i=0;i<networkTreeArray.length;i++) {
-                    if(this.GO_LEVEL>=new Integer(networkTreeArray[i][3].toString()).intValue()) {
+                if(GOLayoutUtil.isValidGOTerm(nodeAttributeValues)) {
+                    buildNetworkTreeMap(attributeValues);
+                    for (int i=0;i<networkTreeArray.length;i++) {
+                        if(this.GO_LEVEL>=new Integer(networkTreeArray[i][3].toString()).intValue()) {
+                            count++;
+                            taskMonitor.setPercentCompleted((100 * count)
+                                    / nbrProcesses);
+                            taskMonitor.setStatus("building subnetwork for " + networkTreeArray[i][0]);
+                            buildSubNetwork(net, i);
+                        }
+                    }
+                } else {
+                    for (Object val : attributeValues) {
                         count++;
                         taskMonitor.setPercentCompleted((100 * count)
                                 / nbrProcesses);
-                        taskMonitor.setStatus("building subnetwork for " + networkTreeArray[i][0]);
-                        buildSubNetwork(net, i);
+                        taskMonitor.setStatus("building subnetwork for " + val);
+                        buildSubNetwork(net, val.toString());
                     }
-				}
-	
-//				for (Object val : attributeValues) {
-//					count++;
-//					taskMonitor.setPercentCompleted((100 * count)
-//							/ nbrProcesses);
-//					taskMonitor.setStatus("building subnetwork for " + val);
-//					buildSubNetwork(net, val.toString());
-//				}
+                }
                 //2011-09-14
                 //Temporarily comment those unimplemented functions
 				System.out.println("*******************Build sub network overview***********************");
@@ -717,7 +733,7 @@ public class PartitionAlgorithm extends AbstractLayout implements
     public void updateOverview(){
         Cytoscape.destroyNetwork(getNetworkByTitle("Overview"));
         CyNetwork net = Cytoscape.getCurrentNetwork();
-        //buildSubnetworkOverview(rootNetwork);
+        buildSubnetworkOverview(rootNetwork);
         tileNetworkViews();
     }
 
@@ -790,24 +806,32 @@ public class PartitionAlgorithm extends AbstractLayout implements
     }
 
     public String getGOTerm(String desc) {
-        for(int i=0;i<networkTreeArray.length;i++) {
-            if(networkTreeArray[i][4].equals(desc)) {
-                return networkTreeArray[i][0].toString();
+        if(GOLayoutUtil.isValidGOTerm(nodeAttributeValues)) {
+            for(int i=0;i<networkTreeArray.length;i++) {
+                if(networkTreeArray[i][4].equals(desc)) {
+                    return networkTreeArray[i][0].toString();
+                }
             }
+            return "";
+        } else {
+            return "";
         }
-        return "";
     }
 
     private boolean existNetwork(Object networkID) {
-        for(int i=0;i<networkTreeArray.length;i++) {
-            if(networkTreeArray[i][0].equals(networkID)) {
-                if(!networkTreeArray[i][5].equals(""))
-                    return true;
-                else
-                    return false;
+        if(GOLayoutUtil.isValidGOTerm(nodeAttributeValues)) {
+            for(int i=0;i<networkTreeArray.length;i++) {
+                if(networkTreeArray[i][0].equals(networkID)) {
+                    if(!networkTreeArray[i][5].equals(""))
+                        return true;
+                    else
+                        return false;
+                }
             }
+            return false;
+        } else {
+            return true;
         }
-        return false;
     }
 
 	public void propertyChange(PropertyChangeEvent evt) {

@@ -24,6 +24,7 @@ import cytoscape.command.CyCommandResult;
 import cytoscape.data.CyAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -120,6 +121,8 @@ public class IdMapping {
                 } else {
                     secKeyList = Arrays.asList(secKeys.toArray()[0].toString().trim().split(","));
                 }
+                //Sort the resuls with reverse order.
+                Collections.sort(secKeyList, Collections.reverseOrder());
             } else {
                 secKeyList.add("unassigned");
             }
@@ -174,20 +177,20 @@ public class IdMapping {
         args.put("sourceid", sourceID);
         args.put("sourcetype", sourceType);
         args.put("targettype", targetType);
-        System.out.println(sourceType+"\t"+targetType);
+        //System.out.println(sourceType+"\t"+targetType);
         CyCommandResult result = null;
         try {
             result = CyCommandManager.execute(
                     "idmapping", "general mapping", args);
         } catch (Exception e) {
             // TODO Auto-generated catch block
-            System.out.println("1"+sourceType+"\t"+targetType);
-            //e.printStackTrace();
+            //System.out.println("1"+sourceType+"\t"+targetType);
+            e.printStackTrace();
         }
         Map<String, Set<String>> secondaryKeyMap = new HashMap<String, Set<String>>();
         if (null != result) {
             secondaryKeyMap= (Map<String, Set<String>>) result.getResult();
-            System.out.println(secondaryKeyMap.size()+"\t"+secondaryKeyMap);
+            //System.out.println(secondaryKeyMap.size()+"\t"+secondaryKeyMap);
         }
         return secondaryKeyMap;
     }
@@ -214,6 +217,8 @@ public class IdMapping {
             results = new Vector(sumValue);
         else
             results = Arrays.asList(sumValue.toArray()[0].toString().trim().split(","));
+        //Sort the resuls with reverse order.
+        Collections.sort(results, Collections.reverseOrder());
         return results;
     }
 

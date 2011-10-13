@@ -25,8 +25,6 @@ import cytoscape.task.util.TaskManager;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,10 +32,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import org.genmapp.golayout.GOLayout;
@@ -117,14 +113,13 @@ public class GOLayoutSettingDialog extends JDialog
                 checkAttributes(GOLayoutStaticValues.BP_ATTNAME).toArray()));
         aAttParComboBox.setSelectedItem(GOLayoutStaticValues.BP_ATTNAME);
         aAttParComboBox.addActionListener(this);
-        aAttLayComboBox.setModel(new DefaultComboBoxModel(
-                checkAttributes(GOLayoutStaticValues.CC_ATTNAME).toArray()));
+        aAttLayComboBox.setModel(new DefaultComboBoxModel(new Object[]{"none", GOLayoutStaticValues.CC_ATTNAME}));
         aAttLayComboBox.setSelectedItem(GOLayoutStaticValues.CC_ATTNAME);
         aAttNodComboBox.setModel(new DefaultComboBoxModel(
                 checkAttributes(GOLayoutStaticValues.MF_ATTNAME).toArray()));
         aAttNodComboBox.setSelectedItem(GOLayoutStaticValues.MF_ATTNAME);
         
-        if (!GOLayoutUtil.checkGPMLPlugin()) {
+        if (!GOLayout.tagGPMLPlugin) {
             lTepPreRadioButton.setEnabled(false);
             lTepPreComboBox.setEnabled(false);
             lTepCusRadioButton.setEnabled(false);
@@ -136,8 +131,8 @@ public class GOLayoutSettingDialog extends JDialog
         lTepPanel.setVisible(false);
         //sParSpaLabel.setVisible(false);
         //sParSpaTextField.setVisible(false);
-        //sParCroLabel.setVisible(false);
-        //sParCroCheckBox.setVisible(false);
+        sParCroLabel.setVisible(false);
+        sParCroCheckBox.setVisible(false);
         sParPatLabel.setVisible(false);
         sParPatComboBox.setVisible(false);
     }
@@ -1077,17 +1072,17 @@ public class GOLayoutSettingDialog extends JDialog
     }
 
     private void beforeSubmit() {
-        if (aAttParComboBox.getSelectedItem().equals("(none)")) {
+        if (aAttParComboBox.getSelectedItem().equals("none")) {
             PartitionAlgorithm.attributeName = null;
         } else {
             PartitionAlgorithm.attributeName = aAttParComboBox.getSelectedItem().toString();
         }
-        if (aAttLayComboBox.getSelectedItem().equals("(none)")) {
+        if (aAttLayComboBox.getSelectedItem().equals("none")) {
             CellAlgorithm.attributeName = null;
         } else {
             CellAlgorithm.attributeName = aAttLayComboBox.getSelectedItem().toString();
         }
-        if (aAttNodComboBox.getSelectedItem().equals("(none)")) {
+        if (aAttNodComboBox.getSelectedItem().equals("none")) {
             PartitionNetworkVisualStyleFactory.attributeName = null;
         } else {
             PartitionNetworkVisualStyleFactory.attributeName = aAttNodComboBox.getSelectedItem().toString();
@@ -1117,13 +1112,13 @@ public class GOLayoutSettingDialog extends JDialog
                 try {
                     taskMonitor.setStatus("Running partition...");
                     CyLayoutAlgorithm layout = CyLayouts.getLayout("partition");
-                    //layout.doLayout(Cytoscape.getCurrentNetworkView(), taskMonitor);
-                    layout.doLayout(Cytoscape.getCurrentNetworkView());
+                    layout.doLayout(Cytoscape.getCurrentNetworkView(), taskMonitor);
+                    //layout.doLayout(Cytoscape.getCurrentNetworkView());
                     taskMonitor.setPercentCompleted(100);
                 } catch (Exception e) {
-                        taskMonitor.setPercentCompleted(100);
-                        taskMonitor.setStatus("Failed.\n");
-                        e.printStackTrace();
+                    taskMonitor.setPercentCompleted(100);
+                    taskMonitor.setStatus("Failed.\n");
+                    e.printStackTrace();
                 }
         }
 

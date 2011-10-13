@@ -148,13 +148,13 @@ public class CellAlgorithm extends AbstractLayout {
 	 * The layout protocol...
 	 */
 	public void construct() {
-        nodeAttributeValues = GOLayoutUtil.setupNodeAttributeValues(attributeName);
-        Set<Object> attributeValues = new HashSet(nodeAttributeValues);
-        goDescMappingFile = GOLayoutUtil.readMappingFile(this.getClass().getResource(GOLayoutStaticValues.GO_DescFile), attributeValues, 0);
-		// if "(none)" was selected in setting, then skip cellular layout
+        // if "(none)" was selected in setting, then skip cellular layout
 		if (null == attributeName) {
 			// skip the whole ordeal
 		} else {
+            nodeAttributeValues = GOLayoutUtil.setupNodeAttributeValues(attributeName);
+            Set<Object> attributeValues = new HashSet(nodeAttributeValues);
+            goDescMappingFile = GOLayoutUtil.readMappingFile(this.getClass().getResource(GOLayoutStaticValues.GO_DescFile), attributeValues, 0);
 
 			// CREATE REGIONS:
 			CellTemplate.buildRegionsFromTepmlate(distanceBetweenNodes);
@@ -180,8 +180,7 @@ public class CellAlgorithm extends AbstractLayout {
 				if (PartitionNetworkVisualStyleFactory.attributeName != null) {
 					// if a non-null attribute has been selection for node
 					// coloring
-					GOLayout.createVisualStyle(Cytoscape
-							.getCurrentNetworkView());
+					GOLayout.createVisualStyle(Cytoscape.getCurrentNetworkView());
 				}
 				if (PartitionNetworkVisualStyleFactory.attributeName != null) {
 					Cytoscape.getVisualMappingManager().setVisualStyle(

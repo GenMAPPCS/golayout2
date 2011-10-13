@@ -41,6 +41,8 @@ import java.util.Map;
 import cytoscape.Cytoscape;
 import cytoscape.data.CyAttributes;
 import cytoscape.data.CyAttributesUtils;
+import cytoscape.layout.CyLayoutAlgorithm;
+import cytoscape.layout.CyLayouts;
 import cytoscape.view.CyNetworkView;
 import cytoscape.visual.CalculatorCatalog;
 import cytoscape.visual.EdgeAppearanceCalculator;
@@ -61,9 +63,14 @@ import cytoscape.visual.mappings.DiscreteMapping;
 import cytoscape.visual.mappings.LinearNumberToNumberInterpolator;
 import cytoscape.visual.mappings.ObjectMapping;
 import cytoscape.visual.mappings.PassThroughMapping;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+import org.genmapp.golayout.GOLayout;
 import org.genmapp.golayout.color.MFEdgeAppearanceCalculator;
 import org.genmapp.golayout.color.MFNodeAppearanceCalculator;
 import org.genmapp.golayout.partition.PartitionAlgorithm;
+import org.genmapp.golayout.utils.GOLayoutUtil;
 
 
 public class PartitionNetworkVisualStyleFactory {
@@ -72,8 +79,8 @@ public class PartitionNetworkVisualStyleFactory {
 	 * 
 	 */
 	public static String attributeName = GOLayoutStaticValues.MF_ATTNAME;
-
-	private static LabelPosition lp = new LabelPosition();
+    private static LabelPosition lp = new LabelPosition();
+    private static Calculator colorCalculator;
 	public static DiscreteMapping disMappingLabelPosition = new DiscreteMapping(
 			lp, "region_name", ObjectMapping.NODE_MAPPING);
 
@@ -103,99 +110,88 @@ public class PartitionNetworkVisualStyleFactory {
 			nac.getDefaultAppearance().set(VisualPropertyType.NODE_FILL_COLOR,
 					new Color(255, 255, 255));
 
-			CyAttributes attribs = Cytoscape.getNodeAttributes();
-			Map attrMap = CyAttributesUtils
-					.getAttribute(attributeName, attribs);
-			Collection values = attrMap.values();
-			List uniqueValueList = new ArrayList();
+            CyAttributes attribs = Cytoscape.getNodeAttributes();
+            Map attrMap = CyAttributesUtils
+                    .getAttribute(attributeName, attribs);
+            Collection values = attrMap.values();
+            /*
+             * key will be a List attribute value, so we need to pull out
+             * individual list items
+             */
+            List uniqueValueList = GOLayoutUtil.setupNodeAttributeValues(attributeName);
 
-			/*
-			 * key will be a List attribute value, so we need to pull out
-			 * individual list items
-			 */
-			if (attribs.getType(attributeName) == CyAttributes.TYPE_SIMPLE_LIST) {
-				for (Object o : values) {
-					List oList = (List) o;
-					for (int j = 0; j < oList.size(); j++) {
-						Object jObj = oList.get(j);
-						if (jObj != null) {
-							if (!uniqueValueList.contains(jObj)) {
-								uniqueValueList.add(jObj);
-							}
-						}
-					}
-				}
-			}
+            //Set the uniqueValueList to the pull down menu in NetworkPanel
+            GOLayout.wsPanel.setFuntionValues(uniqueValueList);
+            
+            // NODE MAPPINGS
+            PassThroughMapping passMappingLabel = new PassThroughMapping("",
+                    "canonicalName");
+            Calculator labelCalculator = new BasicCalculator(
+                    attributeName, passMappingLabel,
+                    VisualPropertyType.NODE_LABEL);
+            nac.setCalculator(labelCalculator);
 
-			// NODE MAPPINGS
-			PassThroughMapping passMappingLabel = new PassThroughMapping("",
-					"canonicalName");
-			Calculator labelCalculator = new BasicCalculator(
-					attributeName, passMappingLabel,
-					VisualPropertyType.NODE_LABEL);
-			nac.setCalculator(labelCalculator);
+            DiscreteMapping disMappingBorderColor = new DiscreteMapping(
+                    Color.black, CellAlgorithm.NODE_COPIED,
+                    ObjectMapping.NODE_MAPPING);
+            disMappingBorderColor.putMapValue(Boolean.TRUE, Color.red);
+            Calculator borderColorCalculator = new BasicCalculator(
+                    attributeName, disMappingBorderColor,
+                    VisualPropertyType.NODE_BORDER_COLOR);
+            nac.setCalculator(borderColorCalculator);
 
-			DiscreteMapping disMappingBorderColor = new DiscreteMapping(
-					Color.black, CellAlgorithm.NODE_COPIED,
-					ObjectMapping.NODE_MAPPING);
-			disMappingBorderColor.putMapValue(Boolean.TRUE, Color.red);
-			Calculator borderColorCalculator = new BasicCalculator(
-					attributeName, disMappingBorderColor,
-					VisualPropertyType.NODE_BORDER_COLOR);
-			nac.setCalculator(borderColorCalculator);
 
-			
-			ContinuousMapping contMappingNodeWidth = new ContinuousMapping(PartitionAlgorithm.NETWORK_LIMIT_MIN, ObjectMapping.NODE_MAPPING);
-			contMappingNodeWidth.setControllingAttributeName(
-					PartitionAlgorithm.SUBNETWORK_SIZE, view.getNetwork(),
-					false);
-			contMappingNodeWidth.setInterpolator(new LinearNumberToNumberInterpolator());
-			contMappingNodeWidth.addPoint(PartitionAlgorithm.NETWORK_LIMIT_MIN, new BoundaryRangeValues(10, 20, 20));
-			contMappingNodeWidth.addPoint(PartitionAlgorithm.NETWORK_LIMIT_MAX, new BoundaryRangeValues(80, 80, 100));
-			Calculator nodeWidthCalculator = new BasicCalculator(attributeName, contMappingNodeWidth, VisualPropertyType.NODE_WIDTH);
-			nac.setCalculator(nodeWidthCalculator);
+            ContinuousMapping contMappingNodeWidth = new ContinuousMapping(PartitionAlgorithm.NETWORK_LIMIT_MIN, ObjectMapping.NODE_MAPPING);
+            contMappingNodeWidth.setControllingAttributeName(
+                    PartitionAlgorithm.SUBNETWORK_SIZE, view.getNetwork(),
+                    false);
+            contMappingNodeWidth.setInterpolator(new LinearNumberToNumberInterpolator());
+            contMappingNodeWidth.addPoint(PartitionAlgorithm.NETWORK_LIMIT_MIN, new BoundaryRangeValues(10, 20, 20));
+            contMappingNodeWidth.addPoint(PartitionAlgorithm.NETWORK_LIMIT_MAX, new BoundaryRangeValues(80, 80, 100));
+            Calculator nodeWidthCalculator = new BasicCalculator(attributeName, contMappingNodeWidth, VisualPropertyType.NODE_WIDTH);
+            nac.setCalculator(nodeWidthCalculator);
 
-			ContinuousMapping contMappingNodeHeight = new ContinuousMapping(PartitionAlgorithm.NETWORK_LIMIT_MIN, ObjectMapping.NODE_MAPPING);
-			contMappingNodeHeight.setControllingAttributeName(
-					PartitionAlgorithm.SUBNETWORK_SIZE, view.getNetwork(),
-					false);
-			contMappingNodeHeight.setInterpolator(new LinearNumberToNumberInterpolator());
-			contMappingNodeHeight.addPoint(PartitionAlgorithm.NETWORK_LIMIT_MIN, new BoundaryRangeValues(10, 20, 20));
-			contMappingNodeHeight.addPoint(PartitionAlgorithm.NETWORK_LIMIT_MAX, new BoundaryRangeValues(80, 80, 100));
-			Calculator nodeHeightCalculator = new BasicCalculator(attributeName, contMappingNodeHeight, VisualPropertyType.NODE_HEIGHT);
-			nac.setCalculator(nodeHeightCalculator);
+            ContinuousMapping contMappingNodeHeight = new ContinuousMapping(PartitionAlgorithm.NETWORK_LIMIT_MIN, ObjectMapping.NODE_MAPPING);
+            contMappingNodeHeight.setControllingAttributeName(
+                    PartitionAlgorithm.SUBNETWORK_SIZE, view.getNetwork(),
+                    false);
+            contMappingNodeHeight.setInterpolator(new LinearNumberToNumberInterpolator());
+            contMappingNodeHeight.addPoint(PartitionAlgorithm.NETWORK_LIMIT_MIN, new BoundaryRangeValues(10, 20, 20));
+            contMappingNodeHeight.addPoint(PartitionAlgorithm.NETWORK_LIMIT_MAX, new BoundaryRangeValues(80, 80, 100));
+            Calculator nodeHeightCalculator = new BasicCalculator(attributeName, contMappingNodeHeight, VisualPropertyType.NODE_HEIGHT);
+            nac.setCalculator(nodeHeightCalculator);
 
-			DiscreteMapping disMappingNodeFill = new DiscreteMapping(
-					Color.white, ObjectMapping.NODE_MAPPING);
-			disMappingNodeFill.setControllingAttributeName(attributeName, view
-					.getNetwork(), false);
+            DiscreteMapping disMappingNodeFill = new DiscreteMapping(
+                    Color.white, ObjectMapping.NODE_MAPPING);
+            disMappingNodeFill.setControllingAttributeName(attributeName, view
+                    .getNetwork(), false);
 
-			/*
-			 * Create random colors
-			 */
-			final float increment = 1f / ((Number) uniqueValueList.size())
-					.floatValue();
-			float hue = 0;
-			float sat = 0;
-			float br = 0;
-			int i = 0;
-			for (Object key : uniqueValueList) {
-				hue = hue + increment;
-				sat = (Math.abs(((Number) Math.cos((8 * i) / (2 * Math.PI)))
-						.floatValue()) * 0.7f) + 0.3f;
-				br = (Math.abs(((Number) Math.sin(((i) / (2 * Math.PI))
-						+ (Math.PI / 2))).floatValue()) * 0.7f) + 0.3f;
-				disMappingNodeFill.putMapValue(key, new Color(Color.HSBtoRGB(
-						hue, sat, br)));
-				i++;
-			}
-			Calculator colorCalculator = new BasicCalculator(
-					attributeName, disMappingNodeFill,
-					VisualPropertyType.NODE_FILL_COLOR);
+            /*
+             * Create random colors
+             */
+            final float increment = 1f / ((Number) uniqueValueList.size())
+                    .floatValue();
+            float hue = 0;
+            float sat = 0;
+            float br = 0;
+            int i = 0;
+            for (Object key : uniqueValueList) {
+                hue = hue + increment;
+                sat = (Math.abs(((Number) Math.cos((8 * i) / (2 * Math.PI)))
+                        .floatValue()) * 0.7f) + 0.3f;
+                br = (Math.abs(((Number) Math.sin(((i) / (2 * Math.PI))
+                        + (Math.PI / 2))).floatValue()) * 0.7f) + 0.3f;
+                disMappingNodeFill.putMapValue(key, new Color(Color.HSBtoRGB(
+                        hue, sat, br)));
+                i++;
+            }
+            colorCalculator = new BasicCalculator(
+                    attributeName, disMappingNodeFill,
+                    VisualPropertyType.NODE_FILL_COLOR);
 
-			nac.setCalculator(colorCalculator);
+            nac.setCalculator(colorCalculator);
 
-			mfStyle.setNodeAppearanceCalculator(nac);
+            mfStyle.setNodeAppearanceCalculator(nac);
 
 			// EDGE MAPPINGS
 			DiscreteMapping disMappingEdgeColor = new DiscreteMapping(
@@ -256,4 +252,36 @@ public class PartitionNetworkVisualStyleFactory {
 		return mfStyle;
 	}
 
+    public static void highlightNodes(String attribute) {
+        CyNetworkView view = Cytoscape.getCurrentNetworkView();
+        VisualMappingManager vmm = Cytoscape.getVisualMappingManager();
+		CalculatorCatalog catalog = vmm.getCalculatorCatalog();
+		VisualStyle mfStyle = catalog.getVisualStyle(attributeName);
+        NodeAppearanceCalculator nodeAppCalculator = mfStyle.getNodeAppearanceCalculator();
+
+        if(attribute.equals("All functions")) {
+            nodeAppCalculator.setCalculator(PartitionNetworkVisualStyleFactory.colorCalculator);
+        } else {
+            DiscreteMapping disMappingNodeFill = new DiscreteMapping(
+                        Color.white, ObjectMapping.NODE_MAPPING);
+            disMappingNodeFill.setControllingAttributeName(attributeName, view
+                        .getNetwork(), false);
+            disMappingNodeFill.putMapValue(attribute, Color.RED);
+            disMappingNodeFill.putMapValue("none", Color.WHITE);
+            Calculator colorCalculator = new BasicCalculator(
+                    attributeName, disMappingNodeFill,
+                    VisualPropertyType.NODE_FILL_COLOR);
+            nodeAppCalculator.setCalculator(colorCalculator);
+        }
+
+        mfStyle.setNodeAppearanceCalculator(nodeAppCalculator);
+        vmm.setNetworkView(view);
+		vmm.setVisualStyle(mfStyle);
+		view.setVisualStyle(attributeName);
+
+		Cytoscape.getVisualMappingManager().setNetworkView(view);
+		Cytoscape.getVisualMappingManager().applyAppearances();
+        CyLayoutAlgorithm layout = CyLayouts.getLayout("force-directed");
+        layout.doLayout(Cytoscape.getCurrentNetworkView());
+    }
 }

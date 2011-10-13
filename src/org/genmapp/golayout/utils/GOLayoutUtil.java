@@ -15,6 +15,7 @@
  ******************************************************************************/
 package org.genmapp.golayout.utils;
 
+import csplugins.id.mapping.CyThesaurusPlugin;
 import cytoscape.Cytoscape;
 import cytoscape.data.CyAttributes;
 import cytoscape.data.CyAttributesUtils;
@@ -52,6 +53,25 @@ public class GOLayoutUtil {
         } catch(NoClassDefFoundError e){
             return false;
         }
+    }
+
+    public static boolean checkCyThesaurus(){
+        try {
+            new CyThesaurusPlugin();
+            return true;
+        } catch(NoClassDefFoundError e){
+            return false;
+        }
+    }
+
+    public static boolean isValidGOTerm(List values) {
+        for(Object o:values) {
+            if(o.toString().indexOf("GO")!=-1||o.toString().equals("unassigned"))
+                continue;
+            else
+                return false;
+        }
+        return true;
     }
     
     public static boolean checkConnection() {
@@ -243,8 +263,8 @@ public class GOLayoutUtil {
      * @param filename
      * @return
      */
-    public static Map<String, String> readMappingFile(final URL filename, Set<Object> firstAttributeList, int index) {
-        final Map<String, String> ret = new HashMap<String, String>();
+    public static Map<String, String> readMappingFile(URL filename, Set<Object> firstAttributeList, int index) {
+        Map<String, String> ret = new HashMap<String, String>();
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(filename.openStream()));
             String inputLine;
@@ -266,8 +286,8 @@ public class GOLayoutUtil {
      * @param filename
      * @return
      */
-    public static Map<String, String> readGOMappingFile(final URL filename, Set<Object> secondAttributeList) {
-        final Map<String, String> ret = new HashMap<String, String>();
+    public static Map<String, String> readGOMappingFile(URL filename, Set<Object> secondAttributeList) {
+        Map<String, String> ret = new HashMap<String, String>();
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(filename.openStream()));
             String inputLine=in.readLine();
@@ -363,28 +383,25 @@ public class GOLayoutUtil {
 
 		// key will be a List attribute value, so we need to pull out individual
 		// list items
-		if (attribs.getType(attributeName) == CyAttributes.TYPE_SIMPLE_LIST) {
-			for (Object o : values) {
-//                String[] oList = o.toString().split(",");
-//                for (String jObj:oList) {
-//                    jObj = jObj.trim();
-//                    if (jObj != null) {
-//						if (!uniqueValueList.contains(jObj)) {
-//							uniqueValueList.add(jObj);
-//						}
-//					}
-//				}
-				List oList = (List) o;
+        for (Object o : values) {
+            List oList = (List) o;
+            if (attribs.getType(attributeName) == CyAttributes.TYPE_SIMPLE_LIST) {
                 for (int j = 0; j < oList.size(); j++) {
-					Object jObj = oList.get(j);
-					if (jObj != null) {
-						if (!uniqueValueList.contains(jObj)) {
-							uniqueValueList.add(jObj);
-						}
-					}
-				}
-			}
-		}
+                    Object jObj = oList.get(j);
+                    if (jObj != null) {
+                        if (!uniqueValueList.contains(jObj)) {
+                            uniqueValueList.add(jObj);
+                        }
+                    }
+                }
+            } else {
+                if (o != null) {
+                    if (!uniqueValueList.contains(o)) {
+                        uniqueValueList.add(o);
+                    }
+                }
+            }
+        }
 		return uniqueValueList;
 	}
 }
