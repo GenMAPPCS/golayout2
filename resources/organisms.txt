@@ -3,7 +3,7 @@ Arabidopsis	thaliana	Arabidopsis	At
 Aspergillus	niger	Black mold	An
 Bacillus	subtilis	Bsubtilis	Bs
 Bos	taurus	Cow	Bt
-Caenorhabditis	elegans	Celegans	Ce
+Caenorhabditis	elegans	C.elegans	Ce
 Canis	familiaris	Dog	Cf
 Ciona	intestinalis	Sea Squirt	Ci
 Danio	rerio	Zebrafish	Dr
