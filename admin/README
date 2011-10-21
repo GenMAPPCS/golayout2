@@ -25,11 +25,16 @@ This directory contains files needed to generate datasources for the GOLayout pl
   5. Go to OBO>builds to find the Path file (built_go_paths.txt) and Name file (go_annotations.txt)
   6. Next, run these pair of commands per species, e.g., Mm:
   		>python GO_Elite.py --update Official --version EnsMart## --species Mm --buildNested yes
-    	>python GO_Elite.py --species Mm --update GORelationships
+    	>python GO_Elite.py --species Mm --update GORelationships --GOtype GOslim --nestTerms yes
     The first one is the same as in step 4, but you have to rerun it per species you want. Again,
-    replace "##" with the version number like in step 4.
+    replace "##" with the version number like in step 4. In step two, you specify the name of the Mosaic GO database file to produce (GOslim or GOfull) along with whether to use GO nesting or not. GO nesting will give you all Ensembl gene associations to every child term of every parent GO term (see GO-Elite documentation for more details).
   7. Now in OBO>builds you'll find a new Mapping file per species.
-  
+  8. When repeating for a new species, repeat step 6 only.
+  9. After building for GO-Slim (or instead of in cases where Ensembl-GOslim is not supported), to build GO-Slim you need to first download the non-Slim GO by not specifying a URL the (default URL will be used instead- http://www.geneontology.org/ontology/gene_ontology.obo):
+  		>python GO_Elite.py --update GO
+  9. Next, simply provide the GORelationships argument line to get the full-GO nested associations:
+    	>python GO_Elite.py --species Mm --update GORelationships --GOtype GOfull --nestTerms yes
+
   === Non-GO ontologies ===
   You can still generate the Path and Name files using steps 1-5 above. Y ou'll have to find 
   another source for generating Mapping files, or users will have to provide their own annotations 
