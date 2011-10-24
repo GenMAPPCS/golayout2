@@ -81,7 +81,7 @@
     <!--  Target to compile all Plug In Code -->
     <target name="compile" depends="prepare"
             description="Compiles all PlugIn source code.">
-        <javac debug="Yes" srcdir="${src.dir}" destdir="${build.classes}">
+        <javac includeantruntime="false" debug="Yes" srcdir="${src.dir}" destdir="${build.classes}">
             <classpath refid="classpath"/>
         </javac>
     </target>
@@ -96,7 +96,7 @@
             <fileset dir="${images}"/>
         </copy>
         <unjar dest="${build.classes}">
-         <fileset dir="${pluginlib.dir}"/>
+            <fileset dir="${pluginlib.dir}" includes="*.jar"/>
         </unjar>
         <jar destfile="${build.dir}/${plugin.name}.jar">
             <fileset dir="${build.classes}"/>
