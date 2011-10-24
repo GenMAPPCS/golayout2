@@ -23,8 +23,11 @@ import cytoscape.layout.LayoutProperties;
 import cytoscape.layout.Tunable;
 import ding.view.DGraphView;
 import ding.view.DingCanvas;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CellTemplate {
+    public static Map<String, String> nodeRegionMap;
 
 	public static void buildRegionsFromTepmlate(double dbn) {
 
@@ -32,6 +35,8 @@ public class CellTemplate {
 
 		RegionManager.clearAll();
 
+        nodeRegionMap = new HashMap<String, String>();
+        
 		// Hard-coded templates
 		String FillColor;
 		String Color;

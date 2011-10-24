@@ -399,7 +399,7 @@ public class PartitionAlgorithm extends AbstractLayout implements
 				networkTreeArray[index][4].toString(), // for network title
 				parentNet, (nodes.size() >= NETWORK_LIMIT_MIN)
 						&& nodes.size() <= NETWORK_LIMIT_MAX);
-        System.out.println(new_network.getTitle()+"\t"+nodes.size());
+        //System.out.println(new_network.getTitle()+"\t"+nodes.size());
         networkTreeArray[index][5] = new_network.getIdentifier();
 		// optional create network view
         //new_network.setIdentifier(goInfo[0].toString().trim());        
@@ -822,9 +822,12 @@ public class PartitionAlgorithm extends AbstractLayout implements
         if(GOLayoutUtil.isValidGOTerm(nodeAttributeValues)) {
             for(int i=0;i<networkTreeArray.length;i++) {
                 if(networkTreeArray[i][0].equals(networkID)) {
-                    if(!networkTreeArray[i][5].equals(""))
-                        return true;
-                    else
+                    if(!networkTreeArray[i][5].equals("")) {
+                        if (Cytoscape.viewExists(networkTreeArray[i][5].toString()))
+                            return true;
+                        else
+                            return false;
+                    }  else
                         return false;
                 }
             }

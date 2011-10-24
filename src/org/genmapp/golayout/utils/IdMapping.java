@@ -57,7 +57,7 @@ public class IdMapping {
         }
         List<String> sourceIDTypes = new ArrayList<String>();
         if (null != result) {
-            System.out.println(result.getResult().toString());
+            //System.out.println(result.getResult().toString());
             Set<String> idTypes = (Set<String>) result.getResult();
             for(String t : idTypes) {
                 sourceIDTypes.add(t);
@@ -199,7 +199,7 @@ public class IdMapping {
         Set<String> sumValue = new HashSet();
         List<String> results = new ArrayList<String>();
         for(Object keyID : stringSetMap.keySet().toArray()) {
-            System.out.println(keyID);
+            //System.out.println(keyID);
             Set<String> valueSet = stringSetMap.get(keyID);
             for(String value:valueSet) {
                 if(value.trim().length()>0) {
@@ -209,7 +209,7 @@ public class IdMapping {
                     
                 }
             }
-            System.out.println(sumValue.toString());
+            //System.out.println(sumValue.toString());
         }
         if(sumValue.size()<1)
             results.add("unassigned");
@@ -222,6 +222,32 @@ public class IdMapping {
         return results;
     }
 
+    private Map<String, Set<String>> checkEmptyValue(Map<String, Set<String>> originalMap) {
+        Map<String, Set<String>> result = originalMap;
+        Object[] geneList = result.keySet().toArray();
+        for(Object o:geneList) {
+            Set<String> GOList = result.get(o);
+            String temp = GOList.toString().trim();
+            if(temp.substring(1, temp.length()-1).trim().length()<1) {
+                Set<String> valueList = new HashSet<String>();
+                valueList.add("unassigned");
+                result.put(o.toString(), valueList);
+            } else {
+                result.put(o.toString(), GOList);
+            }
+        }
+        return result;
+    }
+
+    private boolean isEnsemblID(String idType){
+        if(idType.toLowerCase().equals("gramene arabidopsis")) {
+            return true;
+        } else if(idType.toLowerCase().indexOf("ensembl")==-1) {
+            return true;
+        } else
+            return false;
+    }
+    
     public boolean mapID(String derbyFilePath, String GOSlimFilePath,
             String sourceIDName, String sourceType, String targetType) {
         Map<String, Set<String>> idGOMap = new HashMap<String, Set<String>>();
@@ -232,7 +258,7 @@ public class IdMapping {
             nodeIds.add(cn.getIdentifier());
         }
         if(sourceIDName == null ? "ID" == null : sourceIDName.equals("ID")) {
-            if(sourceType.toLowerCase().indexOf("ensembl")==-1) {
+            if(isEnsemblID(sourceType)) {
                 System.out.println("IdMapping:mapID: ID & Non-Ensembl");
                 //Finished at 2011-09-21, for non-"Ensembl" & ID. ticket 3 for idmapping
                 connectDerbyFileSource(derbyFilePath);
@@ -276,15 +302,18 @@ public class IdMapping {
                 //Finished, for "Ensembl" & ID.
                 connectGOSlimSource(GOSlimFilePath);
                 idGOMap = mapAttribute(nodeIds, "Ensembl", GOLayoutStaticValues.BP_ATTNAME);
+                idGOMap=checkEmptyValue(idGOMap);
                 setGOAttribute(idGOMap, GOLayoutStaticValues.BP_ATTNAME);
                 idGOMap = mapAttribute(nodeIds, "Ensembl", GOLayoutStaticValues.CC_ATTNAME);
+                idGOMap=checkEmptyValue(idGOMap);
                 setGOAttribute(idGOMap, GOLayoutStaticValues.CC_ATTNAME);
                 idGOMap = mapAttribute(nodeIds, "Ensembl", GOLayoutStaticValues.MF_ATTNAME);
+                idGOMap=checkEmptyValue(idGOMap);
                 setGOAttribute(idGOMap, GOLayoutStaticValues.MF_ATTNAME);
                 disConnectGOSlimSource(GOSlimFilePath);
             }
         } else {
-            if(sourceType.toLowerCase().indexOf("ensembl")==-1) {
+            if(isEnsemblID(sourceType)) {
                 System.out.println("IdMapping:mapID: Non-ID & Non-Ensembl");
                 //unfinished, for "Ensembl" & non-ID. ticket 3 for idmapping
                 Map<String, List<String>> idEnMap = new HashMap();

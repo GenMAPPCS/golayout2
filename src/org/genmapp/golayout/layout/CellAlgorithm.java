@@ -163,7 +163,9 @@ public class CellAlgorithm extends AbstractLayout {
 			// Check for valid region-annotation mapping
 			boolean valid = false;
 			for (Region r : sra) {
-                if (r.getAttValue() != "unassigned" && r.getNodeCount() > 0) {
+                //TODO: if all nodes only have "unassigned" funtion, shoud we display layout?
+                //if (r.getAttValue() != "unassigned" && r.getNodeCount() > 0) {
+                if (r.getNodeCount() > 0) {
 					valid = true;
 				}
 			}
@@ -981,27 +983,33 @@ public class CellAlgorithm extends AbstractLayout {
 
 	public static List<NodeView> populateNodeViews(Region r) {
 		CyAttributes attribs = Cytoscape.getNodeAttributes();
+        int count = 0;
         // attribs.setUserVisible(REGION_ATT, false);
 		Iterator<Node> it = Cytoscape.getCurrentNetwork().nodesIterator();
-		List<NodeView> nvList = new ArrayList<NodeView>();
+        Cytoscape.getCurrentNetwork().nodesList();
+        List<NodeView> nvList = new ArrayList<NodeView>();
 		while (it.hasNext()) {
+            count++;
 			Node node = (Node) it.next();
 			String val = null;
-			List<Object> valList = new ArrayList<Object>();
+			List<Object> goList = new ArrayList<Object>();
+            List<Object> valList = new ArrayList<Object>();
 			String terms[] = new String[1];
 			// add support for parsing List type attributes
 			if (attribs.getType(attributeName) == CyAttributes.TYPE_SIMPLE_LIST) {
-				valList = attribs.getListAttribute(node.getIdentifier(),
+				goList = attribs.getListAttribute(node.getIdentifier(),
 						attributeName);
 				// iterate through all elements in the list
-				if (valList != null && valList.size() > 0) {
-					terms = new String[valList.size()];
-					for (int i = 0; i < valList.size(); i++) {
+				if (goList != null && goList.size() > 0) {
+					terms = new String[goList.size()];
+					for (int i = 0; i < goList.size(); i++) {
 						//Object o = valList.get(i);
                         //Get the corresponding desc for each go term
-                        Object o = goDescMappingFile.get(valList.get(i));
-                        if(o != null)
+                        Object o = goDescMappingFile.get(goList.get(i));
+                        if(o != null) {
                             terms[i] = o.toString();
+                            valList.add(o);
+                        }
 					}
 				}
 				val = join(terms);
@@ -1012,19 +1020,27 @@ public class CellAlgorithm extends AbstractLayout {
 					val = valCheck;
 				}
 			}
-
-			// loop through elements in array below and match
-			if ((!(val == null) && (!val.equals("null")) && (val.length() > 0))) {
+            // loop through elements in array below and match
+            if ((!(val == null) && (!val.equals("null")) && (val.length() > 0))) {
 				for (Object o : r.getNestedAttValues()) {
 					if (val.indexOf(o.toString()) >= 0) {
-						if (r.getAttValue().equals("unassigned")
-								&& valList.indexOf(val) < valList.size() - 1) {
-							break; // skip to next, more specific, value
-						} else {
-							nvList.add(Cytoscape.getCurrentNetworkView()
-									.getNodeView(node));
-							break; // stop searching after first hit
-						}
+//						if (r.getAttValue().equals("unassigned")
+//								&& valList.indexOf(val) < valList.size() - 1) {
+//							break; // skip to next, more specific, value
+//						} else {
+//							nvList.add(Cytoscape.getCurrentNetworkView()
+//									.getNodeView(node));
+//							break; // stop searching after first hit
+//						}
+                        if(r.getAttValue().equals("unassigned")) {
+                            if(!CellTemplate.nodeRegionMap.containsKey(node.getIdentifier()))
+                                nvList.add(Cytoscape.getCurrentNetworkView().getNodeView(node));
+                            break;
+                        } else {
+                            CellTemplate.nodeRegionMap.put(node.getIdentifier(), "Yes");
+                            nvList.add(Cytoscape.getCurrentNetworkView().getNodeView(node));
+                            break;
+                        }
 					}
 
 				}
@@ -1033,7 +1049,7 @@ public class CellAlgorithm extends AbstractLayout {
 			}
 
 		}
-		return nvList;
+        return nvList;
 	}
 
 	/**

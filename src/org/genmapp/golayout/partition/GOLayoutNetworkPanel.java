@@ -197,13 +197,13 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
 		networkTreePanel.add(scroll);
 
 		functionPanel = new JPanel();
-        functionPanel.setBorder(BorderFactory.createTitledBorder(null,"Function selection",
+        functionPanel.setBorder(BorderFactory.createTitledBorder(null,"Node color selection",
                 TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
                 new Font("SansSerif", 1, 12), Color.darkGray));
 		functionPanel.setMinimumSize(new Dimension(PANEL_PREFFERED_WIDTH, 50));
         functionPanel.setMaximumSize(new Dimension(10000, 50));
 		functionPanel.setPreferredSize(new Dimension(PANEL_PREFFERED_WIDTH, 50));
-        String[] functionList = {"All functions"};
+        String[] functionList = {"Show all", "---------"};
         functionComboBox = new JComboBox(functionList);
         functionPanel.setLayout(new BoxLayout(functionPanel, BoxLayout.Y_AXIS));
         functionPanel.add(functionComboBox);
@@ -269,7 +269,8 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
 	 */
 	public void setFuntionValues(List values) {
         List result = new ArrayList();
-        result.add("All functions");
+        result.add("Show all");
+        result.add("---------");
         Collections.sort(values);
         
         if(GOLayoutUtil.isValidGOTerm(values)) {
@@ -540,16 +541,14 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
 	 */
 	protected class ChangeFunctionListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-            String selectedGOTerm = "";
-            if(descGOMappingFile.isEmpty()) {
-                selectedGOTerm = ((JComboBox)e.getSource()).getSelectedItem().toString();
-            } else {
-                selectedGOTerm = ((JComboBox)e.getSource()).getSelectedItem().toString();
-                if(!selectedGOTerm.equals("All functions"))
-                    selectedGOTerm = descGOMappingFile.get(((JComboBox)e.getSource()).getSelectedItem()).toString();
+            String selectedGOTerm = ((JComboBox)e.getSource()).getSelectedItem().toString();
+            if(!selectedGOTerm.equals("---------")) {
+                if(!descGOMappingFile.isEmpty()) {
+                    if(!selectedGOTerm.equals("Show all"))
+                        selectedGOTerm = descGOMappingFile.get(((JComboBox)e.getSource()).getSelectedItem()).toString();
+                }
+                PartitionNetworkVisualStyleFactory.highlightNodes(selectedGOTerm);
             }
-            System.out.println(selectedGOTerm);
-            PartitionNetworkVisualStyleFactory.highlightNodes(selectedGOTerm);
         }
     }
 

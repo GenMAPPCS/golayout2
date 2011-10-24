@@ -94,6 +94,18 @@ public class GOLayout extends CytoscapePlugin{
             //GOLayoutUtil.writeFile(derbyRemotelist, GOLayoutBaseDir+"derbyDBList.txt");
             goslimRemotelist = GOLayoutUtil.readUrl(GOLayoutStaticValues.genmappcsDatabaseDir);
             //GOLayoutUtil.writeFile(derbyRemotelist, GOLayoutBaseDir+"goslimDBList.txt");
+            List<String> supportedSpeList = GOLayoutUtil.readUrl(GOLayoutStaticValues.genmappcsDatabaseDir+GOLayoutStaticValues.supportedSpecieslist);
+            if(supportedSpeList.size()>0) {
+                GOLayoutUtil.writeFile(supportedSpeList, GOLayoutBaseDir+GOLayoutStaticValues.supportedSpecieslist);
+                GOLayoutStaticValues.speciesList = GOLayoutUtil.parseSpeciesList(supportedSpeList);
+            }
+        } else {
+            if(new File(GOLayoutBaseDir+GOLayoutStaticValues.supportedSpecieslist).exists()) {
+                List<String> supportedSpeList = GOLayoutUtil.readFile(GOLayoutBaseDir+GOLayoutStaticValues.supportedSpecieslist);
+                if(supportedSpeList.size()>0) {
+                    GOLayoutStaticValues.speciesList = GOLayoutUtil.parseSpeciesList(supportedSpeList);
+                }
+            }            
         }
         GOLayout.tagGPMLPlugin = GOLayoutUtil.checkGPMLPlugin();
         partitionObject = new PartitionAlgorithm();

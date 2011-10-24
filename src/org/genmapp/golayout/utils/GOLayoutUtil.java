@@ -57,7 +57,8 @@ public class GOLayoutUtil {
 
     public static boolean checkCyThesaurus(){
         try {
-            new CyThesaurusPlugin();
+            double cyThesVersion = CyThesaurusPlugin.VERSION;
+            System.out.println("CyThesaurusPlugin VERSION: "+ cyThesVersion);
             return true;
         } catch(NoClassDefFoundError e){
             return false;
@@ -404,4 +405,14 @@ public class GOLayoutUtil {
         }
 		return uniqueValueList;
 	}
+
+
+    public static String[] parseSpeciesList(List<String> speciesList) {
+        String[] result = new String[speciesList.size()];
+        for(int i=0; i<result.length; i++){
+            String[] temp = speciesList.get(i).split("\t");
+            result[i] = temp[0];
+        }
+        return result;
+    }
 }

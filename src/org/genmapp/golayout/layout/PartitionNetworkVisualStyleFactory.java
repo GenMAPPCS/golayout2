@@ -220,7 +220,8 @@ public class PartitionNetworkVisualStyleFactory {
 					false);
 			contMappingLineWidth.setInterpolator(new LinearNumberToNumberInterpolator());
 			contMappingLineWidth.addPoint(PartitionAlgorithm.NETWORK_LIMIT_MIN, new BoundaryRangeValues(1, 2, 2));
-			contMappingLineWidth.addPoint(PartitionAlgorithm.NETWORK_LIMIT_MAX, new BoundaryRangeValues(70, 70, 90));
+            contMappingLineWidth.addPoint(PartitionAlgorithm.NETWORK_LIMIT_MAX, new BoundaryRangeValues(40, 40, 60));
+			//contMappingLineWidth.addPoint(PartitionAlgorithm.NETWORK_LIMIT_MAX, new BoundaryRangeValues(70, 70, 90));
 			Calculator lineWidthCalculator = new BasicCalculator(attributeName, contMappingLineWidth, VisualPropertyType.EDGE_LINE_WIDTH);
 			eac.setCalculator(lineWidthCalculator);
 
@@ -259,7 +260,7 @@ public class PartitionNetworkVisualStyleFactory {
 		VisualStyle mfStyle = catalog.getVisualStyle(attributeName);
         NodeAppearanceCalculator nodeAppCalculator = mfStyle.getNodeAppearanceCalculator();
 
-        if(attribute.equals("All functions")) {
+        if(attribute.equals("Show all")) {
             nodeAppCalculator.setCalculator(PartitionNetworkVisualStyleFactory.colorCalculator);
         } else {
             DiscreteMapping disMappingNodeFill = new DiscreteMapping(

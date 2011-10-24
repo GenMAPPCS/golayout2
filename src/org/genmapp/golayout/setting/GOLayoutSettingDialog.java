@@ -175,7 +175,7 @@ public class GOLayoutSettingDialog extends JDialog
             if(localDerbyDB.equals("")||!localDerbyDB.equals(latestDerbyDB))
                 downloadList.add(GOLayoutStaticValues.bridgedbDerbyDir+latestDerbyDB+".zip");
             String localGOslimDB = identifyLatestVersion(localFileList,
-                    species+"_GOslim", ".tab");
+                    species+"_GOslim", ".txt");
             if(latestGOslimDB.equals("")&&!localGOslimDB.equals(""))
                 latestGOslimDB = localGOslimDB;
             //System.out.println("latestGOslimDB: "+latestGOslimDB);
@@ -380,6 +380,8 @@ public class GOLayoutSettingDialog extends JDialog
     }
     
     private int findMatchType(String matchSeq) {
+        if(matchSeq.equals("Ensembl") && annotationSpeciesCode.equals("At"))
+            matchSeq = "Gramene Arabidopsis";
         int i = idMappingTypeValues.indexOf(matchSeq);
         if(i==-1) {
             int n=0;
@@ -873,7 +875,7 @@ public class GOLayoutSettingDialog extends JDialog
                     GOLayout.GOLayoutDatabaseDir), annotationSpeciesCode+
                     "_Derby", ".bridge")+".bridge");
             idMappingTypeValues = IdMapping.getSourceTypes();
-            System.out.println("No. of types "+ idMappingTypeValues.size());
+            //System.out.println("No. of types "+ idMappingTypeValues.size());
             rAnnTypComboBox.removeAllItems();
             rAnnTypComboBox.setModel(new DefaultComboBoxModel(idMappingTypeValues.toArray()));
         }
@@ -913,7 +915,7 @@ public class GOLayoutSettingDialog extends JDialog
                     GOLayout.GOLayoutDatabaseDir), annotationSpeciesCode+
                     "_Derby", ".bridge")+".bridge");
                 idMappingTypeValues = IdMapping.getSourceTypes();
-                System.out.println(idMappingTypeValues.toString());            
+                //System.out.println(idMappingTypeValues.toString());
                 rAnnTypComboBox.setModel(new DefaultComboBoxModel(idMappingTypeValues.toArray()));
             }
             rAnnIdeComboBox.setSelectedItem("ID");
@@ -929,7 +931,7 @@ public class GOLayoutSettingDialog extends JDialog
                         "_Derby", ".bridge") + ".bridge";
                 String localGOslimDB = GOLayout.GOLayoutDatabaseDir+
                         identifyLatestVersion(localFileList,selectSpecies[1]+
-                        "_GOslim", ".tab") + ".tab";
+                        "_GOslim", ".txt") + ".txt";
                 final JTaskConfig jTaskConfig = new JTaskConfig();
                 jTaskConfig.setOwner(cytoscape.Cytoscape.getDesktop());
                 jTaskConfig.displayCloseButton(true);
@@ -1148,7 +1150,7 @@ public class GOLayoutSettingDialog extends JDialog
          */
         //@Override
         public String getTitle() {
-                return "Runing partition...";
+                return "Running partition...";
         }
     }
 }
