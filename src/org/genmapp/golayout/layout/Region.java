@@ -112,6 +112,7 @@ public class Region extends JComponent implements ViewportChangeListener {
 			this.height = 1;
 		this.area = (int) (width * height);
 		this.zorder = zorder;
+
 		this.rotation = rotation;
 		this.attValue = attValue;
 		RegionManager.addRegion(this.attValue, this);
@@ -129,8 +130,8 @@ public class Region extends JComponent implements ViewportChangeListener {
 			nestedAttValues = Arrays.asList("endoplasmic reticulum",
 					"Golgi apparatus");
 		else if (this.attValue.equals("plasma membrane"))
-			nestedAttValues = Arrays.asList("plasma membrane", "cell wall",
-					"membrane");
+			//nestedAttValues = Arrays.asList("plasma membrane", "cell wall","membrane");
+            nestedAttValues = Arrays.asList("plasma membrane", "cell wall");
 		else if (this.attValue.equals("cytoplasm"))
 			nestedAttValues = Arrays.asList("cytoplasm", "intracellular",
 					"cytosol", "vacuole", "lysosome", "peroxisome");
