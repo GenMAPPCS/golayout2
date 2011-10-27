@@ -15,10 +15,6 @@
  ******************************************************************************/
 package org.genmapp.golayout.utils;
 
-/**
- *
- * @author Chao
- */
 public class GOLayoutStaticValues {
     public static final String BP_ATTNAME = "annotation.GO BIOLOGICAL_PROCESS";
     public static final String CC_ATTNAME = "annotation.GO CELLULAR_COMPONENT";

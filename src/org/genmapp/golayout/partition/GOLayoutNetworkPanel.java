@@ -17,14 +17,11 @@ package org.genmapp.golayout.partition;
 
 import cytoscape.CyNetwork;
 import cytoscape.CyNetworkTitleChange;
-import cytoscape.CyNode;
 import cytoscape.Cytoscape;
 import cytoscape.actions.ApplyVisualStyleAction;
 import cytoscape.actions.CreateNetworkViewAction;
 import cytoscape.data.SelectEvent;
 import cytoscape.data.SelectEventListener;
-import cytoscape.groups.CyGroup;
-import cytoscape.groups.CyGroupManager;
 import cytoscape.logger.CyLogger;
 import cytoscape.util.CyNetworkNaming;
 import cytoscape.util.swing.JTreeTable;
@@ -36,8 +33,11 @@ import cytoscape.view.TreeCellRenderer;
 import giny.model.Node;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -58,8 +58,8 @@ import java.util.TreeSet;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.ImageIcon;
 import javax.swing.InputMap;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -70,6 +70,8 @@ import javax.swing.JTree;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.ToolTipManager;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -82,8 +84,6 @@ import javax.swing.tree.TreePath;
 import org.genmapp.golayout.layout.PartitionNetworkVisualStyleFactory;
 import org.genmapp.golayout.utils.GOLayoutStaticValues;
 import org.genmapp.golayout.utils.GOLayoutUtil;
-
-
 
 /**
  * GUI component for managing network list in current session.
@@ -104,6 +104,7 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
 	private JPanel functionPanel;
     private JComboBox functionComboBox;
     private ChangeFunctionListener changeFunctionListener;
+    private JButton functionLegendButton;
 	private JPanel networkTreePanel;
 	private JPopupMenu popup;
 	private PopupActionListener popupActionListener;
@@ -122,6 +123,7 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
     private PartitionAlgorithm partitionObject;
 
     public static Map<String, String> descGOMappingFile = new HashMap<String, String>();
+    
 	/**
 	 * Constructor for the Network Panel.
 	 *
@@ -201,16 +203,23 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
                 TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
                 new Font("SansSerif", 1, 12), Color.darkGray));
 		functionPanel.setMinimumSize(new Dimension(PANEL_PREFFERED_WIDTH, 50));
-        functionPanel.setMaximumSize(new Dimension(10000, 50));
-		functionPanel.setPreferredSize(new Dimension(PANEL_PREFFERED_WIDTH, 50));
+        functionPanel.setMaximumSize(new Dimension(10000, 80));
+		functionPanel.setPreferredSize(new Dimension(PANEL_PREFFERED_WIDTH, 75));
+        functionPanel.setLayout(new BoxLayout(functionPanel, BoxLayout.Y_AXIS));
         String[] functionList = {"Show all", "---------"};
         functionComboBox = new JComboBox(functionList);
-        functionPanel.setLayout(new BoxLayout(functionPanel, BoxLayout.Y_AXIS));
         functionPanel.add(functionComboBox);
         changeFunctionListener = new ChangeFunctionListener();
         functionComboBox.addActionListener(changeFunctionListener);
         functionComboBox.setEnabled(false);
-
+        JPanel legendPanel = new JPanel();
+        
+        legendPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 3));
+        functionLegendButton = new JButton("View legend");
+        functionLegendButton.setEnabled(false);
+        legendPanel.add(functionLegendButton);
+        functionPanel.add(legendPanel);
+        
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         contentPanel.add(functionPanel);
