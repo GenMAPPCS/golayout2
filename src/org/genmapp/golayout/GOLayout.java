@@ -45,7 +45,7 @@ import javax.swing.SwingConstants;
 import org.genmapp.golayout.partition.GOLayoutNetworkPanel;
 import org.genmapp.golayout.setting.GOLayoutSettingDialog;
 import org.genmapp.golayout.utils.GOLayoutUtil;
-import org.genmapp.golayout.utils.GpmlTest;
+//import org.genmapp.golayout.utils.GpmlTest;
 import org.genmapp.golayout.utils.IdMapping;
 
 
@@ -214,27 +214,27 @@ class GOLayoutPluginActionListener implements ActionListener {
     }
 }
 
-class GpmlActionListener implements ActionListener {
-    GOLayout plugin = null;
-
-    public GpmlActionListener(GOLayout plugin_) {
-        plugin = plugin_;
-    }
-
-    public void actionPerformed(ActionEvent evt_) {
-        try {
-            if(Cytoscape.getNetworkSet().size()>0) {
-                new GpmlTest();
-            } else {
-                JOptionPane.showMessageDialog(Cytoscape.getDesktop(),
-                        "Please load a network first!", GOLayout.pluginName,
-                        JOptionPane.WARNING_MESSAGE);
-            }
-        } catch (Exception e) {
-            System.out.println("Exception: " + e);
-        }
-    }
-}
+//class GpmlActionListener implements ActionListener {
+//    GOLayout plugin = null;
+//
+//    public GpmlActionListener(GOLayout plugin_) {
+//        plugin = plugin_;
+//    }
+//
+//    public void actionPerformed(ActionEvent evt_) {
+//        try {
+//            if(Cytoscape.getNetworkSet().size()>0) {
+//                new GpmlTest();
+//            } else {
+//                JOptionPane.showMessageDialog(Cytoscape.getDesktop(),
+//                        "Please load a network first!", GOLayout.pluginName,
+//                        JOptionPane.WARNING_MESSAGE);
+//            }
+//        } catch (Exception e) {
+//            System.out.println("Exception: " + e);
+//        }
+//    }
+//}
 
 class NewDialogTask implements Task {
     private TaskMonitor taskMonitor;

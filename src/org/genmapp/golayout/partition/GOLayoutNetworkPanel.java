@@ -30,6 +30,7 @@ import cytoscape.view.CyNetworkView;
 import cytoscape.view.CytoscapeDesktop;
 import cytoscape.view.NetworkTreeTableModel;
 import cytoscape.view.TreeCellRenderer;
+import cytoscape.visual.mappings.DiscreteMapping;
 import giny.model.Node;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -61,17 +62,17 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.ToolTipManager;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -101,10 +102,13 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
 
 	public final JTreeTable treeTable;
 	private final GOLayoutNetworkTreeNode root;
+    private JPanel contentPanel;
 	private JPanel functionPanel;
     private JComboBox functionComboBox;
     private ChangeFunctionListener changeFunctionListener;
     private JButton functionLegendButton;
+    private LegendPanel legendPanel;
+    private JPanel legendLabelPanel;
 	private JPanel networkTreePanel;
 	private JPopupMenu popup;
 	private PopupActionListener popupActionListener;
@@ -172,13 +176,53 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
         setLayout(new BorderLayout());
 		setPreferredSize(new Dimension(PANEL_PREFFERED_WIDTH, 700));
 		setMinimumSize(new Dimension(PANEL_PREFFERED_WIDTH, PANEL_PREFFERED_WIDTH));
+        
+		functionPanel = new JPanel();
+        functionPanel.setBorder(BorderFactory.createTitledBorder(null,"Node color selection",
+                TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
+                new Font("SansSerif", 1, 12), Color.darkGray));
+		functionPanel.setMinimumSize(new Dimension(PANEL_PREFFERED_WIDTH, 75));
+        functionPanel.setMaximumSize(new Dimension(10000, 80));
+		functionPanel.setPreferredSize(new Dimension(PANEL_PREFFERED_WIDTH, 75));
+        functionPanel.setLayout(new BoxLayout(functionPanel, BoxLayout.Y_AXIS));
+        String[] functionList = {"Show all", "---------"};
+        functionComboBox = new JComboBox(functionList);
+        functionPanel.add(functionComboBox);
+        changeFunctionListener = new ChangeFunctionListener();
+        functionComboBox.addActionListener(changeFunctionListener);
+        functionComboBox.setEnabled(false);
+        JPanel legendButtonPanel = new JPanel();
+        legendButtonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 3));
+        functionLegendButton = new JButton("View legend");
+        functionLegendButton.addActionListener(new ViewLegendListener());
+        functionLegendButton.setEnabled(false);
+        legendButtonPanel.add(functionLegendButton);
+        functionPanel.add(legendButtonPanel);
+
+        legendPanel = new LegendPanel();
+        legendPanel.setBorder(BorderFactory.createTitledBorder(null,"Legend",
+                TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
+                new Font("SansSerif", 1, 12), Color.darkGray));
+        legendPanel.setVisible(false);
+//        legendPanel = new JPanel();
+//        legendPanel.setBorder(BorderFactory.createTitledBorder(null,"Legend",
+//                TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
+//                new Font("SansSerif", 1, 12), Color.darkGray));
+//        //legendPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
+//        legendPanel.setMinimumSize(new Dimension(PANEL_PREFFERED_WIDTH, 50));
+//        legendPanel.setMaximumSize(new Dimension(10000, 200));
+//        legendPanel.setPreferredSize(new Dimension(PANEL_PREFFERED_WIDTH, 150));
+//        legendPanel.setVisible(false);
+//        legendLabelPanel = new JPanel();
+//        final JScrollPane legendScrollPane = new JScrollPane(legendLabelPanel);
+//        legendScrollPane.setPreferredSize(new Dimension(PANEL_PREFFERED_WIDTH-50,150));
+//		legendPanel.add(legendScrollPane);
 
 		networkTreePanel = new JPanel();
         networkTreePanel.setBorder(BorderFactory.createTitledBorder(null,"",
                 TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
                 new Font("SansSerif", 1, 12), Color.darkGray));
 		networkTreePanel.setLayout(new BoxLayout(networkTreePanel, BoxLayout.Y_AXIS));
-
 		treeTable.getTree().addTreeSelectionListener(this);
 		treeTable.getTree().setRootVisible(false);
 		ToolTipManager.sharedInstance().registerComponent(treeTable);
@@ -194,35 +238,14 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
 //		treeTable.getTree().setCellRenderer(treeCellRenderer);
         treeTable.getTree().setCellRenderer(new TreeCellRenderer());
 		resetTable();
-
         final JScrollPane scroll = new JScrollPane(treeTable);
 		networkTreePanel.add(scroll);
-
-		functionPanel = new JPanel();
-        functionPanel.setBorder(BorderFactory.createTitledBorder(null,"Node color selection",
-                TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION,
-                new Font("SansSerif", 1, 12), Color.darkGray));
-		functionPanel.setMinimumSize(new Dimension(PANEL_PREFFERED_WIDTH, 50));
-        functionPanel.setMaximumSize(new Dimension(10000, 80));
-		functionPanel.setPreferredSize(new Dimension(PANEL_PREFFERED_WIDTH, 75));
-        functionPanel.setLayout(new BoxLayout(functionPanel, BoxLayout.Y_AXIS));
-        String[] functionList = {"Show all", "---------"};
-        functionComboBox = new JComboBox(functionList);
-        functionPanel.add(functionComboBox);
-        changeFunctionListener = new ChangeFunctionListener();
-        functionComboBox.addActionListener(changeFunctionListener);
-        functionComboBox.setEnabled(false);
-        JPanel legendPanel = new JPanel();
-        
-        legendPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 0, 3));
-        functionLegendButton = new JButton("View legend");
-        functionLegendButton.setEnabled(false);
-        legendPanel.add(functionLegendButton);
-        functionPanel.add(legendPanel);
-        
-        JPanel contentPanel = new JPanel();
+    
+        contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         contentPanel.add(functionPanel);
+        contentPanel.add(legendPanel);
+        //contentPanel.add(new ScrollDemo2());
         contentPanel.add(networkTreePanel);
         add(contentPanel);
 
@@ -271,33 +294,56 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
 		treeTable.setRowHeight(DEF_ROW_HEIGHT);
 	}
 
+    private void repaintAll() {
+        contentPanel.repaint();
+    }
     /**
 	 * DOCUMENT ME!
 	 *
 	 * @return DOCUMENT ME!
 	 */
-	public void setFuntionValues(List values) {
+	public void setFuntionValues(List values, DiscreteMapping oldDisMappingNodeFill) {
+        Map<String, Color> legendMap = new HashMap<String, Color>();
         List result = new ArrayList();
         result.add("Show all");
         result.add("---------");
         Collections.sort(values);
+//        legendLabelPanel.removeAll();
+//        legendLabelPanel.setPreferredSize(new Dimension(PANEL_PREFFERED_WIDTH-15,145));
+//        legendLabelPanel.setLayout(new BoxLayout(legendLabelPanel, BoxLayout.Y_AXIS));
         
         if(GOLayoutUtil.isValidGOTerm(values)) {
             Set<Object> attributeValues = new HashSet(values);
             Map<String, String> goDescMappingFile = GOLayoutUtil.readMappingFile(this.getClass().getResource(GOLayoutStaticValues.GO_DescFile), attributeValues, 0);
             for(Object o:attributeValues){
-                if(goDescMappingFile.containsKey(o))
+                if(goDescMappingFile.containsKey(o)) {
                     descGOMappingFile.put(goDescMappingFile.get(o).toString(), o.toString());
+                    legendMap.put(goDescMappingFile.get(o).toString(), (Color)oldDisMappingNodeFill.getMapValue(o));
+//                    JPanel tempPanel = new JPanel();
+//                    tempPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 3));
+//                    JTextField tempColorField = new JTextField("          ");
+//                    tempColorField.setEnabled(false);
+//                    tempColorField.setSize(50, 8);
+//                    tempColorField.setBackground((Color)oldDisMappingNodeFill.getMapValue(o));
+//                    JLabel tempTextLebel = new JLabel(goDescMappingFile.get(o).toString());
+//                    tempPanel.add(tempColorField);
+//                    tempPanel.add(tempTextLebel);
+//                    legendLabelPanel.add(tempPanel);
+                }
             }
             List descList = new ArrayList(descGOMappingFile.keySet());
             Collections.sort(descList);
             result.addAll(descList);
         } else {
             result.addAll(values);
-        }
-
+            for(Object o:values) {
+                legendMap.put(o.toString(), (Color)oldDisMappingNodeFill.getMapValue(o));
+            }
+        }       
+        legendPanel.initialize(legendMap);
         functionComboBox.setModel(new DefaultComboBoxModel(result.toArray()));
         functionComboBox.setEnabled(true);
+        functionLegendButton.setEnabled(true);
 	}
 
 	/**
@@ -541,6 +587,32 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
 
 		return null;
 	}
+
+    /**
+	 * This class listens to mouse events from the TreeTable, if the mouse event
+	 * is one that is canonically associated with a popup menu (ie, a right
+	 * click) it will pop up the menu with option for destroying view, creating
+	 * view, and destroying network (this is platform specific apparently)
+	 */
+	protected class ViewLegendListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            String buttonText = ((JButton)e.getSource()).getText();
+            contentPanel.invalidate();
+            if(buttonText.equals("View legend")) {
+                functionLegendButton.setText("Close legend");                
+                //legendPanel.setMinimumSize(new Dimension(PANEL_PREFFERED_WIDTH, 50));
+                //legendPanel.setMaximumSize(new Dimension(10000, 150));
+                //legendPanel.setPreferredSize(new Dimension(PANEL_PREFFERED_WIDTH, 75));
+                legendPanel.setVisible(true);
+            } else {
+                functionLegendButton.setText("View legend");
+                legendPanel.setVisible(false);
+            }
+            contentPanel.revalidate();
+            contentPanel.repaint();
+            contentPanel.validate();
+        }
+    }
 
     /**
 	 * This class listens to mouse events from the TreeTable, if the mouse event

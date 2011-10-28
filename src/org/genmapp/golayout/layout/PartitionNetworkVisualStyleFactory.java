@@ -105,9 +105,6 @@ public class PartitionNetworkVisualStyleFactory {
              * individual list items
              */
             List uniqueValueList = GOLayoutUtil.setupNodeAttributeValues(attributeName);
-
-            //Set the uniqueValueList to the pull down menu in NetworkPanel
-            GOLayout.wsPanel.setFuntionValues(uniqueValueList);
             
             // NODE MAPPINGS
             PassThroughMapping passMappingLabel = new PassThroughMapping("",
@@ -227,6 +224,9 @@ public class PartitionNetworkVisualStyleFactory {
 			mfStyle.setGlobalAppearanceCalculator(gac);
 
 			catalog.addVisualStyle(mfStyle);
+
+            //Set the uniqueValueList to the pull down menu in NetworkPanel
+            GOLayout.wsPanel.setFuntionValues(uniqueValueList, (DiscreteMapping)PartitionNetworkVisualStyleFactory.colorCalculator.getMappings().get(0));
 		}
 		CyNetworkView myView = Cytoscape.getCurrentNetworkView();
 		vmm.setNetworkView(myView);

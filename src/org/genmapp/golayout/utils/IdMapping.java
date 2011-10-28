@@ -240,9 +240,9 @@ public class IdMapping {
     }
 
     private boolean isEnsemblID(String idType){
-        if(idType.toLowerCase().equals("gramene arabidopsis")) {
+        if(idType.trim().toLowerCase().equals("gramene arabidopsis")) {
             return true;
-        } else if(idType.toLowerCase().indexOf("ensembl")==-1) {
+        } else if(idType.toLowerCase().indexOf("ensembl")!=-1) {
             return true;
         } else
             return false;
@@ -258,7 +258,7 @@ public class IdMapping {
             nodeIds.add(cn.getIdentifier());
         }
         if(sourceIDName == null ? "ID" == null : sourceIDName.equals("ID")) {
-            if(isEnsemblID(sourceType)) {
+            if(!isEnsemblID(sourceType)) {
                 System.out.println("IdMapping:mapID: ID & Non-Ensembl");
                 //Finished at 2011-09-21, for non-"Ensembl" & ID. ticket 3 for idmapping
                 connectDerbyFileSource(derbyFilePath);
@@ -313,7 +313,7 @@ public class IdMapping {
                 disConnectGOSlimSource(GOSlimFilePath);
             }
         } else {
-            if(isEnsemblID(sourceType)) {
+            if(!isEnsemblID(sourceType)) {
                 System.out.println("IdMapping:mapID: Non-ID & Non-Ensembl");
                 //unfinished, for "Ensembl" & non-ID. ticket 3 for idmapping
                 Map<String, List<String>> idEnMap = new HashMap();
