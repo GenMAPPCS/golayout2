@@ -686,7 +686,8 @@ public class PartitionAlgorithm extends AbstractLayout implements
                             String targetPath = pathTermMap.get(goTermList[j].toString());
                             int targetPathLevel = targetPath.trim().length()-targetPath.replace(".", "").trim().length();
                             if(queryPathLevel>targetPathLevel){
-                                if(targetPath.equals(queryPath.substring(0, targetPath.length()))) {
+                                if(queryPath.indexOf(targetPath)==0) {
+                                //if(targetPath.equals(queryPath.substring(0, targetPath.length()))) {
                                     if(termTreeMap.containsKey(goTermList[i].toString())) {
                                         String currentPath = pathTermMap.get(termTreeMap.get(goTermList[i].toString()));
                                         int currentGoPathLevel = currentPath.trim().length()-currentPath.replace(".", "").trim().length();

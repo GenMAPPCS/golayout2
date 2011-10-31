@@ -34,11 +34,9 @@ import cytoscape.visual.mappings.DiscreteMapping;
 import giny.model.Node;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -62,13 +60,11 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
@@ -731,7 +727,7 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
                         destroyALLNetworkItem.setEnabled(false);
                         partitionNetworkMenu.setEnabled(false);
                     }
-                    System.out.println(cyNetwork.getTitle());
+                    //System.out.println(cyNetwork.getTitle());
 					popup.show(e.getComponent(), e.getX(), e.getY());
 				}
 			}
@@ -836,7 +832,7 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
                     partitionObject.destroyAllSubNet("root","root");
                 }
 			} else {
-                System.out.println(label);
+                //System.out.println(label);
                 if(!label.equals("")) {
                     CyNetwork selectedNetwork = Cytoscape.getSelectedNetworks().get(0);
                     String goTerm = partitionObject.getGOTerm(selectedNetwork.getTitle());

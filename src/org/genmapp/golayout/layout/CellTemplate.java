@@ -19,8 +19,6 @@ import java.util.Collection;
 import java.util.List;
 
 import cytoscape.Cytoscape;
-import cytoscape.layout.LayoutProperties;
-import cytoscape.layout.Tunable;
 import ding.view.DGraphView;
 import ding.view.DingCanvas;
 import java.util.HashMap;

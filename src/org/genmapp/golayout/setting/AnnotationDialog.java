@@ -47,6 +47,7 @@ public class AnnotationDialog implements Task {
             taskMonitor.setPercentCompleted(-1);
             long start=System.currentTimeMillis();
             System.out.println("--------------"+this.selectedMappingType+"-----------------");
+            System.out.println(localGOslimDBPath);
             IdMapping idMapper = new IdMapping();
             idMapper.mapID(this.localDerbyDBPath, this.localGOslimDBPath,
                     this.selectedMappingID, this.selectedMappingType, this.ensemblIDType);

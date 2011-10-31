@@ -46,8 +46,7 @@ public class IdMapping {
         Map<String, Object> noargs = new HashMap<String, Object>();
         CyCommandResult result = null;
         try {
-            result = CyCommandManager.execute(
-                    "idmapping", "get target id types", noargs);
+            result = CyCommandManager.execute("idmapping", "get target id types", noargs);
         } catch (CyCommandException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -71,8 +70,7 @@ public class IdMapping {
         Set<String> idTypes;
         args.put("sourceid", sampleId);
         try {
-            CyCommandResult result = CyCommandManager.execute(
-                    "idmapping", "guess id type", args);
+            CyCommandResult result = CyCommandManager.execute("idmapping", "guess id type", args);
             idTypes = (Set<String>) result.getResult();
         } catch (CyCommandException e) {
             // TODO Auto-generated catch block
@@ -180,17 +178,15 @@ public class IdMapping {
         //System.out.println(sourceType+"\t"+targetType);
         CyCommandResult result = null;
         try {
-            result = CyCommandManager.execute(
-                    "idmapping", "general mapping", args);
+            result = CyCommandManager.execute("idmapping", "general mapping", args);
+            //System.out.println("message:"+result.getMessages().get(0));
         } catch (Exception e) {
             // TODO Auto-generated catch block
-            //System.out.println("1"+sourceType+"\t"+targetType);
             e.printStackTrace();
         }
         Map<String, Set<String>> secondaryKeyMap = new HashMap<String, Set<String>>();
         if (null != result) {
             secondaryKeyMap= (Map<String, Set<String>>) result.getResult();
-            //System.out.println(secondaryKeyMap.size()+"\t"+secondaryKeyMap);
         }
         return secondaryKeyMap;
     }
@@ -550,6 +546,7 @@ public class IdMapping {
      */
     private static void connectFileDB(Map<String, Object> args) {
         System.out.println("-----run connectFileDB-----");
+        System.out.println(args.toString());
         CyCommandResult result = null;
         try {
             result = CyCommandManager.execute("idmapping",
@@ -581,6 +578,7 @@ public class IdMapping {
      */
     private static void disConnectFileDB(Map<String, Object> args) {
         System.out.println("-----run disConnectFileDB-----");
+        System.out.println(args.toString());
         CyCommandResult result = null;
         try {
             result = CyCommandManager.execute("idmapping",
