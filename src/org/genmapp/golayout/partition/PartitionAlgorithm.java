@@ -48,6 +48,7 @@ import cytoscape.layout.LayoutProperties;
 import cytoscape.view.CyDesktopManager;
 import cytoscape.view.CyNetworkView;
 import cytoscape.view.CytoscapeDesktop;
+import java.util.Arrays;
 import java.util.Collections;
 import javax.swing.SwingConstants;
 import org.genmapp.golayout.GOLayout;
@@ -175,9 +176,42 @@ public class PartitionAlgorithm extends AbstractLayout implements
 
 		CyAttributes nAttributes = Cytoscape.getNodeAttributes();
 		CyAttributes eAttributes = Cytoscape.getEdgeAttributes();
-
+        List<String> edgeAttName = Arrays.asList(eAttributes.getAttributeNames());
 		int[] edges = net.getEdgeIndicesArray();
         
+        if(edgeAttName.indexOf(SUBNETWORK_CONNECTIONS)!=-1) {
+            for (int edgeInt : edges) {
+                int nodeInt1 = Cytoscape.getRootGraph().getEdgeSourceIndex(edgeInt);
+                int nodeInt2 = Cytoscape.getRootGraph().getEdgeTargetIndex(edgeInt);
+                String node1 = net.getNode(nodeInt1).getIdentifier();
+                //System.out.println(node1);
+                String node2 = net.getNode(nodeInt2).getIdentifier();
+                if (nAttributes.getType(attributeName) == CyAttributes.TYPE_SIMPLE_LIST) {
+                    List<Object> nodePartitionList1 = nAttributes.getListAttribute(node1, attributeName);
+                    List<Object> nodePartitionList2 = nAttributes.getListAttribute(node2, attributeName);
+
+                    for (Object np1 : nodePartitionList1) {
+                        if(!existNetwork(np1))
+                            continue;
+                        for (Object np2 : nodePartitionList2) {
+                            if(!existNetwork(np2))
+                                continue;
+                            // skip if same partition
+                            if (np1.toString().equalsIgnoreCase(np2.toString()))
+                                continue;
+                            // create nodes and edges
+                            CyNode cn1 = Cytoscape.getCyNode(np1.toString(), true);
+                            CyNode cn2 = Cytoscape.getCyNode(np2.toString(), true);
+                            CyEdge ce = Cytoscape.getCyEdge(cn1, cn2,
+                                    Semantics.INTERACTION, "subnetworkInteraction",
+                                    true);
+                            
+                            eAttributes.setAttribute(ce.getIdentifier(), SUBNETWORK_CONNECTIONS, 0.0);
+                        }
+                    }
+                }
+            }
+        }        
 		for (int edgeInt : edges) {
 			int nodeInt1 = Cytoscape.getRootGraph().getEdgeSourceIndex(edgeInt);
 			int nodeInt2 = Cytoscape.getRootGraph().getEdgeTargetIndex(edgeInt);
@@ -724,8 +758,6 @@ public class PartitionAlgorithm extends AbstractLayout implements
             if(currentNetwork != null) {
                 Cytoscape.destroyNetwork(currentNetwork);
                 resetNetworkID(childNetwork);
-            } else {
-                System.out.println(childNetwork);
             }
         }
     }

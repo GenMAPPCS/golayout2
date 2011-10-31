@@ -584,8 +584,8 @@ public class IdMapping {
         CyCommandResult result = null;
         try {
             result = CyCommandManager.execute("idmapping",
-                    "deselect resource", args);
-                    //"unregister resource", args);
+                    //"deselect resource", args);
+                    "unregister resource", args);
             List<String> results = result.getMessages();
             if (results.size() > 0) {
                 for (String re : results) {

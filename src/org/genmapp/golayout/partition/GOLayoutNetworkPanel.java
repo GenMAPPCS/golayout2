@@ -810,29 +810,31 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
 				}
 			} else if (DESTROY_NETWORK.equals(label)) {
                 CyNetwork selectedNetwork = Cytoscape.getSelectedNetworks().get(0);
+                String networkID = "";
                 if(GOLayoutUtil.isValidGOTerm(partitionObject.nodeAttributeValues)) {
-                    String networkID = partitionObject.getGOTerm(selectedNetwork.getTitle());
-                    if(!networkID.equals(""))
+                    networkID = partitionObject.getGOTerm(selectedNetwork.getTitle());
+                    if(!networkID.equals("")) {
                         partitionObject.destroyAllSubNet(networkID,networkID);
-                    else
+                    } else if(!selectedNetwork.getTitle().equals("Overview")) {
                         partitionObject.destroyAllSubNet("root","root");
+                    }
                     partitionObject.resetNetworkID(selectedNetwork);
                 }
-				Cytoscape.destroyNetwork(selectedNetwork);                
-                partitionObject.updateOverview();
+				Cytoscape.destroyNetwork(selectedNetwork);
+                if(!networkID.equals(""))
+                    partitionObject.updateOverview();
 			} else if (EDIT_NETWORK_TITLE.equals(label)) {
 				CyNetworkNaming.editNetworkTitle(cyNetwork);
 				Cytoscape.getDesktop().getNetworkPanel().updateTitle(cyNetwork);
             } else if (DESTROY_ALL.equals(label)) {
 				CyNetwork selectedNetwork = Cytoscape.getSelectedNetworks().get(0);
                 String networkID = partitionObject.getGOTerm(selectedNetwork.getTitle());
-                if(!networkID.equals(""))
+                if(!networkID.equals("")) {
                     partitionObject.destroyAllSubNet(networkID,networkID);
-                else
+                    partitionObject.updateOverview();
+                } else {
                     partitionObject.destroyAllSubNet("root","root");
-                partitionObject.updateOverview();
-//            } else if (PARTITION_NETWORK.equals(label)) {
-//				System.out.println("PARTITION_NETWORK");
+                }
 			} else {
                 System.out.println(label);
                 if(!label.equals("")) {
