@@ -261,13 +261,13 @@ public class IdMapping {
             if(!isEnsemblID(sourceType)) {
                 System.out.println("IdMapping:mapID: ID & Non-Ensembl");
                 //Finished at 2011-09-21, for non-"Ensembl" & ID. ticket 3 for idmapping
-                connectDerbyFileSource(derbyFilePath);
+                //connectDerbyFileSource(derbyFilePath);
                 System.out.println("IdMapping:mapID: connectDerbyFileSource :"+ sourceType+" : "+ targetType);
                 Map<String, Set<String>> idEnMap = mapAttribute(nodeIds, sourceType, targetType);
                 System.out.println("IdMapping:mapID: mapAttribute Ensembl");
                 setGOAttribute(idEnMap, GOLayout.pluginName+"_Ensembl");
                 System.out.println("IdMapping:mapID: setGOAttribute");
-                disConnectDerbyFileSource(derbyFilePath);
+                //disConnectDerbyFileSource(derbyFilePath);
                 System.out.println("IdMapping:mapID: disConnectDerbyFileSource");
                 connectGOSlimSource(GOSlimFilePath);
                 for (CyNode cn : (List<CyNode>) currentNetwork.nodesList()) {
@@ -317,7 +317,7 @@ public class IdMapping {
                 System.out.println("IdMapping:mapID: Non-ID & Non-Ensembl");
                 //unfinished, for "Ensembl" & non-ID. ticket 3 for idmapping
                 Map<String, List<String>> idEnMap = new HashMap();
-                connectDerbyFileSource(derbyFilePath);
+                //connectDerbyFileSource(derbyFilePath);
                 for (CyNode cn : (List<CyNode>) currentNetwork.nodesList()) {
                     String keyID = cn.getIdentifier();
                     List<String> attList;
@@ -330,7 +330,7 @@ public class IdMapping {
                     idGOMap = mapAttribute(attList, sourceType, targetType);
                     idEnMap.put(keyID, convertSetMapValueToList(idGOMap));                    
                 }
-                disConnectDerbyFileSource(derbyFilePath);
+                //disConnectDerbyFileSource(derbyFilePath);
                 connectGOSlimSource(GOSlimFilePath);
                 for (CyNode cn : (List<CyNode>) currentNetwork.nodesList()) {
                     String keyID = cn.getIdentifier();
@@ -565,7 +565,7 @@ public class IdMapping {
                 }
             } else {
                 System.out.println("Failed to connect!");
-            };
+            }
             //System.out.println(count);
         } catch (CyCommandException e) {
             // TODO Auto-generated catch block
