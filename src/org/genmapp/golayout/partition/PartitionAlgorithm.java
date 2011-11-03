@@ -20,7 +20,6 @@ import org.genmapp.golayout.utils.GOLayoutStaticValues;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -36,7 +35,6 @@ import cytoscape.CyNetwork;
 import cytoscape.CyNode;
 import cytoscape.Cytoscape;
 import cytoscape.data.CyAttributes;
-import cytoscape.data.CyAttributesUtils;
 import cytoscape.data.Semantics;
 import cytoscape.ding.CyGraphAllLOD;
 import cytoscape.ding.DingNetworkView;
@@ -49,7 +47,7 @@ import cytoscape.view.CyDesktopManager;
 import cytoscape.view.CyNetworkView;
 import cytoscape.view.CytoscapeDesktop;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashSet;
 import javax.swing.SwingConstants;
 import org.genmapp.golayout.GOLayout;
 import org.genmapp.golayout.utils.GOLayoutUtil;
@@ -593,9 +591,21 @@ public class PartitionAlgorithm extends AbstractLayout implements
 
 			nodeAttributeValues = GOLayoutUtil.setupNodeAttributeValues(attributeName);
             System.out.println("Partition Attribute number: " +nodeAttributeValues.size());
+            Set<Object> attributeValues = new HashSet<Object>(nodeAttributeValues);
 			// warn before building more than 100 subnetworks;
+            int numberOfSub = 0;
+            if(GOLayoutUtil.isValidGOTerm(nodeAttributeValues)) {
+                buildNetworkTreeMap(attributeValues);
+                for (int i=0;i<networkTreeArray.length;i++) {
+                    if(this.GO_LEVEL>=new Integer(networkTreeArray[i][3].toString()).intValue()) {
+                        numberOfSub++;
+                    }
+                }
+            } else {
+                numberOfSub = nodeAttributeValues.size();
+            }
 			int response = JOptionPane.YES_OPTION;
-			if (nodeAttributeValues.size() > SUBNETWORK_COUNT_WARNING) {
+			if (numberOfSub > SUBNETWORK_COUNT_WARNING) {
 				// TODO: add dialog to continue
 				response = JOptionPane.showConfirmDialog((java.awt.Window) taskMonitor,
                         "Building " + nodeAttributeValues.size()
@@ -614,17 +624,16 @@ public class PartitionAlgorithm extends AbstractLayout implements
 					GOLayout.createVisualStyle(Cytoscape.getCurrentNetworkView());
 				}
 
-				Set<Object> attributeValues = attributeValueNodeMap.keySet();
+				
 				CyNetwork net = Cytoscape.getCurrentNetwork();
                 rootNetwork = net;
-				CyNetworkView view = Cytoscape.getNetworkView(net
-						.getIdentifier());
+				//CyNetworkView view = Cytoscape.getNetworkView(net.getIdentifier());
 
 				int nbrProcesses = attributeValues.size();
 				int count = 0;
 
                 if(GOLayoutUtil.isValidGOTerm(nodeAttributeValues)) {
-                    buildNetworkTreeMap(attributeValues);
+                    //buildNetworkTreeMap(attributeValues);
                     for (int i=0;i<networkTreeArray.length;i++) {
                         if(this.GO_LEVEL>=new Integer(networkTreeArray[i][3].toString()).intValue()) {
                             count++;

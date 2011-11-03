@@ -61,7 +61,7 @@ public class GOLayoutSettingDialog extends JDialog
     /** Creates new form GOLayoutSettingPanel */
     public GOLayoutSettingDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
-        this.setTitle(GOLayout.pluginName+" Settings");
+        this.setTitle(GOLayout.pluginName+" Settings"+ " "+GOLayout.VERSION);
         loadCurrentValues();
         initComponents();
         initValues();
@@ -157,16 +157,13 @@ public class GOLayoutSettingDialog extends JDialog
 
         String latestDerbyDB = identifyLatestVersion(GOLayout.derbyRemotelist,
                 species+"_Derby", ".zip");
-        String latestGOslimDB = identifyLatestVersion(GOLayout.goslimRemotelist,
-                species+"_GOslim", ".zip");
-        String latestGOfullDB = identifyLatestVersion(GOLayout.goslimRemotelist,
-                species+"_GOfull", ".zip");
+        String latestGOAnnotationDB = identifyLatestVersion(GOLayout.goRemotelist,
+                species+"_GO", ".zip");
 
         localFileList = GOLayoutUtil.retrieveLocalFiles(GOLayout.GOLayoutDatabaseDir);
         if(localFileList==null || localFileList.isEmpty()) {
             downloadList.add(GOLayoutStaticValues.bridgedbDerbyDir+latestDerbyDB+".zip");
-            downloadList.add(GOLayoutStaticValues.genmappcsDatabaseDir+latestGOslimDB+".zip");
-            downloadList.add(GOLayoutStaticValues.genmappcsDatabaseDir+latestGOfullDB+".zip");
+            downloadList.add(GOLayoutStaticValues.genmappcsDatabaseDir+latestGOAnnotationDB+".zip");
             System.out.println("No any local db, need download all");
         }  else {
             String localDerbyDB = identifyLatestVersion(localFileList,
@@ -176,17 +173,11 @@ public class GOLayoutSettingDialog extends JDialog
             if(localDerbyDB.equals("")||!localDerbyDB.equals(latestDerbyDB))
                 downloadList.add(GOLayoutStaticValues.bridgedbDerbyDir+latestDerbyDB+".zip");
             String localGOslimDB = identifyLatestVersion(localFileList,
-                    species+"_GOslim", ".txt");
-            if(latestGOslimDB.equals("")&&!localGOslimDB.equals(""))
-                latestGOslimDB = localGOslimDB;
-            if(localGOslimDB.equals("")||!localGOslimDB.equals(latestGOslimDB))
-                downloadList.add(GOLayoutStaticValues.genmappcsDatabaseDir+latestGOslimDB+".zip");
-            String localGOfullDB = identifyLatestVersion(localFileList,
-                    species+"_GOfull", ".txt");
-            if(latestGOfullDB.equals("")&&!localGOfullDB.equals(""))
-                latestGOfullDB = localGOfullDB;
-            if(latestGOfullDB.equals("")||!localGOfullDB.equals(latestGOfullDB))
-                downloadList.add(GOLayoutStaticValues.genmappcsDatabaseDir+latestGOfullDB+".zip");
+                    species+"_GO", ".zip");
+            if(latestGOAnnotationDB.equals("")&&!localGOslimDB.equals(""))
+                latestGOAnnotationDB = localGOslimDB;
+            if(localGOslimDB.equals("")||!localGOslimDB.equals(latestGOAnnotationDB))
+                downloadList.add(GOLayoutStaticValues.genmappcsDatabaseDir+latestGOAnnotationDB+".zip");
         }
         return downloadList;
     }
@@ -613,7 +604,7 @@ public class GOLayoutSettingDialog extends JDialog
         rAnnGOtLabel.setMinimumSize(new java.awt.Dimension(130, 14));
         rAnnGOtLabel.setPreferredSize(new java.awt.Dimension(130, 14));
 
-        rAnnGOtComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "slim", "full" }));
+        rAnnGOtComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "SlimMosaic", "SlimMosaic2", "SlimPIR", "SlimGeneric", "Full" }));
         rAnnGOtComboBox.setMinimumSize(new java.awt.Dimension(90, 18));
         rAnnGOtComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
 
@@ -798,7 +789,7 @@ public class GOLayoutSettingDialog extends JDialog
         sParMorTextField.setMinimumSize(new java.awt.Dimension(90, 18));
         sParMorTextField.setPreferredSize(new java.awt.Dimension(108, 18));
 
-        sParLevComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Deepest Level", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14" }));
+        sParLevComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Deepest Level", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14" }));
         sParLevComboBox.setMinimumSize(new java.awt.Dimension(90, 18));
         sParLevComboBox.setPreferredSize(new java.awt.Dimension(108, 18));
 
@@ -867,9 +858,9 @@ public class GOLayoutSettingDialog extends JDialog
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(sParCroCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(sParMorTextField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(sParMorLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(sParMorTextField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(sParCroLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGroup(sParPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(sParPanelLayout.createSequentialGroup()
@@ -960,6 +951,7 @@ public class GOLayoutSettingDialog extends JDialog
         }
         rAnnIdeComboBox.setSelectedItem("ID");
         setDefaultAttType("ID");
+        CytoscapeInit.getProperties().setProperty("defaultSpeciesName", speciesCode[0]);
     }//GEN-LAST:event_rAnnSpeComboBoxActionPerformed
 
     private void rAnnIdeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rAnnIdeComboBoxActionPerformed
@@ -1010,7 +1002,7 @@ public class GOLayoutSettingDialog extends JDialog
                         "_Derby", ".bridge") + ".bridge";
                 String localGOslimDB = GOLayout.GOLayoutDatabaseDir+
                         identifyLatestVersion(localFileList,selectSpecies[1]+
-                        "_GO"+rAnnGOtComboBox.getSelectedItem().toString(), ".txt") + ".txt";
+                        "_GO"+rAnnGOtComboBox.getSelectedItem().toString().toLowerCase(), ".txt") + ".txt";
                 final JTaskConfig jTaskConfig = new JTaskConfig();
                 jTaskConfig.setOwner(cytoscape.Cytoscape.getDesktop());
                 jTaskConfig.displayCloseButton(true);

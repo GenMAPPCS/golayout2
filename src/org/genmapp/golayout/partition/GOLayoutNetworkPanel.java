@@ -136,7 +136,8 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
 
 		root = new GOLayoutNetworkTreeNode("Network Root", "nroot");
 		networkTreeTableModel = new NetworkTreeTableModel(root);
-
+        networkTreeTableModel.removeColumn(2);
+//      networkTreeTableModel.addColumn(ColumnTypes.NODES, 2);
 		treeTable = new JTreeTable(networkTreeTableModel);
 		treeTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		initialize();
@@ -285,8 +286,8 @@ public class GOLayoutNetworkPanel extends JPanel implements PropertyChangeListen
                 .setPreferredWidth(170);
 		treeTable.getColumn(ColumnTypes.NODES.getDisplayName())
 				.setPreferredWidth(45);
-		treeTable.getColumn(ColumnTypes.EDGES.getDisplayName())
-				.setPreferredWidth(45);
+//		treeTable.getColumn(ColumnTypes.EDGES.getDisplayName())
+//				.setPreferredWidth(45);
 		treeTable.setRowHeight(DEF_ROW_HEIGHT);
 	}
 

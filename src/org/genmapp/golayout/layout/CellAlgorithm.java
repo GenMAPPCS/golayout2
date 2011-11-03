@@ -304,7 +304,9 @@ public class CellAlgorithm extends AbstractLayout {
 							// collect unique list to rename later
 							if (!firstCopies.contains(oldNode))
 								firstCopies.add(oldNode);
-							Integer next = nvSeen.get(nv) + 1;
+							//2011-11-02 keep the orignial copy, won't rename it to *__1
+                            //Integer next = nvSeen.get(nv) + 1;
+                            Integer next = nvSeen.get(nv);
 							String cleanOldId = oldId;
 							if (oldId.contains("__1")) {
 								// clean up name from prior runs of GO Layout
@@ -748,83 +750,83 @@ public class CellAlgorithm extends AbstractLayout {
 							regNv.getNode().getRootGraphIndex(), true);
 				}
 
-				// rename first copies of replicated nodes
-				CyAttributes attributes = Cytoscape.getNodeAttributes();
-				for (Node n : firstCopies) {
-
-					String oldId = n.getIdentifier();
-					HashMap<String, Object> atthash = new HashMap<String, Object>();
-
-					// copy attributes
-					String[] atts = attributes.getAttributeNames();
-					for (String att : atts) {
-						/*
-						 * skip hidden attributes
-						 */
-						if (attributes.getUserVisible(att)
-								&& attributes.hasAttribute(oldId, att)) {
-							byte type = attributes.getType(att);
-							if (type == CyAttributes.TYPE_BOOLEAN) {
-								atthash.put(att, attributes
-										.getBooleanAttribute(oldId, att));
-							} else if (type == CyAttributes.TYPE_INTEGER) {
-								atthash.put(att, attributes
-										.getIntegerAttribute(oldId, att));
-							} else if (type == CyAttributes.TYPE_FLOATING) {
-								atthash.put(att, attributes.getDoubleAttribute(
-										oldId, att));
-							} else if (type == CyAttributes.TYPE_STRING) {
-								atthash.put(att, attributes.getStringAttribute(
-										oldId, att));
-
-							} else if (type == CyAttributes.TYPE_SIMPLE_LIST) {
-								atthash.put(att, attributes.getListAttribute(
-										oldId, att));
-							} else if (type == CyAttributes.TYPE_SIMPLE_MAP) {
-								atthash.put(att, attributes.getMapAttribute(
-										oldId, att));
-							}
-						}
-					}
-
-					String cleanOldId = n.getIdentifier();
-					if (oldId.contains("__1")) {
-						// clean up name from prior runs of algorithm
-						cleanOldId = n.getIdentifier().substring(0,
-								oldId.lastIndexOf("__1"));
-					}
-					n.setIdentifier(cleanOldId.concat("__1"));
-					String newId = n.getIdentifier();
-
-					for (String att : atthash.keySet()) {
-						/*
-						 * skip hidden attributes
-						 */
-						if (attributes.getUserVisible(att)
-								&& attributes.hasAttribute(oldId, att)) {
-							byte type = attributes.getType(att);
-							if (type == CyAttributes.TYPE_BOOLEAN) {
-								attributes.setAttribute(newId, att,
-										(Boolean) atthash.get(att));
-							} else if (type == CyAttributes.TYPE_INTEGER) {
-								attributes.setAttribute(newId, att,
-										(Integer) atthash.get(att));
-							} else if (type == CyAttributes.TYPE_FLOATING) {
-								attributes.setAttribute(newId, att,
-										(Double) atthash.get(att));
-							} else if (type == CyAttributes.TYPE_STRING) {
-								attributes.setAttribute(newId, att,
-										(String) atthash.get(att));
-							} else if (type == CyAttributes.TYPE_SIMPLE_LIST) {
-								attributes.setListAttribute(newId, att,
-										(List) atthash.get(att));
-							} else if (type == CyAttributes.TYPE_SIMPLE_MAP) {
-								attributes.setMapAttribute(newId, att,
-										(HashMap) atthash.get(att));
-							}
-						}
-					}
-				}
+//				// rename first copies of replicated nodes
+//				CyAttributes attributes = Cytoscape.getNodeAttributes();
+//				for (Node n : firstCopies) {
+//
+//					String oldId = n.getIdentifier();
+//					HashMap<String, Object> atthash = new HashMap<String, Object>();
+//
+//					// copy attributes
+//					String[] atts = attributes.getAttributeNames();
+//					for (String att : atts) {
+//						/*
+//						 * skip hidden attributes
+//						 */
+//						if (attributes.getUserVisible(att)
+//								&& attributes.hasAttribute(oldId, att)) {
+//							byte type = attributes.getType(att);
+//							if (type == CyAttributes.TYPE_BOOLEAN) {
+//								atthash.put(att, attributes
+//										.getBooleanAttribute(oldId, att));
+//							} else if (type == CyAttributes.TYPE_INTEGER) {
+//								atthash.put(att, attributes
+//										.getIntegerAttribute(oldId, att));
+//							} else if (type == CyAttributes.TYPE_FLOATING) {
+//								atthash.put(att, attributes.getDoubleAttribute(
+//										oldId, att));
+//							} else if (type == CyAttributes.TYPE_STRING) {
+//								atthash.put(att, attributes.getStringAttribute(
+//										oldId, att));
+//
+//							} else if (type == CyAttributes.TYPE_SIMPLE_LIST) {
+//								atthash.put(att, attributes.getListAttribute(
+//										oldId, att));
+//							} else if (type == CyAttributes.TYPE_SIMPLE_MAP) {
+//								atthash.put(att, attributes.getMapAttribute(
+//										oldId, att));
+//							}
+//						}
+//					}
+//
+//					String cleanOldId = n.getIdentifier();
+//					if (oldId.contains("__1")) {
+//						// clean up name from prior runs of algorithm
+//						cleanOldId = n.getIdentifier().substring(0,
+//								oldId.lastIndexOf("__1"));
+//					}
+//					n.setIdentifier(cleanOldId.concat("__1"));
+//					String newId = n.getIdentifier();
+//
+//					for (String att : atthash.keySet()) {
+//						/*
+//						 * skip hidden attributes
+//						 */
+//						if (attributes.getUserVisible(att)
+//								&& attributes.hasAttribute(oldId, att)) {
+//							byte type = attributes.getType(att);
+//							if (type == CyAttributes.TYPE_BOOLEAN) {
+//								attributes.setAttribute(newId, att,
+//										(Boolean) atthash.get(att));
+//							} else if (type == CyAttributes.TYPE_INTEGER) {
+//								attributes.setAttribute(newId, att,
+//										(Integer) atthash.get(att));
+//							} else if (type == CyAttributes.TYPE_FLOATING) {
+//								attributes.setAttribute(newId, att,
+//										(Double) atthash.get(att));
+//							} else if (type == CyAttributes.TYPE_STRING) {
+//								attributes.setAttribute(newId, att,
+//										(String) atthash.get(att));
+//							} else if (type == CyAttributes.TYPE_SIMPLE_LIST) {
+//								attributes.setListAttribute(newId, att,
+//										(List) atthash.get(att));
+//							} else if (type == CyAttributes.TYPE_SIMPLE_MAP) {
+//								attributes.setMapAttribute(newId, att,
+//										(HashMap) atthash.get(att));
+//							}
+//						}
+//					}
+//				}
 
 				// prune and annotate edges
 				List<Integer> edgesToRemove = new ArrayList<Integer>();

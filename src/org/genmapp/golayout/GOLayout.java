@@ -15,6 +15,7 @@
  ******************************************************************************/
 package org.genmapp.golayout;
 
+import csplugins.id.mapping.CyThesaurusPlugin;
 import org.genmapp.golayout.partition.PartitionAlgorithm;
 import org.genmapp.golayout.layout.PartitionNetworkVisualStyleFactory;
 import org.genmapp.golayout.layout.CellAlgorithm;
@@ -51,6 +52,7 @@ import org.genmapp.golayout.utils.IdMapping;
 
 public class GOLayout extends CytoscapePlugin{
     public static final String pluginName = "Mosaic";
+    public static final String VERSION = " 1.0Beta(1102)";
     private CyLogger logger;
     public static String GOLayoutBaseDir;
     public static String GOLayoutDatabaseDir;
@@ -59,7 +61,7 @@ public class GOLayout extends CytoscapePlugin{
     public static boolean tagGPMLPlugin;
     public static boolean tagNodePlugin;
     public static List<String> derbyRemotelist = new ArrayList<String>();
-    public static List<String> goslimRemotelist = new ArrayList<String>();
+    public static List<String> goRemotelist = new ArrayList<String>();
     public static List<String> speciesMappinglist = new ArrayList<String>();
     private static final String HELP = pluginName + " Help";
     private PartitionAlgorithm partitionObject;
@@ -92,7 +94,7 @@ public class GOLayout extends CytoscapePlugin{
             //Get the lastest db lists
             derbyRemotelist = GOLayoutUtil.readUrl(GOLayoutStaticValues.bridgedbDerbyDir);
             //GOLayoutUtil.writeFile(derbyRemotelist, GOLayoutBaseDir+"derbyDBList.txt");
-            goslimRemotelist = GOLayoutUtil.readUrl(GOLayoutStaticValues.genmappcsDatabaseDir);
+            goRemotelist = GOLayoutUtil.readUrl(GOLayoutStaticValues.genmappcsDatabaseDir);
             //GOLayoutUtil.writeFile(derbyRemotelist, GOLayoutBaseDir+"goslimDBList.txt");
             List<String> supportedSpeList = GOLayoutUtil.readUrl(GOLayoutStaticValues.genmappcsDatabaseDir+GOLayoutStaticValues.supportedSpecieslist);
             if(supportedSpeList.size()>0) {

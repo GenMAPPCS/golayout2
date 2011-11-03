@@ -256,6 +256,8 @@ public class Downloader implements DownloadListener {
 
 			zipFile.close();
 			outputFile.delete();
+            outputFile.createNewFile();
+            System.out.println("Successfully extracting file: " + zipFile.getName());
 		} catch (IOException ioe) {
 			System.out.println("Unhandled exception:");
 			ioe.printStackTrace();

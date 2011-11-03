@@ -57,8 +57,20 @@ public class GOLayoutUtil {
 
     public static boolean checkCyThesaurus(){
         try {
+//            try {
+//                PluginManager Mgr = PluginManager.getPluginManager();
+//                List<DownloadableInfo> downloadableList= Mgr.getDownloadables(PluginStatus.CURRENT);
+//                PluginInfo pli = PluginProperties.fillPluginInfoObject(downloadableList.get(0));
+//
+//                System.out.println("aaa: "+downloadableList.indexOf("CyThesaurus"));
+//
+//                //PluginProperties cyTheProp = new PluginProperties(new CyThesaurusPlugin());
+//                //System.out.println("CyThesaurusPlugin VERSION: "+ cyTheProp.getProperty("pluginVersion"));
+//            } catch (Exception ex) {
+//                Logger.getLogger(GOLayoutUtil.class.getName()).log(Level.SEVERE, null, ex);
+//            }
             double cyThesVersion = CyThesaurusPlugin.VERSION;
-            System.out.println("CyThesaurusPlugin VERSION: "+ cyThesVersion);
+            //System.out.println("CyThesaurusPlugin VERSION: "+ cyThesVersion);
             return true;
         } catch(NoClassDefFoundError e){
             return false;

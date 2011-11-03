@@ -39,3 +39,9 @@ This directory contains files needed to generate datasources for the GOLayout pl
   You can still generate the Path and Name files using steps 1-5 above. Y ou'll have to find 
   another source for generating Mapping files, or users will have to provide their own annotations 
   or mapping files themselves.
+  
+  === For At ===
+  Since no Ensembl relationships are present in the current GO-Elite database (in Ensembl but not with the main database), you will need the attached file and follow the below steps after downloading GO slim and installing the At database:
+  1) Save the attached file to: GO-Elite\Databases\EnsMart62Plus\At\uid-gene
+  2) Re-download the At database
+  3) Build the Mosaic files as you did before.

@@ -546,7 +546,7 @@ public class IdMapping {
      */
     private static void connectFileDB(Map<String, Object> args) {
         System.out.println("-----run connectFileDB-----");
-        System.out.println(args.toString());
+        //System.out.println(args.toString());
         CyCommandResult result = null;
         try {
             result = CyCommandManager.execute("idmapping",
@@ -578,11 +578,9 @@ public class IdMapping {
      */
     private static void disConnectFileDB(Map<String, Object> args) {
         System.out.println("-----run disConnectFileDB-----");
-        System.out.println(args.toString());
         CyCommandResult result = null;
         try {
             result = CyCommandManager.execute("idmapping",
-                    //"deselect resource", args);
                     "unregister resource", args);
             List<String> results = result.getMessages();
             if (results.size() > 0) {
@@ -590,13 +588,10 @@ public class IdMapping {
                     System.out.println(re);
                 }
             } else {
-                System.out.println("Failed to connect!");
+                System.out.println("Failed to unregister db!");
             };
             //System.out.println(count);
-        } catch (CyCommandException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
